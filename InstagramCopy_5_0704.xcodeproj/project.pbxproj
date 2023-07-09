@@ -126,8 +126,8 @@
 			isa = PBXGroup;
 			children = (
 				5FCE52712A5913650095BFA9 /* SelectImageVC.swift */,
-				5FCE52732A5913E50095BFA9 /* SelectPhotoCell.swift */,
 				5FCE52752A5914290095BFA9 /* SelectPhotoHeader.swift */,
+				5FCE52732A5913E50095BFA9 /* SelectPhotoCell.swift */,
 				5F19F0D92A55503D0073E5A9 /* UploadPostVC.swift */,
 				5FEDD2692A56DC7600081AE9 /* UserPostCell.swift */,
 			);

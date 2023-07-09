@@ -18,8 +18,8 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     var posts = [Post]()
     
-    
-    
+    var viewSinglePost: Bool = false
+    var post: Post?
     
     
     
@@ -35,10 +35,19 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         self.collectionView!.register(FeedCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
 
-         
+        // configure refresh control
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+        
         configureNavigationBar()
         
-        fetchPosts()
+        if !viewSinglePost {
+            fetchPosts()
+        }
+        
+        updateUserFeeds()
+        
         
     }
     // MARK: - UICollectionViewDataSource
@@ -49,6 +58,10 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     }
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
+
+        if viewSinglePost {
+            return 1
+        }
         return self.posts.count
     }
 
@@ -57,8 +70,18 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         
         cell.delegate = self
         
+        if viewSinglePost {
+            if let post = self.post {
+                cell.post = post
+            }
+        } else {
+            cell.post = posts[indexPath.row]
+        }
+        
+        
+        
         // Configure the cell
-        cell.post = posts[indexPath.row]
+//        cell.post = posts[indexPath.row]
         
         return cell
     }
@@ -86,18 +109,22 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     // MARK: - Handlers
     func configureNavigationBar() {
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(handleLogout))
-        self.navigationItem.title = "Feed"
+        
+        if !viewSinglePost {
+            self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(handleLogout))
+        }
+        
+        
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "send2"), style: .plain, target: self, action: #selector(handleShowMessages))
+        self.navigationItem.title = "Feed"
+        
+        
     }
     @objc private func handleShowMessages() {
         print("handleShowMessages")
     }
     
     @objc func handleLogout() {
-        
-        print("handleLogut pressed")
-        
         // declare alert controller
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
@@ -113,14 +140,6 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
                 let navController = UINavigationController(rootViewController: loginVC)
                 navController.modalPresentationStyle = .fullScreen
                 self.present(navController, animated: true, completion: nil)
-                
-//
-//                let loginVC = LoginVC()
-//                loginVC.modalPresentationStyle = .fullScreen
-//
-//                self.present(loginVC, animated: true, completion: nil)
-                
-                
             } catch {
                 // handle error
                 print("Failed to sign out")
@@ -134,27 +153,69 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     }
     
     
+    @objc private func handleRefresh() {
+        posts.removeAll(keepingCapacity: false)
+        fetchPosts()
+        collectionView.reloadData()
+    }
+    
+    
     
     // MARK: - API
-    private func fetchPosts() {
+    private func updateUserFeeds() {
         
-        POSTS_REF.observe(.childAdded) { snapshot in
+        guard let currentId = Auth.auth().currentUser?.uid else { return }
+        
+        USER_FOLLOWING_REF.child(currentId).observe(.childAdded) { snapshot in
+            
+            print("Follower ----- \(snapshot)")
+            let followingUserId = snapshot.key
+            
+            USER_POSTS_REF.child(followingUserId).observe(.childAdded) { snapshot in
+                // snapshot : current-user를 follow한 사람들
+                
+                let postId = snapshot.key
+                
+                USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
+                
+                
+            }
+        }
+        
+        USER_POSTS_REF.child(currentId).observe(.childAdded) { snapshot in
+            let postId = snapshot.key
+            
+            USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
+            
+        }
+        
+        
+        
+    }
+    
+    
+    
+    private func fetchPosts() {
+        print("FeedVC - fetchPosts")
+        
+        guard let currentId = Auth.auth().currentUser?.uid else { return }
+        
+        USER_FEED_REF.child(currentId).observe(.childAdded) { snapshot in
             // post id
             let postId = snapshot.key
-            guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
-            guard let ownerUid = dictionary["ownerUid"] as? String else { return }
             
-            Database.fetchUser(with: ownerUid) { user in
-                
-                let post = Post(postId: postId, user: user, dictionary: dictionary)
+            Database.fetchPost(with: postId) { post in
                 
                 self.posts.append(post)
                 
                 self.posts.sort { post1, post2 in
                     return post1.creationDate > post2.creationDate
                 }
+                // stop refreshing
+                self.collectionView.refreshControl?.endRefreshing()
                 
-                print("Post caption is \(post.caption)")
+                
+                
                 self.collectionView.reloadData()
             }
         }
@@ -168,7 +229,13 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
 // MARK: - FeedCell - Delegate
 extension FeedVC: FeedCellDelegate {
     func handleUserNameTapped(for cell: FeedCell) {
-        print("handle user name Tapped")
+        
+        guard let post = cell.post else { return }
+        
+        let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
+        
+        userProfileVC.user = post.user
+        self.navigationController?.pushViewController(userProfileVC, animated: true)
     }
     
     func handleOptionsTapped(for cel: FeedCell) {

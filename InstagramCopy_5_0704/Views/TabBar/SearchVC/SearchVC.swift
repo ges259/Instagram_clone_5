@@ -21,7 +21,7 @@ final class SearchVC: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("SearchVC")
+//        print("SearchVC")
         
         // register cell classes
         self.tableView.register(SearchUserCell.self, forCellReuseIdentifier: reuserIdentifier)

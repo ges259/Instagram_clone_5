@@ -166,7 +166,7 @@ final class FeedCell: UICollectionViewCell {
     // MARK: - caption()
     private func configurePostCaption(user: User) {
         guard let post = self.post else { return }
-        guard let caption = self.post?.caption else { return }
+        guard let caption = post.caption else { return }
                 
         let attributedText = NSMutableAttributedString(string: user.userName, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12)])
         attributedText.append(NSAttributedString(string: " \(caption)", attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12)]))

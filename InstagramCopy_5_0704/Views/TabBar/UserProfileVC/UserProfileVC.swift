@@ -131,6 +131,16 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
         return cell
     }
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let feedVC = FeedVC(collectionViewLayout: UICollectionViewFlowLayout())
+        
+        feedVC.viewSinglePost = true
+        feedVC.post = self.posts[indexPath.item]
+        
+        self.navigationController?.pushViewController(feedVC, animated: true)
+        
+        
+    }
 
     
     
@@ -157,12 +167,7 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
         USER_POSTS_REF.child(uid).observe(.childAdded) { snapshot in
             let postId = snapshot.key
             
-            POSTS_REF.child(postId).observeSingleEvent(of: .value) { snapshot in
-          
-                guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
-                
-                let post = Post(postId: postId, dictionary: dictionary)
-                
+            Database.fetchPost(with: postId) { post in
                 self.posts.append(post)
                 
                 self.posts.sort { post1, post2 in
@@ -171,7 +176,6 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
                 
                 self.collectionView.reloadData()
             }
-            
         }
         
         

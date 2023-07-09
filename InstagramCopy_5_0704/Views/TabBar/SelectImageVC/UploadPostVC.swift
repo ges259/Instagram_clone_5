@@ -38,6 +38,9 @@ final class UploadPostVC: UIViewController {
         tv.backgroundColor = UIColor.groupTableViewBackground
         tv.font = UIFont.systemFont(ofSize: 12)
         
+        tv.autocorrectionType = .no
+        tv.autocapitalizationType = .none
+        
         
         
         return tv
@@ -117,6 +120,30 @@ final class UploadPostVC: UIViewController {
     
     
     // MARK: - handler
+    func updateUserFeeds(with postId: String) {
+        // current user id
+        guard let currentUid = Auth.auth().currentUser?.uid else { return }
+        
+        // database values
+        let values = [postId: 1]
+        
+        // update follow feed
+        USER_FOLLOWER_REF.child(currentUid).observe(.childAdded) { snapshot in
+            
+            let followUid = snapshot.key
+            // update user-feed
+            // 자신이 follow한 모든 사람의 user-feed에 자신의 포스트를 올림
+            USER_FEED_REF.child(followUid).updateChildValues(values)
+            print("************* follow Id is: \(followUid) *************")
+        }
+        // update current user feed
+        // 자신의 user-post에 포스트를 올림
+        USER_FEED_REF.child(currentUid).updateChildValues(values)
+        print("current id is \(currentUid)")
+    }
+    
+    
+    
     @objc private func handleSharePost() {
         
         // paramaters
@@ -134,7 +161,6 @@ final class UploadPostVC: UIViewController {
         
         // update storage
         let fileName = NSUUID().uuidString
-        
         
         
         let storageRef = Storage.storage().reference().child("post_images").child(fileName)
@@ -165,6 +191,7 @@ final class UploadPostVC: UIViewController {
                 
                 // post id
                 let postId = POSTS_REF.childByAutoId()
+                guard let postKey = postId.key else { return }
                 
                 // upload information to database
                 postId.updateChildValues(values) { err, ref in
@@ -175,6 +202,8 @@ final class UploadPostVC: UIViewController {
                     // user-post가 하는 일: 어떤 사용자가 어떤 게시물을 올렸는지 확인이 가능하다.
                     USER_POSTS_REF.child(currentId).updateChildValues([postKey: 1])
                     
+                    // update user-feed structure
+                    self.updateUserFeeds(with: postKey)
                     
                     // return to home feed
                     self.dismiss(animated: true) {

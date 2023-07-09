@@ -59,10 +59,12 @@ class User {
 //        uploadFollowNotificationToServer()
         
 //         add followed users posts to current user-feed
-//        USER_POSTS_REF.child(uid).observe(.childAdded) { snapshot in
-//            let postId = snapshot.key
-//            USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
-//        }
+        USER_POSTS_REF.child(uid).observe(.childAdded) { snapshot in
+            let postId = snapshot.key
+            USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
+        }
+
+        
     }
     // unfollow
     func unfollow() {
@@ -77,10 +79,10 @@ class User {
         
         USER_FOLLOWER_REF.child(uid).child(currentUid).removeValue()
         
-//        USER_POSTS_REF.child(uid).observe(.childAdded) { (snapshot) in
-//            let postId = snapshot.key
-//            USER_FEED_REF.child(currentUid).child(postId).removeValue()
-//        }
+        USER_POSTS_REF.child(uid).observe(.childAdded) { (snapshot) in
+            let postId = snapshot.key
+            USER_FEED_REF.child(currentUid).child(postId).removeValue()
+        }
     }
     
     
@@ -93,11 +95,9 @@ class User {
             if snapshot.hasChild(self.uid) {
                 self.isFollowed = true
                 completion(true)
-                print("User is Followed")
             } else {
                 self.isFollowed = false
                 completion(false)
-                print("User is not followed")
             }
         }
     }
