@@ -23,7 +23,7 @@ final class FollowLikeCell: UITableViewCell {
             guard let userName = user?.userName else { return }
             guard let fullName = user?.name else { return }
             
-            profileImageView.loadImageView(with: profileImgeUrl)
+            self.profileImageView.loadImageView(with: profileImgeUrl)
             
             self.textLabel?.text = userName
             self.detailTextLabel?.text = fullName
@@ -58,8 +58,8 @@ final class FollowLikeCell: UITableViewCell {
     
     
     // MARK: - Layout
-    private let profileImageView: UIImageView = {
-        let img = UIImageView()
+    private let profileImageView: CustomImageView = {
+        let img = CustomImageView()
         img.contentMode = .scaleAspectFill
         img.backgroundColor = .lightGray
         img.clipsToBounds = true
@@ -73,9 +73,11 @@ final class FollowLikeCell: UITableViewCell {
         btn.setTitle("Loading", for: .normal)
         btn.setTitleColor(.white, for: .normal)
         btn.backgroundColor = UIColor(red: 17/255, green: 154/255, blue: 237/255, alpha: 1)
-        btn.addTarget(self, action: #selector(handleFollowTapped), for: .touchUpInside)
+        
         btn.layer.borderColor = UIColor.lightGray.cgColor
         btn.titleLabel?.font = .boldSystemFont(ofSize: 14)
+        
+        btn.addTarget(self, action: #selector(handleFollowTapped), for: .touchUpInside)
 
         return btn
     }()

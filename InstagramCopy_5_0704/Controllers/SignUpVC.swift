@@ -298,6 +298,7 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
                 // handle error
                 if let error = error {
                     print("Failed to upload image to Firebase storage with error", error.localizedDescription)
+                    return 
                 }
                 
                 

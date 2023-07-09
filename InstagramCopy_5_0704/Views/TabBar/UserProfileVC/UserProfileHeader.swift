@@ -40,8 +40,8 @@ final class UserProfileHeader: UICollectionViewCell {
     
     
     // MARK: - ImageView
-    private let profileImageView: UIImageView = {
-        let img = UIImageView()
+    private let profileImageView: CustomImageView = {
+        let img = CustomImageView()
         
         img.image = UIImage(named: "profile_unselected")
         img.contentMode = .scaleAspectFill

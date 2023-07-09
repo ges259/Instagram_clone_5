@@ -22,6 +22,9 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
 //
 //    var userToLoadFromSearchVC: User?
     
+    
+    var posts = [Post]()
+    
     var user: User?
     
     override func viewDidLoad() {
@@ -41,30 +44,38 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
         }
         
         
+        // fetch post
+        fetchPost()
+        
+        
     }
+    
+    // MARK: - FlowLayout
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
+        let width = (view.frame.width - 2) / 3
         
-    // MARK: - UICollectionViewDataSource
+        return CGSize(width: width, height: width)
+    }
 
-    override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        
+        return CGSize(width: view.frame.width, height: 200)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 1
     }
-    // dataSource
-    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of items
-        return 0
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 1
     }
-    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
     
-        // Configure the cell
-        
-        
-        
     
-        return cell
-    }
+    
+    
+    
+    
     
     
     
@@ -96,19 +107,77 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
         // return header
         return header
     }
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: view.frame.width, height: 200)
+    
+    
+    // MARK: - DataSource
+
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        // #warning Incomplete implementation, return the number of sections
+        return 1
+    }
+    // dataSource
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        // #warning Incomplete implementation, return the number of items
+        return self.posts.count
+    }
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! UserPostCell
+    
+        // Configure the cell
+            // date순으로 해야함
+        cell.post = posts[indexPath.item]
+        
+        
+    
+        return cell
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // MARK: - API - Fetch
+    func fetchPost() {
+        
+        var uid: String!
+        
+        // 사용자가 올린 게시글과 다른 사람이 올린 게시글을 분리
+        if let user = self.user {
+            uid = user.uid
+        } else {
+            uid = Auth.auth().currentUser?.uid
+        }
+        
+        // USER_POSTS_REF = Database.database().reference().child("user-posts")
+        USER_POSTS_REF.child(uid).observe(.childAdded) { snapshot in
+            let postId = snapshot.key
+            
+            POSTS_REF.child(postId).observeSingleEvent(of: .value) { snapshot in
+          
+                guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
+                
+                let post = Post(postId: postId, dictionary: dictionary)
+                
+                self.posts.append(post)
+                
+                self.posts.sort { post1, post2 in
+                    return post1.creationDate > post.creationDate
+                }
+                
+                self.collectionView.reloadData()
+            }
+            
+        }
+        
+        
+        
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    // MARK: - API
     func fetchCurrentUserData() {
         
         // set user in header
@@ -180,7 +249,6 @@ extension UserProfileVC: UserProfileHeaderDelegate {
             }
         }
     }
-    
     func setUserStats(for header: UserProfileHeader) {
                 
         guard let uid = header.user?.uid else { return }
@@ -215,13 +283,6 @@ extension UserProfileVC: UserProfileHeaderDelegate {
             
             header.followingLabel.attributedText = attributedText
         }
-        
-        
-        
-        
-//        let followVC = FollowLikeVC()
-//
-//        self.navigationController?.pushViewController(followVC, animated: true)
     }
     
 

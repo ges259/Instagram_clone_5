@@ -15,7 +15,7 @@ final class SearchUserCell: UITableViewCell {
             guard let userName = user?.userName else { return }
             guard let fullName = user?.name else { return }
             
-            profileImageView.loadImageView(with: profileImgeUrl)
+            self.profileImageView.loadImageView(with: profileImgeUrl)
             
             self.textLabel?.text = userName
             self.detailTextLabel?.text = fullName
@@ -27,8 +27,8 @@ final class SearchUserCell: UITableViewCell {
     
     
     // MARK: - ImageView
-    private let profileImageView: UIImageView = {
-        let img = UIImageView()
+    private let profileImageView: CustomImageView = {
+        let img = CustomImageView()
         
         img.image = UIImage(named: "profile_unselected")
         img.contentMode = .scaleAspectFill

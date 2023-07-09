@@ -14,8 +14,8 @@
             filePath = "InstagramCopy_5_0704/Controllers/SignUpVC.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "329"
-            endingLineNumber = "329"
+            startingLineNumber = "330"
+            endingLineNumber = "330"
             landmarkName = "handleSignUp()"
             landmarkType = "7">
             <Locations>
@@ -77,6 +77,36 @@
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "329"
                   endingLineNumber = "329"
+                  offsetFromSymbolStart = "32">
+               </Location>
+               <Location
+                  uuid = "6B5A7898-E266-4561-804F-6AD00A0038D7 - d43494526086df62"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;Swift.Error&gt;, __C.FIRDatabaseReference) -&gt; () in closure #1 (Swift.Optional&lt;Foundation.URL&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in closure #1 (Swift.Optional&lt;FirebaseStorage.StorageMetadata&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in closure #1 (Swift.Optional&lt;__C.FIRAuthDataResult&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in InstagramCopy_5_0704.SignUpVC.handleSignUp() -&gt; ()"
+                  moduleName = "InstagramCopy_5_0704"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/gyeeunseong/Documents/Practice4/InstagramCopy_5_0704/InstagramCopy_5_0704/Controllers/SignUpVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "330"
+                  endingLineNumber = "330"
+                  offsetFromSymbolStart = "84">
+               </Location>
+               <Location
+                  uuid = "6B5A7898-E266-4561-804F-6AD00A0038D7 - b257396f67b884a4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (__C.UIWindow) -&gt; Swift.Bool in closure #1 (Swift.Optional&lt;Swift.Error&gt;, __C.FIRDatabaseReference) -&gt; () in closure #1 (Swift.Optional&lt;Foundation.URL&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in closure #1 (Swift.Optional&lt;FirebaseStorage.StorageMetadata&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in closure #1 (Swift.Optional&lt;__C.FIRAuthDataResult&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in InstagramCopy_5_0704.SignUpVC.handleSignUp() -&gt; ()"
+                  moduleName = "InstagramCopy_5_0704"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/gyeeunseong/Documents/Practice4/InstagramCopy_5_0704/InstagramCopy_5_0704/Controllers/SignUpVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "330"
+                  endingLineNumber = "330"
                   offsetFromSymbolStart = "32">
                </Location>
             </Locations>

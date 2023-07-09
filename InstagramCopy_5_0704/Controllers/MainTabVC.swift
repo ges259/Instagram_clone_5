@@ -35,23 +35,25 @@ final class MainTabVC: UITabBarController, UITabBarControllerDelegate {
     // function to create view controllers that exist within tab bar controller
     func configureViewControllers() {
         // home feed controller
-        let feedVC = configureNavController(UnselectedImage: #imageLiteral(resourceName: "home_unselected"), selectedImage: #imageLiteral(resourceName: "home_selected"),
+        let feedVC = constructNavController(UnselectedImage: #imageLiteral(resourceName: "home_unselected"), selectedImage: #imageLiteral(resourceName: "home_selected"),
                                             rootViewController: FeedVC(collectionViewLayout: UICollectionViewFlowLayout()))
         // search feed controller
-        let searchVC = configureNavController(UnselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"),
+        let searchVC = constructNavController(UnselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"),
                                               rootViewController: SearchVC())
-        // post controler
-        let uploadPostVC = configureNavController(UnselectedImage: #imageLiteral(resourceName: "plus_unselected"), selectedImage: #imageLiteral(resourceName: "save_shadow"),
-                                                  rootViewController: UploadPostVC())
+        
+        // selectImageVC controller
+        let selectImageVC = constructNavController(UnselectedImage: #imageLiteral(resourceName: "plus_unselected"), selectedImage: #imageLiteral(resourceName: "plus_photo"))
+        
+        
         // notification controller
-        let notificationVC = configureNavController(UnselectedImage: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected"),
+        let notificationVC = constructNavController(UnselectedImage: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected"),
                                                     rootViewController: NotificationsVC())
         // profile controller
-        let userProfileVC = configureNavController(UnselectedImage: #imageLiteral(resourceName: "profile_unselected"), selectedImage: #imageLiteral(resourceName: "profile_selected"),
+        let userProfileVC = constructNavController(UnselectedImage: #imageLiteral(resourceName: "profile_unselected"), selectedImage: #imageLiteral(resourceName: "profile_selected"),
                                                    rootViewController: UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout()))
         
         // view controller to be added to tab controller
-        self.viewControllers = [feedVC, searchVC, uploadPostVC, notificationVC, userProfileVC]
+        self.viewControllers = [feedVC, searchVC, selectImageVC, notificationVC, userProfileVC]
         
         // tab bar tint color
         self.tabBar.tintColor = .black
@@ -60,9 +62,30 @@ final class MainTabVC: UITabBarController, UITabBarControllerDelegate {
         
     }
     
-    // construct navigation controllers
-    private func configureNavController(UnselectedImage: UIImage, selectedImage: UIImage, rootViewController: UIViewController = UIViewController()) -> UINavigationController {
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        let index = viewControllers?.firstIndex(of: viewController)
+
+        if index == 2 {
+            let selectIamgeVC = SelectImageVC(collectionViewLayout: UICollectionViewFlowLayout())
+            let navController = UINavigationController(rootViewController: selectIamgeVC)
+            navController.modalPresentationStyle = .fullScreen
+            navController.navigationBar.tintColor = .black
+            self.present(navController, animated: true, completion: nil)
+            
+            return false
+        }
+        return true
         
+    }
+    
+    
+    
+    
+    
+    
+    
+    // construct navigation controllers
+    private func constructNavController(UnselectedImage: UIImage, selectedImage: UIImage, rootViewController: UIViewController = UIViewController()) -> UINavigationController {
         
         // construct nav controller
         let navController = UINavigationController(rootViewController: rootViewController)
@@ -70,9 +93,6 @@ final class MainTabVC: UITabBarController, UITabBarControllerDelegate {
         navController.tabBarItem.image = UnselectedImage
         navController.tabBarItem.selectedImage = selectedImage
         navController.navigationBar.tintColor = .black
-        
-        
-        
         
         return navController
     }

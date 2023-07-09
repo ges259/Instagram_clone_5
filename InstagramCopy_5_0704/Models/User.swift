@@ -9,16 +9,18 @@ import Firebase
 
 
 class User {
-    // attributes
+    // attributesw
     var userName: String!
     var name: String!
     var profileImageUrl: String!
     var uid: String!
     var isFollowed: Bool = false
     
+    
     init(uid: String, dictionary: Dictionary<String, AnyObject>) {
         
         self.uid = uid
+        
         
         if let userName = dictionary["userName"] as? String {
             self.userName = userName

@@ -63,43 +63,6 @@ extension UIView {
 }
 
 
-var imageCache = [String: UIImage]()
-
-extension UIImageView {
-    
-    func loadImageView(with urlString: String) {
-        
-        // check if iamge exists in cache
-        if let cachedImage = imageCache[urlString] {
-            self.image = cachedImage
-            return
-        }
-        
-        // if image does not exists in cache
-        guard let url = URL(string: urlString) else { return }
-        // fetch contents of URL
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            // handle error
-            if let error = error {
-                print("Failed to load image with error", error.localizedDescription)
-            }
-            
-            // image data
-            guard let imageData = data else { return }
-            
-            // set image using image data
-            let phothoImage = UIImage(data: imageData)
-            
-            // set key and value for iamge cache
-            imageCache[url.absoluteString] = phothoImage
-            
-            // set image
-            DispatchQueue.main.async {
-                self.image = phothoImage
-            }
-        }.resume()
-    }
-}
 
 
 extension Database {
@@ -114,8 +77,5 @@ extension Database {
             completion(user)
             
         }
-        
-        
-        
     }
 }

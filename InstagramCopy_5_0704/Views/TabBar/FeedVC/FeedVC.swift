@@ -11,11 +11,12 @@ import Firebase
 private let reuseIdentifier = "Cell"
 
 
-final class FeedVC: UICollectionViewController {
+final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     
     
     // MARK: - properties
     
+    var posts = [Post]()
     
     
     
@@ -28,34 +29,52 @@ final class FeedVC: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.collectionView.backgroundColor = .white
         
         
-        self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        self.collectionView!.register(FeedCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        
 
+         
+        configureNavigationBar()
         
-        configureLogoutButton()
+        fetchPosts()
+        
     }
     // MARK: - UICollectionViewDataSource
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 0
+        return 1
     }
-
-
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
-        return 0
+        return self.posts.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
-    
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! FeedCell
+        
+        cell.delegate = self
+        
         // Configure the cell
-    
+        cell.post = posts[indexPath.row]
+        
         return cell
     }
     
+    
+    // MARK: - FlowLayout
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
+        let width = self.view.frame.width
+        var height = width + 8 + 40 + 8
+        height += 50
+        height += 60
+        
+        
+        return CGSize(width: width, height: height)
+    }
     
     
     
@@ -66,9 +85,15 @@ final class FeedVC: UICollectionViewController {
     
     
     // MARK: - Handlers
-    func configureLogoutButton() {
+    func configureNavigationBar() {
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(handleLogout))
+        self.navigationItem.title = "Feed"
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "send2"), style: .plain, target: self, action: #selector(handleShowMessages))
     }
+    @objc private func handleShowMessages() {
+        print("handleShowMessages")
+    }
+    
     @objc func handleLogout() {
         
         print("handleLogut pressed")
@@ -106,13 +131,57 @@ final class FeedVC: UICollectionViewController {
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
         present(alertController, animated: true, completion: nil)
-        
-        
-        
-        
     }
     
     
+    
+    // MARK: - API
+    private func fetchPosts() {
+        
+        POSTS_REF.observe(.childAdded) { snapshot in
+            // post id
+            let postId = snapshot.key
+            guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
+            guard let ownerUid = dictionary["ownerUid"] as? String else { return }
+            
+            Database.fetchUser(with: ownerUid) { user in
+                
+                let post = Post(postId: postId, user: user, dictionary: dictionary)
+                
+                self.posts.append(post)
+                
+                self.posts.sort { post1, post2 in
+                    return post1.creationDate > post2.creationDate
+                }
+                
+                print("Post caption is \(post.caption)")
+                self.collectionView.reloadData()
+            }
+        }
+    }
+}
+
+
+
+
+
+// MARK: - FeedCell - Delegate
+extension FeedVC: FeedCellDelegate {
+    func handleUserNameTapped(for cell: FeedCell) {
+        print("handle user name Tapped")
+    }
+    
+    func handleOptionsTapped(for cel: FeedCell) {
+        print("handle Options Tapped")
+    }
+    
+    func handleLikeTapped(for cel: FeedCell) {
+        print("handle likes Tapped")
+    }
+    
+    func handleCommentTapped(for cel: FeedCell) {
+        print("handle comment Tapped")
+    }
     
     
 }
