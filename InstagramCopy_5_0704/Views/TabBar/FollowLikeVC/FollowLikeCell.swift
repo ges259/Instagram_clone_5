@@ -14,6 +14,13 @@ final class FollowLikeCell: UITableViewCell {
     
     // MARK: - Properties
     
+
+    
+    
+    
+    
+    
+    
     // FollowLikeVC
     var delegate: FollowCellDelegate?
     
@@ -99,18 +106,24 @@ final class FollowLikeCell: UITableViewCell {
         self.detailTextLabel?.text = "FullName"
         
         self.addSubview(self.profileImageView)
-        self.addSubview(self.followButton)
-        
-        
-        
-        self.profileImageView.anchor(top: nil, bottom: nil, leading: self.leadingAnchor, trailing: nil, paddingTop: 0, paddingBottom: 0, paddingLeading: 8, paddingTrailing: 0, width: 48, height: 48)
         self.profileImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         self.profileImageView.layer.cornerRadius = 48 / 2
+        self.profileImageView.anchor(top: nil, bottom: nil,
+                                     leading: self.leadingAnchor, trailing: nil,
+                                     paddingTop: 0, paddingBottom: 0,
+                                     paddingLeading: 8, paddingTrailing: 0,
+                                     width: 48, height: 48)
         
         
-        self.followButton.anchor(top: nil, bottom: nil, leading: nil, trailing: self.trailingAnchor, paddingTop: 0, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 12, width: 90, height: 30)
+        self.addSubview(self.followButton)
         self.followButton.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         self.followButton.layer.cornerRadius = 3
+        self.followButton.anchor(top: nil, bottom: nil,
+                                 leading: nil, trailing: self.trailingAnchor,
+                                 paddingTop: 0, paddingBottom: 0,
+                                 paddingLeading: 0, paddingTrailing: 12,
+                                 width: 90, height: 30)
+        
 
 
         self.selectionStyle = .none

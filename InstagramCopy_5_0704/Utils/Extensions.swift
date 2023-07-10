@@ -68,10 +68,11 @@ extension UIView {
 extension Database {
     
     static func fetchUser(with uid: String, completion: @escaping(User) -> ()) {
-        
+        // Database.database().reference().child("users")
         USER_REF.child(uid).observeSingleEvent(of: .value) { snapshot in
-            guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
             
+            guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
+
             let user = User(uid: uid, dictionary: dictionary)
             
             completion(user)

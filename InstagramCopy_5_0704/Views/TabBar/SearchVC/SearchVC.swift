@@ -101,9 +101,9 @@ final class SearchVC: UITableViewController {
     
     
     // MARK: - API
-    func fetchUsers() {
+    private func fetchUsers() {
         // childAdded = 목록 가져오기
-        Database.database().reference().child("users").observe(.childAdded) { snapshot in
+        USER_REF.observe(.childAdded) { snapshot in
             
             // uid
             let uid = snapshot.key

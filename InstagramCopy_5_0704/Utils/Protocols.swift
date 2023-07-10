@@ -23,7 +23,9 @@ protocol FollowCellDelegate {
 
 protocol FeedCellDelegate {
     func handleUserNameTapped(for cell: FeedCell)
-    func handleOptionsTapped(for cel: FeedCell)
-    func handleLikeTapped(for cel: FeedCell)
-    func handleCommentTapped(for cel: FeedCell)
+    func handleOptionsTapped(for cell: FeedCell)
+    func handleLikeTapped(for cell: FeedCell, isDoubleTapped: Bool)
+    func handleCommentTapped(for cell: FeedCell)
+    func handleConfigureLikeButton(for cell: FeedCell)
+    func handleShowLikes(for cell: FeedCell)
 }

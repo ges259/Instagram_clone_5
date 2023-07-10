@@ -16,8 +16,23 @@ final class FollowLikeVC: UITableViewController {
     
     
     // MARK: - Properties
-    var viewFollowers: Bool = false
-    var viewFollowing: Bool = false
+    enum ViewingMode: Int {
+        case Following
+        case Followers
+        case Likes
+        init(index: Int) {
+            switch index {
+            case 0: self = .Following
+            case 1: self = .Followers
+            case 2: self = .Likes
+            default: self = .Following
+            }
+        }
+    }
+    var postId: String?
+    
+    
+    var viewingMode: ViewingMode!
     
     
     var uid: String?
@@ -36,21 +51,12 @@ final class FollowLikeVC: UITableViewController {
         
         self.tableView.register(FollowLikeCell.self, forCellReuseIdentifier: reuseIdentifer)
         
-//        self.navigationItem.title = "Followers"
         
-        // configure nav controller
-        if viewFollowers {
-            self.navigationItem.title = "Followers"
-        } else {
-            self.navigationItem.title = "Following"
-        }
-        
+        // configure nav titles
+        configureNavigationTitle()
         
         // fetch users
-        fetchUser()
-        
-        
-        
+        fetchUsers()
         
     }
     
@@ -90,34 +96,69 @@ final class FollowLikeVC: UITableViewController {
     }
     
     
+    // MARK: - Handler
+    private func configureNavigationTitle() {
+        
+        guard let viewingMode = self.viewingMode else { return }
+
+        // configure nav controller
+        switch viewingMode {
+        case .Following: self.navigationItem.title = "Following"
+        case .Followers: self.navigationItem.title = "Follower"
+        case .Likes: self.navigationItem.title = "Likes"
+        }
+    }
+    
+    
     
     
     // MARK: - API
-    func fetchUser() {
+    private func getDatabaseReference() -> DatabaseReference? {
+        guard let viewingMode = self.viewingMode else { return nil }
         
-        guard let uid = self.uid else { return }
-        var ref: DatabaseReference!
-        
-        // fetch Followers
-        if viewFollowers {
-            ref = USER_FOLLOWER_REF
-        // fetch Following users
-        } else {
-            ref = USER_FOLLOWING_REF
+        switch viewingMode {
+        case .Following: return USER_FOLLOWING_REF
+        case .Followers: return USER_FOLLOWER_REF
+        case .Likes: return POST_LIKES_REF
         }
+    }
+    
+    private func fetchUser(with userId: String) {
+        Database.fetchUser(with: userId) { user in
+            self.users.append(user)
+            self.tableView.reloadData()
+        }
+    }
+    
+    
+    
+    
+    private func fetchUsers() {
+        guard let viewingMode = self.viewingMode else { return }
+        guard let ref = getDatabaseReference() else { return }
         
-        ref.child(uid).observeSingleEvent(of: .value) { snapshot in
+        switch viewingMode {
+        case .Following, .Followers:
+            guard let uid = self.uid else { return }
+           
+            ref.child(uid).observeSingleEvent(of: .value) { snapshot in
 
-            guard let allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
-            
-            allObjects.forEach { snapshot in
+                guard let allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
                 
-                let userId = snapshot.key
-                
-                Database.fetchUser(with: userId) { user in
-                    self.users.append(user)
-                    self.tableView.reloadData()
+                allObjects.forEach { snapshot in
+                    
+                    let userId = snapshot.key
+                    self.fetchUser(with: userId)
                 }
+            }
+        case .Likes:
+            
+            guard let postId = self.postId else { return }
+            
+            ref.child(postId).observe(.childAdded) { snapshot in
+                
+                let uid = snapshot.key
+                self.fetchUser(with: uid)
             }
         }
     }
@@ -135,23 +176,11 @@ extension FollowLikeVC: FollowCellDelegate {
         // isFollowed가 true이면 => follow상태
         if user.isFollowed {
             user.unfollow()
-//            cell.followButton.setTitle("Follow", for: .normal)
-//            cell.followButton.setTitleColor(.white, for: .normal)
-//            cell.followButton.layer.borderWidth = 0
-//            cell.followButton.backgroundColor = UIColor(red: 17/255, green: 154/255, blue: 237/255, alpha: 1)
-            
             cell.followButton.configure(didFollow: false)
-
-            
             
         // isFollowed가 false이면 => unfollow상태
         } else {
             user.follow()
-//            cell.followButton.setTitle("Following", for: .normal)
-//            cell.followButton.setTitleColor(.black, for: .normal)
-//            cell.followButton.layer.borderWidth = 0.5
-//            cell.followButton.backgroundColor = .white
-            
             
             cell.followButton.configure(didFollow: true)
         }

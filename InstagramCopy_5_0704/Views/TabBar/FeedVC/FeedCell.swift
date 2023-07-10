@@ -18,7 +18,7 @@ final class FeedCell: UICollectionViewCell {
             guard let ownerUid = post?.ownerUid else { return }
             guard let imageUrl = post?.imageUrl else { return }
             guard let likes = post?.likes else { return }
-            guard let date = post?.creationDate else { return }
+//            guard let date = post?.creationDate else { return }
             
             Database.fetchUser(with: ownerUid) { user in
                 self.profileImageView.loadImageView(with: user.profileImageUrl)
@@ -28,8 +28,9 @@ final class FeedCell: UICollectionViewCell {
             }
             self.profileImageView.loadImageView(with: imageUrl)
             self.likesLabel.text = "\(likes) likes"
-            self.postTimeLabel.text = "\(date)"
+//            self.postTimeLabel.text = "\(date)"
             
+            self.handleConfigureLikeButton()
         }
     }
     
@@ -46,12 +47,18 @@ final class FeedCell: UICollectionViewCell {
         
         return img
     }()
-    private let postImageView: CustomImageView = {
+    private lazy var postImageView: CustomImageView = {
         let img = CustomImageView()
         
         img.contentMode = .scaleAspectFill
         img.clipsToBounds = true
         img.backgroundColor = .lightGray
+        
+        // add gesture recognizer for double tap to like
+        let likeTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTappedToLike))
+        likeTap.numberOfTapsRequired = 2
+        img.isUserInteractionEnabled = true
+        img.addGestureRecognizer(likeTap)
         
         return img
     }()
@@ -81,7 +88,7 @@ final class FeedCell: UICollectionViewCell {
 
         return btn
     }()
-    private lazy var likeButton: UIButton = {
+    lazy var likeButton: UIButton = {
         let btn = UIButton(type: .system)
         
         btn.setImage(#imageLiteral(resourceName: "like_unselected"), for: .normal)
@@ -132,11 +139,18 @@ final class FeedCell: UICollectionViewCell {
     
     
     // MARK: - Lbael
-    private let likesLabel: UILabel = {
+    lazy var likesLabel: UILabel = {
         let lbl = UILabel()
         
         lbl.font = UIFont.boldSystemFont(ofSize: 12)
         lbl.text = "3 likes"
+        
+        // add gesture recognizer to label
+        let likeTap = UITapGestureRecognizer(target: self, action: #selector(handleShowLikes))
+        likeTap.numberOfTapsRequired = 1
+        lbl.isUserInteractionEnabled = true
+        lbl.addGestureRecognizer(likeTap)
+        
         
         return lbl
     }()
@@ -182,18 +196,30 @@ final class FeedCell: UICollectionViewCell {
     
     // MARK: - Handler
     @objc private func handleUserNameTapped() {
-        delegate?.handleUserNameTapped(for: self)
+        self.delegate?.handleUserNameTapped(for: self)
     }
     @objc private func handleOptionsTapped() {
-        delegate?.handleOptionsTapped(for: self)
+        self.delegate?.handleOptionsTapped(for: self)
     }
     @objc private func handleLikeTapped() {
-        delegate?.handleLikeTapped(for: self)
+        self.delegate?.handleLikeTapped(for: self, isDoubleTapped: false)
     }
     @objc private func handleCommentTapped() {
-        delegate?.handleCommentTapped(for: self)
+        self.delegate?.handleCommentTapped(for: self)
+    }
+    func handleConfigureLikeButton() {
+        self.delegate?.handleConfigureLikeButton(for: self)
     }
     
+    
+    
+    // gesture
+    @objc private func handleShowLikes() {
+        self.delegate?.handleShowLikes(for: self)
+    }
+    @objc private func handleDoubleTappedToLike() {
+        self.delegate?.handleLikeTapped(for: self, isDoubleTapped: true)
+    }
     
     
     
@@ -252,15 +278,27 @@ final class FeedCell: UICollectionViewCell {
                                    width: 20, height: 24)
         
         self.addSubview(self.likesLabel)
-        self.likesLabel.anchor(top: self.likeButton.bottomAnchor, bottom: nil, leading: self.leadingAnchor, trailing: nil, paddingTop: -4, paddingBottom: 0, paddingLeading: 8, paddingTrailing: 0, width: 0, height: 0)
+        self.likesLabel.anchor(top: self.likeButton.bottomAnchor, bottom: nil,
+                               leading: self.leadingAnchor, trailing: nil,
+                               paddingTop: -4, paddingBottom: 0,
+                               paddingLeading: 8, paddingTrailing: 0,
+                               width: 0, height: 0)
         
         
         self.addSubview(self.captionLabel)
-        self.captionLabel.anchor(top: self.likesLabel.bottomAnchor, bottom: nil, leading: self.leadingAnchor, trailing: self.trailingAnchor, paddingTop: 8, paddingBottom: 0, paddingLeading: 8, paddingTrailing: 8, width: 0, height: 0)
+        self.captionLabel.anchor(top: self.likesLabel.bottomAnchor, bottom: nil,
+                                 leading: self.leadingAnchor, trailing: self.trailingAnchor,
+                                 paddingTop: 8, paddingBottom: 0,
+                                 paddingLeading: 8, paddingTrailing: 8,
+                                 width: 0, height: 0)
         
         
         self.addSubview(self.postTimeLabel)
-        self.postTimeLabel.anchor(top: self.captionLabel.bottomAnchor, bottom: nil, leading: self.leadingAnchor, trailing: nil, paddingTop: 8, paddingBottom: 0, paddingLeading: 8, paddingTrailing: 0, width: 0, height: 0)
+        self.postTimeLabel.anchor(top: self.captionLabel.bottomAnchor, bottom: nil,
+                                  leading: self.leadingAnchor, trailing: nil,
+                                  paddingTop: 8, paddingBottom: 0,
+                                  paddingLeading: 8, paddingTrailing: 0,
+                                  width: 0, height: 0)
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

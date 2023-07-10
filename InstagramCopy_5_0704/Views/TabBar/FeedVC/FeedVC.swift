@@ -16,6 +16,10 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     // MARK: - properties
     
+    
+    
+    
+    
     var posts = [Post]()
     
     var viewSinglePost: Bool = false
@@ -77,11 +81,6 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         } else {
             cell.post = posts[indexPath.row]
         }
-        
-        
-        
-        // Configure the cell
-//        cell.post = posts[indexPath.row]
         
         return cell
     }
@@ -161,6 +160,13 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     
     
+    
+    
+    
+    
+    
+    
+    
     // MARK: - API
     private func updateUserFeeds() {
         
@@ -168,35 +174,26 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         
         USER_FOLLOWING_REF.child(currentId).observe(.childAdded) { snapshot in
             
-            print("Follower ----- \(snapshot)")
             let followingUserId = snapshot.key
-            
+            // followingUserId: 자신이 follow한 사람들
             USER_POSTS_REF.child(followingUserId).observe(.childAdded) { snapshot in
                 // snapshot : current-user를 follow한 사람들
-                
                 let postId = snapshot.key
                 
                 USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
-                
-                
             }
         }
-        
         USER_POSTS_REF.child(currentId).observe(.childAdded) { snapshot in
             let postId = snapshot.key
             
             USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
-            
         }
-        
-        
-        
     }
     
     
     
     private func fetchPosts() {
-        print("FeedVC - fetchPosts")
+//        print("FeedVC - fetchPosts")
         
         guard let currentId = Auth.auth().currentUser?.uid else { return }
         
@@ -228,6 +225,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
 
 // MARK: - FeedCell - Delegate
 extension FeedVC: FeedCellDelegate {
+    // User Name Button Tapped
     func handleUserNameTapped(for cell: FeedCell) {
         
         guard let post = cell.post else { return }
@@ -238,17 +236,75 @@ extension FeedVC: FeedCellDelegate {
         self.navigationController?.pushViewController(userProfileVC, animated: true)
     }
     
-    func handleOptionsTapped(for cel: FeedCell) {
+    
+    
+    func handleOptionsTapped(for cell: FeedCell) {
         print("handle Options Tapped")
     }
     
-    func handleLikeTapped(for cel: FeedCell) {
-        print("handle likes Tapped")
+    // Like Button Tapped
+    func handleLikeTapped(for cell: FeedCell, isDoubleTapped: Bool) {
+        
+        guard let post = cell.post else { return }
+        
+        // post.didLike가 true이면,
+            // -> 기본값이 false임
+        if post.didLike {
+            // handle unlike post
+            if !isDoubleTapped {
+                post.adjustLikes(addLike: false) { likes in
+                    cell.likesLabel.text = "\(likes) likes"
+                    cell.likeButton.setImage(#imageLiteral(resourceName: "like_unselected"), for: .normal)
+                }
+            }
+        } else {
+            // handle like post
+            post.adjustLikes(addLike: true) { likes in
+                cell.likesLabel.text = "\(likes) likes"
+                cell.likeButton.setImage(#imageLiteral(resourceName: "like_selected"), for: .normal)
+            }
+        }
     }
     
-    func handleCommentTapped(for cel: FeedCell) {
-        print("handle comment Tapped")
+    func handleConfigureLikeButton(for cell: FeedCell) {
+        
+        guard let post = cell.post else { return }
+        guard let postId = post.postId else { return }
+        guard let currentUid = Auth.auth().currentUser?.uid else { return }
+        
+        USER_LIKES_REF.child(currentUid).observeSingleEvent(of: .value) { snapshot in
+            
+            // check if post id exists in user-like sturcture
+            if snapshot.hasChild(postId) {
+                post.didLike = true
+                cell.likeButton.setImage(#imageLiteral(resourceName: "like_selected"), for: .normal)
+            } else {
+                post.didLike = false
+                cell.likeButton.setImage(#imageLiteral(resourceName: "like_unselected"), for: .normal)
+            }
+        }
+    }
+    
+    // add gesture
+    func handleShowLikes(for cell: FeedCell) {
+        guard let post = cell.post else { return }
+        guard let postId = post.postId else { return }
+        
+        let followLikeVC = FollowLikeVC()
+        followLikeVC.viewingMode = FollowLikeVC.ViewingMode(index: 2)
+        followLikeVC.postId = postId
+        
+        navigationController?.pushViewController(followLikeVC, animated: true)
     }
     
     
+    
+    
+    
+    func handleCommentTapped(for cell: FeedCell) {
+        
+        let commentVC = CommentVC(collectionViewLayout: UICollectionViewFlowLayout())
+
+        self.navigationController?.pushViewController(commentVC, animated: true)
+    }
 }

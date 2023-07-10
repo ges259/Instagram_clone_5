@@ -16,12 +16,6 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     // MARK: - properties
-//
-//    var currentUser: User?
-//
-//
-//    var userToLoadFromSearchVC: User?
-    
     
     var posts = [Post]()
     
@@ -219,16 +213,16 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
 extension UserProfileVC: UserProfileHeaderDelegate {
     
     func handleFollowersTapped(for header: UserProfileHeader) {
-        let followVC = FollowLikeVC()
-        followVC.viewFollowers = true
-        followVC.uid = user?.uid
-        self.navigationController?.pushViewController(followVC, animated: true)
+        let followLikeVC = FollowLikeVC()
+        followLikeVC.viewingMode = FollowLikeVC.ViewingMode(index: 1)
+        followLikeVC.uid = user?.uid
+        self.navigationController?.pushViewController(followLikeVC, animated: true)
     }
     func handleFollowingTapped(for header: UserProfileHeader) {
-        let followVC = FollowLikeVC()
-        followVC.viewFollowing = true
-        followVC.uid = user?.uid
-        self.navigationController?.pushViewController(followVC, animated: true)
+        let followLikeVC = FollowLikeVC()
+        followLikeVC.viewingMode = FollowLikeVC.ViewingMode(index: 0)
+        followLikeVC.uid = user?.uid
+        self.navigationController?.pushViewController(followLikeVC, animated: true)
     }
     func handleEditFollowTapped(for header: UserProfileHeader) {
         

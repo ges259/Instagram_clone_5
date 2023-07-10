@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import Firebase
+import FirebaseDatabase
 import FirebaseAuth
 import FirebaseStorage
 
@@ -321,6 +321,8 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
                     guard let uid = user?.user.uid else { return }
                     
                     let values = [uid: dictionaryValues]
+                    
+                    
                     
                     
                     // realtime database에 저장
