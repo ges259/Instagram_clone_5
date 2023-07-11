@@ -303,8 +303,12 @@ extension FeedVC: FeedCellDelegate {
     
     func handleCommentTapped(for cell: FeedCell) {
         
-        let commentVC = CommentVC(collectionViewLayout: UICollectionViewFlowLayout())
+        guard let postId = cell.post?.postId else { return }
 
+        let commentVC = CommentVC(collectionViewLayout: UICollectionViewFlowLayout())
+        
+        commentVC.postId = postId
+        
         self.navigationController?.pushViewController(commentVC, animated: true)
     }
 }

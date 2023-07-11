@@ -10,34 +10,63 @@ import UIKit
 final class CommentCell: UICollectionViewCell {
     
     
+    // MARK: - Properties
+    var comment: Comment? {
+        didSet{
+            guard let user = comment?.user else { return }
+            guard let profileImageUrl = user.profileImageUrl else { return }
+            guard let userName = user.userName else { return }
+            guard let commentText = comment?.commentText else { return }
+            
+            profileImageView.loadImageView(with: profileImageUrl)
+            
+            let attributedText = NSMutableAttributedString(string: userName, attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 12)])
+            attributedText.append(NSAttributedString(string: " \(commentText)", attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12)]))
+            attributedText.append(NSAttributedString(string: " 2d", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 12), NSAttributedString.Key.foregroundColor: UIColor.lightGray]))
+            self.commentTextView.attributedText = attributedText
+        }
+    }
+    
     
     
     // MARK: - Layout
-    let profileImageView: CustomImageView = {
+    private let profileImageView: CustomImageView = {
         let img = CustomImageView()
+        
         img.contentMode = .scaleAspectFill
-//        img.backgroundColor = .lightGray
         img.backgroundColor = .lightGray
         img.clipsToBounds = true
         
         return img
     }()
     
-    
-//
-    let commentLabel: UILabel = {
-        let lbl = UILabel()
 
-        let attributedText = NSMutableAttributedString(string: "joker", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 12)])
-        attributedText.append(NSAttributedString(string: " Some test comment", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 12)]))
-        lbl.attributedText = attributedText
-
-        return lbl
+    private let commentTextView: UITextView = {
+        let tv = UITextView()
+        
+        tv.font = UIFont.systemFont(ofSize: 12)
+        tv.isScrollEnabled = false
+        
+        tv.autocorrectionType = .no
+        tv.autocapitalizationType = .none
+        
+        return tv
     }()
+    
+    private let separatorView: UIView = {
+        let view = UIView()
+        
+        view.backgroundColor = .lightGray
+        
+        return view
+    }()
+    
+    
 
     
     
     
+    // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -49,24 +78,22 @@ final class CommentCell: UICollectionViewCell {
                                      paddingLeading: 8, paddingTrailing: 0,
                                      width: 40, height: 40)
 
-        self.addSubview(self.commentLabel)
-        self.commentLabel.centerYAnchor.constraint(equalTo: self.profileImageView.centerYAnchor).isActive = true
-        self.commentLabel.anchor(top: nil, bottom: nil,
-                             leading: self.profileImageView.trailingAnchor, trailing: nil,
-                             paddingTop: 0, paddingBottom: 0,
-                             paddingLeading: 8, paddingTrailing: 0,
+        self.addSubview(self.commentTextView)
+        self.commentTextView.anchor(top: self.topAnchor, bottom: self.bottomAnchor,
+                                    leading: self.profileImageView.trailingAnchor, trailing: self.trailingAnchor,
+                             paddingTop: 4, paddingBottom: 4,
+                             paddingLeading: 4, paddingTrailing: 4,
                              width: 0, height: 0)
+        
+        self.addSubview(self.separatorView)
+        self.separatorView.anchor(top: nil, bottom: self.bottomAnchor,
+                                  leading: self.leadingAnchor, trailing: self.trailingAnchor,
+                                  paddingTop: 0, paddingBottom: 0,
+                                  paddingLeading: 60, paddingTrailing: 0,
+                                  width: 0, height: 0.5)
 
-        
-        
-        
-        
     }
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    
-    
 }

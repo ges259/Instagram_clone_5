@@ -71,7 +71,6 @@ final class FollowLikeCell: UITableViewCell {
         img.backgroundColor = .lightGray
         img.clipsToBounds = true
 
-        
         return img
     }()
     

@@ -47,7 +47,7 @@ final class MainTabVC: UITabBarController, UITabBarControllerDelegate {
         
         // notification controller
         let notificationVC = constructNavController(UnselectedImage: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected"),
-                                                    rootViewController: NotificationsVC())
+                                                    rootViewController: NotificationVC())
         // profile controller
         let userProfileVC = constructNavController(UnselectedImage: #imageLiteral(resourceName: "profile_unselected"), selectedImage: #imageLiteral(resourceName: "profile_selected"),
                                                    rootViewController: UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout()))
