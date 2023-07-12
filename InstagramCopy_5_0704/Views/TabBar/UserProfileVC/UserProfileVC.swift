@@ -165,7 +165,7 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
                 self.posts.append(post)
                 
                 self.posts.sort { post1, post2 in
-                    return post1.creationDate > post.creationDate
+                    return post1.creationDate > post2.creationDate
                 }
                 
                 self.collectionView.reloadData()

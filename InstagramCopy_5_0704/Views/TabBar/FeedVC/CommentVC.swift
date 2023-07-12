@@ -14,7 +14,7 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     // MARK: - Properties
     var comments = [Comment]()
     
-    var postId: String?
+    var post: Post?
     
     
     
@@ -93,7 +93,7 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         self.collectionView!.register(CommentCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
         // fetch comments
-        fetchComment()
+        fetchComments()
         
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -120,7 +120,7 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     // MARK: - Handler
     @objc private func handleUploadComment() {
         
-        guard let postId = postId else { return }
+        guard let postId = self.post?.postId else { return }
         guard let commentText = commentTextField.text else { return }
         guard let uid = Auth.auth().currentUser?.uid else  { return }
         
@@ -132,12 +132,13 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         
         
         COMMENT_REF.child(postId).childByAutoId().updateChildValues(values) { Error, ref in
+            self.uploadCommentNotificationToServer()
             self.commentTextField.text = nil
         }
     }
-    private func fetchComment() {
+    private func fetchComments() {
         
-        guard let postId = postId else { return }
+        guard let postId = self.post?.postId else { return }
 
         COMMENT_REF.child(postId).observe(.childAdded) { snapshot in
 
@@ -145,12 +146,34 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
             guard let uid = dictionary["uid"] as? String else { return }
 
             Database.fetchUser(with: uid) { (user) in
-
                 let comment = Comment(user: user, dictionary: dictionary)
                 self.comments.append(comment)
                 self.collectionView.reloadData()
             }
         }
+    }
+    
+    private func uploadCommentNotificationToServer() {
+        guard let currentUid = Auth.auth().currentUser?.uid else { return }
+        guard let post = self.post else { return }
+        guard let postId = self.post?.postId else { return }
+        guard let uid = post.user?.uid else { return }
+        let creationDate = Int(NSDate().timeIntervalSince1970)
+        
+        // notification values
+        let values = ["checked": 0,
+                      "creationDate": creationDate,
+                      "uid": currentUid,
+                      "type": COMMENT_INT_VALUE,
+                      "postId": postId] as [String: Any]
+        
+        // upload comment notification to server
+        if uid != currentUid {
+            NOTIFICATIONS_REF.child(uid).childByAutoId().updateChildValues(values )
+        }
+        
+        
+        
     }
     
     

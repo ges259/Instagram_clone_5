@@ -193,7 +193,6 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     
     private func fetchPosts() {
-//        print("FeedVC - fetchPosts")
         
         guard let currentId = Auth.auth().currentUser?.uid else { return }
         
@@ -210,8 +209,6 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
                 }
                 // stop refreshing
                 self.collectionView.refreshControl?.endRefreshing()
-                
-                
                 
                 self.collectionView.reloadData()
             }
@@ -303,11 +300,11 @@ extension FeedVC: FeedCellDelegate {
     
     func handleCommentTapped(for cell: FeedCell) {
         
-        guard let postId = cell.post?.postId else { return }
+        guard let post = cell.post else { return }
 
         let commentVC = CommentVC(collectionViewLayout: UICollectionViewFlowLayout())
         
-        commentVC.postId = postId
+        commentVC.post = post
         
         self.navigationController?.pushViewController(commentVC, animated: true)
     }

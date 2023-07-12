@@ -24,6 +24,7 @@
 		5F3F403C2A5515EA0038913D /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 5F3F403B2A5515EA0038913D /* FirebaseAuth */; };
 		5F3F403E2A5515EA0038913D /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 5F3F403D2A5515EA0038913D /* FirebaseDatabase */; };
 		5F3F40402A5515EA0038913D /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 5F3F403F2A5515EA0038913D /* FirebaseStorage */; };
+		5F6AA80F2A5E95D800A1DF97 /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6AA80E2A5E95D800A1DF97 /* Notification.swift */; };
 		5F9BA3502A545031004DE084 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9BA34F2A545031004DE084 /* AppDelegate.swift */; };
 		5F9BA3522A545031004DE084 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9BA3512A545031004DE084 /* SceneDelegate.swift */; };
 		5F9BA3592A545032004DE084 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F9BA3582A545032004DE084 /* Assets.xcassets */; };
@@ -61,6 +62,7 @@
 		5F3F40342A54F4570038913D /* TFExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TFExtensions.swift; sourceTree = "<group>"; };
 		5F3F40362A54F6740038913D /* SignUpVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpVC.swift; sourceTree = "<group>"; };
 		5F3F40382A55153D0038913D /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		5F6AA80E2A5E95D800A1DF97 /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
 		5F9BA34C2A545031004DE084 /* InstagramCopy_5_0704.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstagramCopy_5_0704.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F9BA34F2A545031004DE084 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5F9BA3512A545031004DE084 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -220,6 +222,7 @@
 				5F19F0E62A5599BB0073E5A9 /* User.swift */,
 				5FCE52772A59763F0095BFA9 /* Post.swift */,
 				5FA4B4C92A5D4A1600562937 /* Comment.swift */,
+				5F6AA80E2A5E95D800A1DF97 /* Notification.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -344,6 +347,7 @@
 				5FEDD2662A56BBE900081AE9 /* FollowLikeVC.swift in Sources */,
 				5F9BA36A2A545202004DE084 /* Extensions.swift in Sources */,
 				5F19F0E52A556C2D0073E5A9 /* UserProfileHeader.swift in Sources */,
+				5F6AA80F2A5E95D800A1DF97 /* Notification.swift in Sources */,
 				5F19F0D62A554FE10073E5A9 /* FeedVC.swift in Sources */,
 				5F3F40372A54F6740038913D /* SignUpVC.swift in Sources */,
 				5FEDD26C2A56E02800081AE9 /* Protocols.swift in Sources */,
@@ -506,9 +510,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "ges.InstagramCopy-5-0704";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -532,9 +539,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "ges.InstagramCopy-5-0704";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

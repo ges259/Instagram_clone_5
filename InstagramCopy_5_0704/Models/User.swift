@@ -56,9 +56,9 @@ class User {
         USER_FOLLOWER_REF.child(uid).updateChildValues([currentId: 1])
         
         // upload follow notification to server
-//        uploadFollowNotificationToServer()
+        uploadFollowNotificationToServer()
         
-//         add followed users posts to current user-feed
+        // add followed users posts to current user-feed
         USER_POSTS_REF.child(uid).observe(.childAdded) { snapshot in
             let postId = snapshot.key
             USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
@@ -101,4 +101,18 @@ class User {
             }
         }
     }
+    
+    func uploadFollowNotificationToServer() {
+        guard let currentUid = Auth.auth().currentUser?.uid else { return }
+        let creationDate = Int(NSDate().timeIntervalSince1970)
+        let values = ["checked": 0,
+                      "creationDate": creationDate,
+                      "uid": currentUid,
+                      "type": FOLLOW_INT_VALUE] as [String: Any]
+        
+        NOTIFICATIONS_REF.child(self.uid).childByAutoId().updateChildValues(values)
+        
+        
+    }
+    
 }
