@@ -8,90 +8,64 @@
 import UIKit
 import Firebase
 
-private let reuserIdentifier = "SearchUserCell"
 
-final class SearchVC: UITableViewController {
+private let collectionreuserIndetifier: String = "SearchPostCell"
+
+final class SearchVC: UIViewController, UISearchResultsUpdating {
+    
     
     
     // MARK: - Properties
     var users = [User]()
     
-
+    var inSearchMode: Bool = false
+//    var tableView: UITableView!
     
+    var collectionView: UICollectionView!
+    var collectionViewEnabled: Bool = true
+    
+    
+    var searchBar = UISearchBar()
+    
+    
+    
+    var resultSearchBar = UISearchController(searchResultsController: SearchResultVC())
+    
+    var posts = [Post]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
 //        print("SearchVC")
         
-        // register cell classes
-        self.tableView.register(SearchUserCell.self, forCellReuseIdentifier: reuserIdentifier)
-        // separator insets
-        self.tableView.separatorInset = UIEdgeInsets(top: 0, left: 64, bottom: 0, right: 0)
+        view.backgroundColor = .white
+        
+        // fetch posts
+        self.fetchPosts()
         
         
-        configreNavController()
+        navigationItem.searchController = resultSearchBar
+        resultSearchBar.searchResultsUpdater = self
+        resultSearchBar.searchBar.autocapitalizationType = .none
+        resultSearchBar.searchBar.autocorrectionType = .no
         
         
-
         
-        // fetch users
+        // configure collection view
+        self.configureCollectionView()
+    }
+    func updateSearchResults(for searchController: UISearchController) {
+        print("서치바에 입력되는 단어 \(searchController.searchBar.text ?? "")")
+        
+        let vc = searchController.searchResultsController as! SearchResultVC
+        
         fetchUsers()
-    }
-    
-    
-    
-    
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return users.count
-    }
-    
-    
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: reuserIdentifier, for: indexPath) as! SearchUserCell
+        vc.users = self.users
         
-        cell.user = users[indexPath.row]
-        
-        return cell
-    }
-    
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 60
-    }
-    
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-
-                let user = users[indexPath.row]
-        
-//        let user = User!
-        
-        
-
-        
-        // create instance of user profile vc
-        let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
-        
-        // passes user from searchVC to userProfileVC
-        userProfileVC.user = user
-        userProfileVC.title = "Followers"
-        // push view controller
-        navigationController?.pushViewController(userProfileVC, animated: true)
+        vc.searchTerm = searchController.searchBar.text ?? ""
         
     }
-    
-    
-    
-    
-    
-    
     
     // MARK: - handler
-    private func configreNavController() {
-        self.navigationItem.title = "Explore"
-    }
-    
     
     
     
@@ -108,34 +82,90 @@ final class SearchVC: UITableViewController {
             // uid
             let uid = snapshot.key
             
-//            // snapshot value cast as dictionary
-//            guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
-//
-//            // construct user
-//            let user = User(uid: uid, dictionary: dictionary)
-//
-//            // append user to data source
-//            self.users.append(user)
-//
-//            // reload our table view
-//            self.tableView.reloadData()
-            
             Database.fetchUser(with: uid) { user in
                 
                 self.users.append(user)
-                
-                self.tableView.reloadData()
-                
             }
-            
-            
-            
         }
+    }
+    
+    private func fetchPosts() {
+        
+        posts.removeAll()
+        
+        POSTS_REF.observe(.childAdded) { snapshot in
+            let postId = snapshot.key
+            
+            Database.fetchPost(with: postId) { post in
+                self.posts.append(post)
+                self.collectionView.reloadData()
+            }
+        }
+    }
+    
+}
+
+
+// MARK: - UICollectionView
+extension SearchVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    
+    // datasource
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return posts.count
+    }
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: collectionreuserIndetifier, for: indexPath) as! SearchPostCell
+        
+        cell.post = posts[indexPath.item]
+        
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        let feedVC = FeedVC(collectionViewLayout: UICollectionViewFlowLayout())
+        
+        feedVC.viewSinglePost = true
+        feedVC.post = self.posts[indexPath.item]
+        
+        self.navigationController?.pushViewController(feedVC, animated: true)
     }
     
     
     
+    private func configureCollectionView() {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        
+        let frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height - (tabBarController?.tabBar.frame.height)! - (navigationController?.navigationBar.frame.height)!)
+        
+        collectionView = UICollectionView(frame: frame, collectionViewLayout: layout)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.alwaysBounceVertical = true
+        collectionView.backgroundColor = .white
+        
+        
+        
+        
+        collectionView.register(SearchPostCell.self, forCellWithReuseIdentifier: collectionreuserIndetifier)
+
+        self.view.addSubview(collectionView)
+//        tableView?.separatorColor = .clear
+        
+    }
     
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 1
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let width = (view.frame.width - 2) / 3
+        return CGSize(width: width, height: width)
+    }
     
     
 }

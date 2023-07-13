@@ -169,7 +169,7 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         
         // upload comment notification to server
         if uid != currentUid {
-            NOTIFICATIONS_REF.child(uid).childByAutoId().updateChildValues(values )
+            NOTIFICATIONS_REF.child(uid).childByAutoId().updateChildValues(values)
         }
         
         

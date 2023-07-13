@@ -120,7 +120,8 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         
     }
     @objc private func handleShowMessages() {
-        print("handleShowMessages")
+        let messagesVC = MessagesVC()
+        self.navigationController?.pushViewController(messagesVC, animated: true)
     }
     
     @objc func handleLogout() {
@@ -236,7 +237,7 @@ extension FeedVC: FeedCellDelegate {
     
     
     func handleOptionsTapped(for cell: FeedCell) {
-        print("handle Options Tapped")
+        print("Option button Tapped")
     }
     
     // Like Button Tapped
