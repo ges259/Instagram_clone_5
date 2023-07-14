@@ -7,6 +7,7 @@
 
 import UIKit
 import Firebase
+import ActiveLabel
 
 final class FeedCell: UICollectionViewCell {
     
@@ -154,11 +155,9 @@ final class FeedCell: UICollectionViewCell {
         
         return lbl
     }()
-    private let captionLabel: UILabel = {
-        let lbl = UILabel()
-        
- 
-        
+    let captionLabel: ActiveLabel = {
+        let lbl = ActiveLabel()
+        lbl.numberOfLines = 0
 
         return lbl
     }()
@@ -181,13 +180,33 @@ final class FeedCell: UICollectionViewCell {
     private func configurePostCaption(user: User) {
         guard let post = self.post else { return }
         guard let caption = post.caption else { return }
-                
-        let attributedText = NSMutableAttributedString(string: user.userName, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12)])
-        attributedText.append(NSAttributedString(string: " \(caption)", attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12)]))
+        guard let userName = post.user?.userName else { return }
         
-        captionLabel.attributedText = attributedText
-
-
+        // look for userName as pattern
+        let customType = ActiveType.custom(pattern: "^\(userName)\\b")
+        
+        // enable userName as custom type
+        captionLabel.enabledTypes = [.mention, .hashtag, .url, customType]
+        
+        // configure userName link attributes
+        captionLabel.configureLinkAttribute = { ( type, attributes, isSelected) in
+            var atts = attributes
+            switch type {
+            case .custom:
+                atts[NSAttributedString.Key.font] = UIFont.boldSystemFont(ofSize: 12)
+            default: ()
+            }
+            return atts
+        }
+        captionLabel.customize { label in
+            label.text = "\(userName) \(caption)"
+            label.customColor[customType] = .black
+            label.font = UIFont.systemFont(ofSize: 12)
+            label.textColor = .black
+            captionLabel.numberOfLines = 2
+        }
+        
+        postTimeLabel.text = "2 DAYS AGO"
     }
     
     

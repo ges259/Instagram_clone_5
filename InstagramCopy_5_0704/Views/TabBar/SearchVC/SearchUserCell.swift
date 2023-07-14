@@ -48,9 +48,7 @@ final class SearchUserCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
-        print("Search user cell")
-        
+
         self.selectionStyle = .none
         
         // add profile image view

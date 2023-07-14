@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import ActiveLabel
 
 final class CommentCell: UICollectionViewCell {
     
@@ -15,17 +16,11 @@ final class CommentCell: UICollectionViewCell {
         didSet{
             guard let user = comment?.user else { return }
             guard let profileImageUrl = user.profileImageUrl else { return }
-            guard let userName = user.userName else { return }
-            guard let commentText = comment?.commentText else { return }
-            guard let timeStamp = getCommentTimeStamp() else { return }
             
             
             profileImageView.loadImageView(with: profileImageUrl)
             
-            let attributedText = NSMutableAttributedString(string: userName, attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 12)])
-            attributedText.append(NSAttributedString(string: " \(commentText)", attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12)]))
-            attributedText.append(NSAttributedString(string: " \(timeStamp)", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 12), NSAttributedString.Key.foregroundColor: UIColor.lightGray]))
-            self.commentTextView.attributedText = attributedText
+            configureCommentLabel()
         }
     }
     
@@ -43,16 +38,13 @@ final class CommentCell: UICollectionViewCell {
     }()
     
 
-    private let commentTextView: UITextView = {
-        let tv = UITextView()
+    let commentLabel: ActiveLabel = {
+        let lbl = ActiveLabel()
         
-        tv.font = UIFont.systemFont(ofSize: 12)
-        tv.isScrollEnabled = false
+        lbl.font = UIFont.systemFont(ofSize: 12)
+        lbl.numberOfLines = 0
         
-        tv.autocorrectionType = .no
-        tv.autocapitalizationType = .none
-        
-        return tv
+        return lbl
     }()
     
     private let separatorView: UIView = {
@@ -78,6 +70,38 @@ final class CommentCell: UICollectionViewCell {
         
         return dateFormatter.string(from: comment.creationDate, to: now)
     }
+    
+    private func configureCommentLabel() {
+        guard let comment = self.comment else { return }
+        guard let user = comment.user else { return }
+        guard let userName = user.userName else { return }
+        guard let commentText = comment.commentText else { return }
+        
+        let customType = ActiveType.custom(pattern: "^\(userName)\\b")
+        
+        self.commentLabel.enabledTypes = [.hashtag, .mention, .url, customType]
+        
+        commentLabel.configureLinkAttribute = {(type, attributes, isSelected) in
+            var atts = attributes
+            
+            switch type {
+            case .custom:
+                atts[NSAttributedString.Key.font] = UIFont.boldSystemFont(ofSize: 12)
+            default: ()
+            }
+            return atts
+        }
+        
+        commentLabel.customize { label in
+            label.text = "\(userName) \(commentText)"
+            label.customColor[customType] = .black
+            label.font = UIFont.systemFont(ofSize: 12)
+            label.textColor = .black
+            label.numberOfLines = 2
+        }
+    }
+    
+    
 
     
     
@@ -94,8 +118,8 @@ final class CommentCell: UICollectionViewCell {
                                      paddingLeading: 8, paddingTrailing: 0,
                                      width: 40, height: 40)
 
-        self.addSubview(self.commentTextView)
-        self.commentTextView.anchor(top: self.topAnchor, bottom: self.bottomAnchor,
+        self.addSubview(self.commentLabel)
+        self.commentLabel.anchor(top: self.topAnchor, bottom: self.bottomAnchor,
                                     leading: self.profileImageView.trailingAnchor, trailing: self.trailingAnchor,
                              paddingTop: 4, paddingBottom: 4,
                              paddingLeading: 4, paddingTrailing: 4,

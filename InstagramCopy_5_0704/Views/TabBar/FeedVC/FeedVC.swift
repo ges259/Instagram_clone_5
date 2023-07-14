@@ -7,6 +7,7 @@
 
 import UIKit
 import Firebase
+import ActiveLabel
 
 private let reuseIdentifier = "Cell"
 
@@ -25,6 +26,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     var viewSinglePost: Bool = false
     var post: Post?
     
+    var currentKey: String?
     
     
     
@@ -54,7 +56,15 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         
         
     }
-    // MARK: - UICollectionViewDataSource
+    // MARK: - DataSource
+    
+    override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if posts.count > 4 {
+            if indexPath.item == posts.count - 1 {
+                fetchPosts()
+            }
+        }
+    }
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         // #warning Incomplete implementation, return the number of sections
@@ -81,6 +91,10 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         } else {
             cell.post = posts[indexPath.row]
         }
+        
+        self.handleHashtagTapped(forCell: cell)
+        self.handleUserNameLabelTapped(forCell: cell)
+        self.handleMentionTapped(forCell: cell)
         
         return cell
     }
@@ -155,10 +169,40 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     @objc private func handleRefresh() {
         posts.removeAll(keepingCapacity: false)
+        self.currentKey = nil
         fetchPosts()
         collectionView.reloadData()
     }
     
+    private func handleHashtagTapped(forCell cell: FeedCell) {
+        cell.captionLabel.handleHashtagTap { hashtag in
+            let hashtagVC = HashtagVC(collectionViewLayout: UICollectionViewFlowLayout())
+            hashtagVC.hashtag = hashtag
+            self.navigationController?.pushViewController(hashtagVC, animated: true)
+        }
+    }
+    
+    private func handleUserNameLabelTapped(forCell cell: FeedCell) {
+        
+        guard let user = cell.post?.user else { return }
+        guard let userName = user.userName else { return }
+        
+        let customType = ActiveType.custom(pattern: "^\(userName)\\b")
+
+        
+        cell.captionLabel.handleCustomTap(for: customType) { _ in
+            let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
+            userProfileVC.user = user
+            userProfileVC.modalPresentationStyle = .fullScreen
+            self.navigationController?.pushViewController(userProfileVC, animated: true)
+        }
+    }
+    
+    private func handleMentionTapped(forCell cell: FeedCell) {
+        cell.captionLabel.handleMentionTap { userName in
+            self.getMentionUser(withuserName: userName)
+        }
+    }
     
     
     
@@ -195,26 +239,56 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     private func fetchPosts() {
         
-        guard let currentId = Auth.auth().currentUser?.uid else { return }
+        guard let currentUid = Auth.auth().currentUser?.uid else { return }
         
-        USER_FEED_REF.child(currentId).observe(.childAdded) { snapshot in
-            // post id
-            let postId = snapshot.key
-            
-            Database.fetchPost(with: postId) { post in
-                
-                self.posts.append(post)
-                
-                self.posts.sort { post1, post2 in
-                    return post1.creationDate > post2.creationDate
-                }
-                // stop refreshing
+        // cueernetKey가 nil이면 -> 처음 화면은 무조건 nil.
+        // 첫 시작은 if문으로 시작되고 그 이후에 fetchPosts가 불리면 else로 빠짐
+        if currentKey == nil {
+            // 일단 5개만 받아오기
+            USER_FEED_REF.child(currentUid).queryLimited(toLast: 5).observeSingleEvent(of: .value) { snapshot in
                 self.collectionView.refreshControl?.endRefreshing()
                 
-                self.collectionView.reloadData()
+                guard let first = snapshot.children.allObjects.first as? DataSnapshot else { return }
+                guard let allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
+                
+                allObjects.forEach { snapshot in
+                    let postId = snapshot.key
+                    self.fetchPost(withPostId: postId)
+                }
+                self.currentKey = first.key
+            }
+            // 2번째 fetchPosts부터
+        } else {
+            // 중복이 있을 수 있으므로 5개보다 많은 6개 불러오기
+            USER_FEED_REF.child(currentUid).queryOrderedByKey().queryEnding(atValue: self.currentKey).queryLimited(toLast: 6).observeSingleEvent(of: .value) { snapshot in
+                
+                guard let first = snapshot.children.allObjects.first as? DataSnapshot else { return }
+                guard let allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
+                
+                allObjects.forEach { snapshot in
+                    let postId = snapshot.key
+                    
+                    if postId != self.currentKey {
+                        self.fetchPost(withPostId: postId)
+                    }
+                }
+                self.currentKey = first.key
             }
         }
     }
+    
+    private func fetchPost(withPostId postId: String) {
+        Database.fetchPost(with: postId) { post in
+            self.posts.append(post)
+            
+            self.posts.sort { post1, post2 -> Bool in
+                return post1.creationDate > post2.creationDate
+            }
+            self.collectionView.reloadData()
+        }
+    }
+    
+    
 }
 
 

@@ -21,6 +21,8 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     var user: User?
     
+    var currentKey: String?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -104,6 +106,16 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     // MARK: - DataSource
+    override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        
+        if posts.count > 9 {
+            // indexPath는 0부터 시작하기 때문에 -1을 해줌.
+            // 포스트 셀의 개수와 포스트의 개수가 같으면
+            if indexPath.item == posts.count - 1 {
+                self.fetchPost()
+            }
+        }
+    }
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         // #warning Incomplete implementation, return the number of sections
@@ -121,8 +133,6 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
             // date순으로 해야함
         cell.post = posts[indexPath.item]
         
-        
-    
         return cell
     }
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -145,8 +155,8 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     
-    // MARK: - API - Fetch
-    func fetchPost() {
+    // MARK: - API
+    private func fetchPost() {
         
         var uid: String!
         
@@ -157,24 +167,54 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
             uid = Auth.auth().currentUser?.uid
         }
         
-        // USER_POSTS_REF = Database.database().reference().child("user-posts")
-        USER_POSTS_REF.child(uid).observe(.childAdded) { snapshot in
-            let postId = snapshot.key
-            
-            Database.fetchPost(with: postId) { post in
-                self.posts.append(post)
+        if currentKey == nil {
+            USER_POSTS_REF.child(uid).queryLimited(toLast: 10).observeSingleEvent(of: .value) { snapshot in
                 
-                self.posts.sort { post1, post2 in
-                    return post1.creationDate > post2.creationDate
+                self.collectionView.refreshControl?.endRefreshing()
+                
+                guard let first = snapshot.children.allObjects.first as? DataSnapshot else { return }
+                guard let allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
+                
+                allObjects.forEach { snapshot in
+                    let postId = snapshot.key
+                    self.fetchPost(withPostId: postId)
                 }
+                self.currentKey = first.key
+            }
+        } else {
+            // queryOrderedByKey : 하위 키에 따라 결과를 정렬한다.
+            // queryEnding : 선택한 정렬 기준 메소드에 따라 지정된 키 또는 값보다 작거나 같은 항목을 반환한다.
+            USER_POSTS_REF.child(uid).queryOrderedByKey().queryEnding(atValue: self.currentKey).queryLimited(toLast: 7).observeSingleEvent(of: .value) { snapshot in
                 
-                self.collectionView.reloadData()
+                guard let first = snapshot.children.allObjects.first as? DataSnapshot else { return }
+                guard let allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
+                
+                allObjects.forEach { snapshot in
+                    let postId = snapshot.key
+                    
+                    if postId != self.currentKey {
+                        self.fetchPost(withPostId: postId)
+                    }
+                }
+                self.currentKey = first.key
             }
         }
-        
-        
-        
     }
+    
+    private func fetchPost(withPostId postid: String) {
+        Database.fetchPost(with: postid) { post in
+            self.posts.append(post)
+            
+            self.posts.sort { post1, post2 in
+                return post1.creationDate > post2.creationDate
+            }
+            self.collectionView.reloadData()
+        }
+    }
+    
+    
+    
+    
     
     func fetchCurrentUserData() {
         

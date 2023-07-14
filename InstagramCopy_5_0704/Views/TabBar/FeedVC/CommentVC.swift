@@ -133,25 +133,14 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         
         COMMENT_REF.child(postId).childByAutoId().updateChildValues(values) { Error, ref in
             self.uploadCommentNotificationToServer()
+            
+            if commentText.contains("@") {
+                self.uploadMentionNotification(forPostId: postId, withText: commentText, isForComment: true)
+            }
             self.commentTextField.text = nil
         }
     }
-    private func fetchComments() {
-        
-        guard let postId = self.post?.postId else { return }
 
-        COMMENT_REF.child(postId).observe(.childAdded) { snapshot in
-
-            guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
-            guard let uid = dictionary["uid"] as? String else { return }
-
-            Database.fetchUser(with: uid) { (user) in
-                let comment = Comment(user: user, dictionary: dictionary)
-                self.comments.append(comment)
-                self.collectionView.reloadData()
-            }
-        }
-    }
     
     private func uploadCommentNotificationToServer() {
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
@@ -171,10 +160,23 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         if uid != currentUid {
             NOTIFICATIONS_REF.child(uid).childByAutoId().updateChildValues(values)
         }
-        
-        
-        
     }
+    private func handleHastagTapped(forcell cell: CommentCell) {
+        cell.commentLabel.handleHashtagTap { hashtag in
+            let hashtagVC = HashtagVC(collectionViewLayout: UICollectionViewFlowLayout())
+            hashtagVC.hashtag = hashtag
+            hashtagVC.modalPresentationStyle = .fullScreen
+            self.navigationController?.pushViewController(hashtagVC, animated: true)
+        }
+    }
+    
+    private func handleMentionTapped(forCell cell: CommentCell) {
+        cell.commentLabel.handleMentionTap { userName in
+            print("Mentioned username is \(userName)")
+            self.getMentionUser(withuserName: userName)
+        }
+    }
+    
     
     
     
@@ -206,7 +208,36 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! CommentCell
         
         cell.comment = self.comments[indexPath.item]
+        handleHastagTapped(forcell: cell)
+        handleMentionTapped(forCell: cell)
         
         return cell
     }
+    
+    
+    
+    
+    
+    
+    // MARK: - API
+    private func fetchComments() {
+        
+        guard let postId = self.post?.postId else { return }
+
+        COMMENT_REF.child(postId).observe(.childAdded) { snapshot in
+
+            guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
+            guard let uid = dictionary["uid"] as? String else { return }
+
+            Database.fetchUser(with: uid) { (user) in
+                let comment = Comment(user: user, dictionary: dictionary)
+                self.comments.append(comment)
+                self.collectionView.reloadData()
+            }
+        }
+    }
+    
+    
+
+    
 }

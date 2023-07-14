@@ -65,6 +65,7 @@ final class UploadPostVC: UIViewController {
     
     
     
+    // MARK: - Init
     override func viewDidLoad() {
         super.viewDidLoad()
             
@@ -115,6 +116,31 @@ final class UploadPostVC: UIViewController {
         
         self.photoImageView.image = selectedImage
         
+    }
+    
+    
+    
+    // MARK: - API
+    private func uploadHashtagToServer(withPostId postId: String) {
+        
+        guard let caption = captionTextView.text else { return }
+        
+        // 단어들을 배열에 넣기
+        let words: [String] = caption.components(separatedBy: .whitespacesAndNewlines)
+        
+        // 배열에 있는 단어들을 하나하나씩 살펴보기(?)
+        for var word in words {
+            // #이 앞에 있는 경우
+            if word.hasPrefix("#") {
+                
+                word = word.trimmingCharacters(in: .punctuationCharacters)
+                word = word.trimmingCharacters(in: .symbols)
+                
+                let hashtagValues = [postId: 1]
+                
+                HASHTAG_POST_REF.child(word.lowercased()).updateChildValues(hashtagValues)
+            }
+        }
     }
     
     
@@ -204,6 +230,14 @@ final class UploadPostVC: UIViewController {
                     
                     // update user-feed structure
                     self.updateUserFeeds(with: postKey)
+                    
+                    // update hashtag to server
+                    self.uploadHashtagToServer(withPostId: postKey)
+                    
+                    // upload mention notification to server
+                    if caption.contains("@") {
+                        self.uploadMentionNotification(forPostId: postKey, withText: caption, isForComment: false)
+                    }
                     
                     // return to home feed
                     self.dismiss(animated: true) {

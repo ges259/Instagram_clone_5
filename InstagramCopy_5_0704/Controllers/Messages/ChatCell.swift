@@ -97,7 +97,7 @@ final class ChatCell: UICollectionViewCell {
                                      width: 32, height: 32)
         
 
-//
+//ㅌ
         
         self.addSubview(self.bubbleView)
         // bubble view right anchor

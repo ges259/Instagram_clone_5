@@ -44,10 +44,8 @@ final class SearchResultVC: UITableViewController {
     // MARK: - TabelView
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if inSearchMode {
-            print("filteredUsers.count - \(filteredUsers.count)")
             return self.filteredUsers.count
         } else {
-            print("users.count - \(users.count)")
             return users.count
         }
     }

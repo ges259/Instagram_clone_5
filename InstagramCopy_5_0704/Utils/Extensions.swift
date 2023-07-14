@@ -6,12 +6,79 @@
 //
 
 import UIKit
-import FirebaseDatabase
+import Firebase
 
 
 extension UIColor {
     static func rgb(red: CGFloat, green: CGFloat, blue: CGFloat) -> UIColor {
         return UIColor(red: red/255, green: green/255, blue: blue/255, alpha: 1)
+    }
+}
+
+
+extension UIViewController {
+    func getMentionUser(withuserName userName: String) {
+        
+        USER_REF.observe(.childAdded) { snapshot in
+            let uid = snapshot.key
+            
+            USER_REF.child(uid).observeSingleEvent(of: .value) { snapshot in
+                guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
+                
+                if userName == dictionary["userName"] as? String {
+                    Database.fetchUser(with: uid) { user in
+                        let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
+                        userProfileVC.user = user
+                        self.navigationController?.pushViewController(userProfileVC, animated: true)
+                        return
+                    }
+                }
+            }
+        }
+    }
+    
+    func uploadMentionNotification(forPostId postId: String, withText text: String, isForComment: Bool) {
+        
+        guard let currentUid = Auth.auth().currentUser?.uid else { return }
+        let creationDate = Int(NSDate().timeIntervalSince1970)
+        
+        let words: [String] = text.components(separatedBy: .whitespacesAndNewlines)
+        
+        var mentionIntegerValue: Int!
+        
+        if isForComment {
+            mentionIntegerValue = COMMENT_MENTION_INT_VALUE
+        } else {
+            mentionIntegerValue = POST_MENTION_INT_VALUE
+        }
+        
+        
+        
+        for var word in words {
+            if word.hasPrefix("@") {
+                word = word.trimmingCharacters(in: .symbols)
+                word = word.trimmingCharacters(in: .punctuationCharacters)
+                
+                USER_REF.observe(.childAdded) { snapshot in
+                    let uid = snapshot.key
+                    
+                    USER_REF.child(uid).observeSingleEvent(of: .value) { snapshot in
+                        guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
+                        
+                        if word == dictionary["userName"] as? String {
+                            let notificationValues = ["postId": postId,
+                                                      "uid": uid,
+                                                      "type": mentionIntegerValue as Int,
+                                                      "creationDate": creationDate] as [String: Any]
+                            
+                            if currentUid != uid {
+                                NOTIFICATIONS_REF.child(uid).childByAutoId().updateChildValues(notificationValues)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

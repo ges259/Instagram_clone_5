@@ -54,7 +54,6 @@ final class SearchVC: UIViewController, UISearchResultsUpdating {
         self.configureCollectionView()
     }
     func updateSearchResults(for searchController: UISearchController) {
-        print("서치바에 입력되는 단어 \(searchController.searchBar.text ?? "")")
         
         let vc = searchController.searchResultsController as! SearchResultVC
         
