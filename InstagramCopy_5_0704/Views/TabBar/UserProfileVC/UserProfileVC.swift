@@ -23,6 +23,12 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     var currentKey: String?
 
+    
+        
+    
+    
+    
+    // MARK: - Init
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -30,6 +36,10 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
         self.collectionView!.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
 
         self.collectionView.backgroundColor = .white
+        
+        // configure refresh control
+        configureRefreshControl()
+        
         
         // fetch user data
         // 프로필을 직접 눌렀을 때만 fetch
@@ -41,7 +51,7 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
         
         
         // fetch post
-        fetchPost()
+        fetchPosts()
         
         
     }
@@ -87,7 +97,7 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
         // set the user in header
             // 유저가 있으면 ( 직접 profile로 들어가면 ) 유저의 정보로 이동
         header.user = user
-        self.navigationItem.title = self.user?.userName
+        self.navigationItem.title = user?.userName
 
 //        if let user = self.user {
 //            header.user = user
@@ -105,14 +115,14 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     }
     
     
-    // MARK: - DataSource
+    // MARK: - Collection view
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
         if posts.count > 9 {
             // indexPath는 0부터 시작하기 때문에 -1을 해줌.
             // 포스트 셀의 개수와 포스트의 개수가 같으면
             if indexPath.item == posts.count - 1 {
-                self.fetchPost()
+                self.fetchPosts()
             }
         }
     }
@@ -138,6 +148,8 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let feedVC = FeedVC(collectionViewLayout: UICollectionViewFlowLayout())
         
+        feedVC.userProfileController = self
+        
         feedVC.viewSinglePost = true
         feedVC.post = self.posts[indexPath.item]
         
@@ -156,7 +168,7 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     // MARK: - API
-    private func fetchPost() {
+    private func fetchPosts() {
         
         var uid: String!
         
@@ -240,6 +252,19 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     
+    // MARK: - Handlers
+    private func configureRefreshControl() {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+        
+    }
+    @objc func handleRefresh() {
+        posts.removeAll(keepingCapacity: false)
+        self.currentKey = nil
+        fetchPosts()
+        collectionView.reloadData()
+    }
     
     
     
@@ -274,6 +299,7 @@ extension UserProfileVC: UserProfileHeaderDelegate {
             editProfileController.user = user
             editProfileController.userProfileController = self
             let navigationController = UINavigationController(rootViewController: editProfileController)
+            navigationController.modalPresentationStyle = .fullScreen
             present(navigationController, animated: true, completion: nil)
         }
         else {

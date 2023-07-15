@@ -28,7 +28,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     var currentKey: String?
     
-    
+    var userProfileController: UserProfileVC?
     
     
     // MARK: - viewDidLoad
@@ -56,7 +56,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         
         
     }
-    // MARK: - DataSource
+    // MARK: - collection view
     
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if posts.count > 4 {
@@ -311,7 +311,40 @@ extension FeedVC: FeedCellDelegate {
     
     
     func handleOptionsTapped(for cell: FeedCell) {
-        print("Option button Tapped")
+        guard let post = cell.post else { return }
+        
+        if post.ownerUid == Auth.auth().currentUser?.uid {
+            let alertController = UIAlertController(title: "Options", message: nil, preferredStyle: .actionSheet)
+            
+            alertController.addAction(UIAlertAction(title: "Delete Post", style: .destructive, handler: { _ in
+                post.deletePost()
+                
+                if !self.viewSinglePost {
+                    self.handleRefresh()
+                } else {
+                    if let userProfileController = self.userProfileController {
+                        self.navigationController?.popViewController(animated: true)
+                        userProfileController.handleRefresh()
+                    }
+                }
+            }))
+            
+            alertController.addAction(UIAlertAction(title: "Edit Post", style: .default, handler: { _ in
+                let uploadPostVC = UploadPostVC()
+                let navigationController = UINavigationController(rootViewController: uploadPostVC)
+                navigationController.modalPresentationStyle = .fullScreen
+                uploadPostVC.postToEdit = post
+                uploadPostVC.uploadAction = UploadPostVC.UploadAction(index: 1)
+                self.present(navigationController, animated: true)
+                
+            }))
+            
+            alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+                print("Handle cancel post..")
+            }))
+            
+            present(alertController, animated: true, completion: nil)
+        }
     }
     
     // Like Button Tapped

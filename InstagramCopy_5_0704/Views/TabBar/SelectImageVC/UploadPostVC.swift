@@ -13,18 +13,31 @@ final class UploadPostVC: UIViewController {
     
     
     // MARK: - Properties
-    
+    enum UploadAction: Int {
+        case UploadPost
+        case SaveChanges
+        
+        init(index: Int) {
+            switch index {
+            case 0: self = .UploadPost
+            case 1: self = .SaveChanges
+            default: self = .UploadPost
+            }
+        }
+    }
     
     
     var selectedImage: UIImage?
+//    var inEditMode: Bool = false
+    var postToEdit: Post?
     
+    var uploadAction: UploadAction!
     
     
     // MARK: - ImageView
-    private var photoImageView: UIImageView = {
-        let img = UIImageView()
+    private var photoImageView: CustomImageView = {
+        let img = CustomImageView()
         
-        img.image = UIImage(named: "profile_unselected")
         img.contentMode = .scaleAspectFill
         img.backgroundColor = .lightGray
         img.clipsToBounds = true
@@ -46,7 +59,7 @@ final class UploadPostVC: UIViewController {
         return tv
     }()
     
-    let shareButton: UIButton = {
+    let actionButton: UIButton = {
         let btn = UIButton(type: .system)
         
         btn.backgroundColor = UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1)
@@ -56,7 +69,7 @@ final class UploadPostVC: UIViewController {
         btn.layer.cornerRadius = 5
         btn.isEnabled = false
         
-        btn.addTarget(self, action: #selector(handleSharePost), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(handleUploadAction), for: .touchUpInside)
         
         return btn
     }()
@@ -74,7 +87,8 @@ final class UploadPostVC: UIViewController {
         
         // configure view components
         configureViewComponents()
-
+        
+        
         
         // load image
         loadImage()
@@ -83,12 +97,35 @@ final class UploadPostVC: UIViewController {
 
         
     }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        
+        if uploadAction == .SaveChanges {
+            self.actionButton.setTitle("SaveChanges", for: .normal)
+            self.navigationItem.title = "Edit Post"
+            self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
+            self.navigationController?.navigationBar.tintColor = .black
+            
+            guard let post = self.postToEdit else { return }
+            photoImageView.loadImageView(with: post.imageUrl)
+            captionTextView.text = post.caption
+        } else {
+            self.actionButton.setTitle("ShareButton", for: .normal)
+            self.navigationItem.title = "Upload Post"
+        }
+        
+        
+    }
+    
     
     func configureViewComponents() {
         
+        print("UploadPostVC")
+        
         self.view.addSubview(self.photoImageView)
         self.view.addSubview(self.captionTextView)
-        self.view.addSubview(self.shareButton)
+        self.view.addSubview(self.actionButton)
         
         self.photoImageView.anchor(top: self.view.topAnchor, bottom: nil,
                                    leading: self.view.leadingAnchor, trailing: nil,
@@ -102,7 +139,7 @@ final class UploadPostVC: UIViewController {
                                     paddingLeading: 12, paddingTrailing: 12,
                                     width: 0, height: 100)
         
-        self.shareButton.anchor(top: self.photoImageView.bottomAnchor, bottom: nil,
+        self.actionButton.anchor(top: self.photoImageView.bottomAnchor, bottom: nil,
                                 leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor,
                                 paddingTop: 12, paddingBottom: 0,
                                 paddingLeading: 24, paddingTrailing: 24,
@@ -170,7 +207,35 @@ final class UploadPostVC: UIViewController {
     
     
     
-    @objc private func handleSharePost() {
+    @objc private func handleUploadAction() {
+        buttonSelector(uploadAction: uploadAction)
+    }
+    private func buttonSelector(uploadAction: UploadAction) {
+        switch uploadAction {
+        case .UploadPost:
+            handleUploadPost()
+        case .SaveChanges:
+            handleSavePostChanges()
+        }
+    }
+    private func handleSavePostChanges() {
+        guard let post = self.postToEdit else { return }
+        let updateCaption = captionTextView.text
+        
+        uploadHashtagToServer(withPostId: post.postId)
+        
+        POSTS_REF.child(post.postId).child("caption").setValue(updateCaption) { err, ref in
+            self.dismiss(animated: true, completion: nil)
+        }
+    }
+    
+    @objc private func handleCancel() {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    
+    
+    private func handleUploadPost() {
         
         // paramaters
         guard
@@ -250,9 +315,6 @@ final class UploadPostVC: UIViewController {
     
     
     
-    
-    
-    
 }
 
 
@@ -262,11 +324,11 @@ extension UploadPostVC: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         
         guard !textView.text.isEmpty else {
-            self.shareButton.isEnabled = false
-            self.shareButton.backgroundColor = UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1)
+            self.actionButton.isEnabled = false
+            self.actionButton.backgroundColor = UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1)
             return
         }
-        self.shareButton.isEnabled = true
-        self.shareButton.backgroundColor = UIColor(red: 17/255, green: 154/255, blue: 237/255, alpha: 1)
+        self.actionButton.isEnabled = true
+        self.actionButton.backgroundColor = UIColor(red: 17/255, green: 154/255, blue: 237/255, alpha: 1)
     }
 }

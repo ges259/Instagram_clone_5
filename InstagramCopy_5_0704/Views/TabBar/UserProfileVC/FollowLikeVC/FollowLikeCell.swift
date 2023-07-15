@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import FirebaseAuth
+import Firebase
 
 final class FollowLikeCell: UITableViewCell {
     
@@ -26,9 +26,11 @@ final class FollowLikeCell: UITableViewCell {
     
     var user: User? {
         didSet {
-            guard let profileImgeUrl = user?.profileImageUrl else { return }
-            guard let userName = user?.userName else { return }
-            guard let fullName = user?.name else { return }
+            guard let user = user else { return }
+            guard let profileImgeUrl = user.profileImageUrl else { return }
+            guard let userName = user.userName else { return }
+            guard let fullName = user.name else { return }
+            
             
             self.profileImageView.loadImageView(with: profileImgeUrl)
             
@@ -37,13 +39,16 @@ final class FollowLikeCell: UITableViewCell {
             
             // hide follow button for current user
                 // 자기 자신은 숨김
-            if user?.uid == Auth.auth().currentUser?.uid {
-                followButton.isHidden = true
+//            guard let currentUid = Auth.auth().currentUser?.uid else { return }
+//            guard let userUid = user.uid else { return }
+            if user.uid == Auth.auth().currentUser?.uid {
+                print(user.uid)
+                self.followButton.isHidden = true
             }
             
             
             // 셀에 들어오면 버튼의 텍스트를 설정
-            user?.checkIfUserIsFollowed(completion: { (followed) in
+            user.checkIfUserIsFollowed(completion: { (followed) in
                 
                 if followed {
                     

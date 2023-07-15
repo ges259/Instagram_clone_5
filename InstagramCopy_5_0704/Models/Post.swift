@@ -6,6 +6,7 @@
 //
 import Foundation
 import Firebase
+import FirebaseStorage
 
 final class Post {
     var caption: String!
@@ -86,6 +87,52 @@ final class Post {
             }
         }
     }
+    
+    func deletePost() {
+        guard let currentUid = Auth.auth().currentUser?.uid else { return }
+        
+        Storage.storage().reference(forURL: self.imageUrl).delete(completion: nil)
+        
+        USER_FOLLOWER_REF.child(currentUid).observe(.childAdded) { snapshot in
+            let followerUid = snapshot.key
+            USER_FEED_REF.child(followerUid).child(self.postId).removeValue()
+        }
+        
+        USER_FEED_REF.child(currentUid).child(postId).removeValue()
+        
+        USER_POSTS_REF.child(currentUid).child(postId).removeValue()
+        
+        POST_LIKES_REF.child(postId).observe(.childAdded) { snapshot in
+            let uid = snapshot.key
+            
+            USER_LIKES_REF.child(uid).child(self.postId).observeSingleEvent(of: .value) { snapshot in
+                guard let notificationId = snapshot.value as? String else { return }
+                
+                NOTIFICATIONS_REF.child(self.ownerUid).child(notificationId).removeValue { err, ref in
+                    POSTS_REF.child(self.postId).removeValue()
+                    
+                    USER_REF.child(uid).child(self.postId).removeValue()
+                }
+            }
+        }
+        let words = caption.components(separatedBy: .whitespacesAndNewlines)
+        
+        for var word in words {
+            if word.hasPrefix("#") {
+                word = word.trimmingCharacters(in: .punctuationCharacters)
+                word = word.trimmingCharacters(in: .symbols)
+                
+                HASHTAG_POST_REF.child(word).child(postId).removeValue()
+            }
+        }
+        
+        COMMENT_REF.child(postId).removeValue()
+        
+        POSTS_REF.child(postId).removeValue()
+    }
+    
+    
+    
     
     func sendLIkeNotificationToServer() {
         // properties

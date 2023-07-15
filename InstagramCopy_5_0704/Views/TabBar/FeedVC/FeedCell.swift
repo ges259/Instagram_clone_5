@@ -22,7 +22,7 @@ final class FeedCell: UICollectionViewCell {
 //            guard let date = post?.creationDate else { return }
             
             Database.fetchUser(with: ownerUid) { user in
-                self.profileImageView.loadImageView(with: user.profileImageUrl)
+//                self.profileImageView.loadImageView(with: user.profileImageUrl)
                 self.userName.setTitle(user.userName, for: .normal)
                 self.postImageView.loadImageView(with: imageUrl)
                 self.configurePostCaption(user: user)
@@ -206,7 +206,7 @@ final class FeedCell: UICollectionViewCell {
             captionLabel.numberOfLines = 2
         }
         
-        postTimeLabel.text = "2 DAYS AGO"
+        postTimeLabel.text = post.creationDate.timeAgoToDisplay()
     }
     
     

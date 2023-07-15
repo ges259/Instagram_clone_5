@@ -9,6 +9,46 @@ import UIKit
 import Firebase
 
 
+extension Date {
+    func timeAgoToDisplay() -> String {
+        let secondsAgo = Int(Date().timeIntervalSince(self))
+        
+        let minute: Int = 60
+        let hour: Int = 60 * minute
+        let day: Int = 24 * hour
+        let week: Int = 7 * day
+        let month: Int = 4 * week
+        
+        let quotient: Int // 몫
+        let unit: String
+        
+        if secondsAgo < minute {
+            quotient = secondsAgo
+            unit = "SECOND"
+        } else if secondsAgo < hour {
+            quotient = secondsAgo / minute
+            unit = "MIN"
+        } else if secondsAgo < day {
+            quotient = secondsAgo / hour
+            unit = "HOUR"
+        } else if secondsAgo < week {
+            quotient = secondsAgo / day
+            unit = "DAY"
+        } else if secondsAgo < month {
+            quotient = secondsAgo / week
+            unit = "WEEK"
+        } else {
+            quotient = secondsAgo / month
+            unit = "MONTH"
+        }
+        
+        return "\(quotient) \(unit)\(quotient == 1 ? "" : "S" ) AGO"
+    }
+}
+
+
+
+
 extension UIColor {
     static func rgb(red: CGFloat, green: CGFloat, blue: CGFloat) -> UIColor {
         return UIColor(red: red/255, green: green/255, blue: blue/255, alpha: 1)
@@ -101,6 +141,7 @@ extension UIButton {
             self.setTitle("Follow", for: .normal)
             self.setTitleColor(.white, for: .normal)
             self.layer.borderWidth = 0
+            self.layer.borderColor = .none
             self.backgroundColor = UIColor(red: 17/255, green: 154/255, blue: 237/255, alpha: 1)
         }
     }

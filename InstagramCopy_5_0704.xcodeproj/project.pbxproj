@@ -139,7 +139,6 @@
 		5F19F0D42A554FD90073E5A9 /* TabBar */ = {
 			isa = PBXGroup;
 			children = (
-				5FEDD2642A56BBDD00081AE9 /* FollowLikeVC */,
 				5F19F0DF2A556BC60073E5A9 /* FeedVC */,
 				5F19F0E02A556BCD0073E5A9 /* SearchVC */,
 				5F19F0E12A556BD20073E5A9 /* SelectImageVC */,
@@ -200,6 +199,7 @@
 				5F19F0DD2A5550900073E5A9 /* UserProfileVC.swift */,
 				5F19F0E42A556C2D0073E5A9 /* UserProfileHeader.swift */,
 				5FEDD26D2A56F13F00081AE9 /* EditProfileController.swift */,
+				5FEDD2642A56BBDD00081AE9 /* FollowLikeVC */,
 			);
 			path = UserProfileVC;
 			sourceTree = "<group>";
@@ -212,6 +212,7 @@
 				5F919F852A601B6E00461721 /* NewMessageCell.swift */,
 				5F919F892A60277700461721 /* ChatVC.swift */,
 				5F919F8B2A60283B00461721 /* ChatCell.swift */,
+				5F919F7F2A6009E600461721 /* MessagesView */,
 			);
 			path = Messages;
 			sourceTree = "<group>";
@@ -262,7 +263,6 @@
 		5F9BA3632A545039004DE084 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				5F919F7F2A6009E600461721 /* MessagesView */,
 				5F19F0D42A554FD90073E5A9 /* TabBar */,
 			);
 			path = Views;
