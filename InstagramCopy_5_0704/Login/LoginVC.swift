@@ -19,7 +19,6 @@ final class LoginVC: UIViewController {
         view.addSubview(self.logoImage)
 
         logoImage.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-//        logoImage.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
 
         logoImage.anchor(top: view.topAnchor, bottom: nil, leading: nil, trailing: nil,
                          paddingTop: 80, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 0,
@@ -27,26 +26,18 @@ final class LoginVC: UIViewController {
 
         logoImage.contentMode = .scaleAspectFill
 
-
-
         view.backgroundColor = UIColor(red: 0/255, green: 120/255, blue: 175/255, alpha: 1)
 
         return view
     }()
-    // MARK: - ImageView
+    
+    
     private let logoImage: UIImageView = {
         let img = UIImageView(image: UIImage(named: "Instagram_logo_white"))
         return img
     }()
     
-    
-    
-    
-    
-    
-    
-    
-    // MARK: - TextView
+    // MARK: - TextField
     private let emailTextField: InsetTextField = {
         let tf = InsetTextField()
         
@@ -80,18 +71,13 @@ final class LoginVC: UIViewController {
         tf.autocorrectionType = .no
         tf.autocapitalizationType = .none
 
-        
         tf.clipsToBounds = true
         tf.layer.cornerRadius = 10
         
         tf.addTarget(self, action: #selector(formValidation), for: .editingChanged)
 
-        
         return tf
     }()
-    
-    
-    
     
     
     // MARK: - Button
@@ -111,7 +97,6 @@ final class LoginVC: UIViewController {
         
         return btn
     }()
-    
     private let dontHaveAccountButton: UIButton = {
         let btn = UIButton(type: .system)
         
@@ -127,11 +112,11 @@ final class LoginVC: UIViewController {
     }()
     
     
-    
     // MARK: - StackView
     private lazy var stackView: UIStackView = {
-        let stv = UIStackView(arrangedSubviews: [self.emailTextField, self.passwordTextField, self.loginButton])
-        
+        let stv = UIStackView(arrangedSubviews: [self.emailTextField,
+                                                 self.passwordTextField,
+                                                 self.loginButton])
         stv.axis = .vertical
         stv.spacing = 10
         stv.alignment = .fill
@@ -143,77 +128,70 @@ final class LoginVC: UIViewController {
     
     
     
-    
-    
-    // MARK: - viewDidLoad()
+    // MARK: - Init
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // background color
         self.view.backgroundColor = .white
         
-        
-        
         self.navigationController?.navigationBar.isHidden = true
         
-        configureUI()
-        
-        
-        
+        // configre UI
+        self.configureUI()
     }
-    
     
     
     
     // MARK: - configureUI()
     private func configureUI() {
+        
         self.view.addSubview(self.logoContainerView)
+        self.logoContainerView.anchor(top: self.view.topAnchor, bottom: nil,
+                                      leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor,
+                                      paddingTop: 0, paddingBottom: 0,
+                                      paddingLeading: 0, paddingTrailing: 0,
+                                      width: 0, height: 200)
+        
         self.view.addSubview(self.stackView)
+        self.stackView.anchor(top: self.logoContainerView.bottomAnchor, bottom: nil,
+                              leading: view.leadingAnchor, trailing: view.trailingAnchor,
+                              paddingTop: 40, paddingBottom: 0,
+                              paddingLeading: 20, paddingTrailing: 20,
+                              width: 0, height: 150)
+        
         self.view.addSubview(self.dontHaveAccountButton)
-        
-        self.logoContainerView.anchor(top: self.view.topAnchor, bottom: nil, leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor, paddingTop: 0, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 0, width: 0, height: 200)
-        
-        self.stackView.anchor(top: self.logoContainerView.bottomAnchor, bottom: nil, leading: view.leadingAnchor, trailing: view.trailingAnchor, paddingTop: 40, paddingBottom: 0, paddingLeading: 20, paddingTrailing: 20, width: 0, height: 150)
-        
-        
-        self.dontHaveAccountButton.anchor(top: nil, bottom: self.view.bottomAnchor, leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor, paddingTop: 0, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 0, width: 0, height: 50)
+        self.dontHaveAccountButton.anchor(top: nil, bottom: self.view.bottomAnchor,
+                                          leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor,
+                                          paddingTop: 0, paddingBottom: 0,
+                                          paddingLeading: 0, paddingTrailing: 0,
+                                          width: 0, height: 50)
     }
     
     
     
-    
-    
-    
-    
-    
-    
-    // MARK: - @objc
+    // MARK: - Handlers
     @objc func handleShowSignUp() {
         let signUpVC = SignUpVC()
-        navigationController?.pushViewController(signUpVC, animated: true)
+        self.navigationController?.pushViewController(signUpVC, animated: true)
     }
     
+    
     @objc func formValidation() {
-        
         // ensures that email and password text fields have text
         guard
             self.emailTextField.hasText,
             self.passwordTextField.hasText
         else {
-            
             // handle case for above conditions not met
             self.loginButton.isEnabled = false
             self.loginButton.backgroundColor = UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1)
             return
         }
-        
         // handle case for conditions were met
         self.loginButton.isEnabled = true
         self.loginButton.backgroundColor = UIColor(red: 17/255, green: 154/255, blue: 237/255, alpha: 1)
-        
-        
     }
-    
     
     
     @objc func handleLogin() {
@@ -224,7 +202,6 @@ final class LoginVC: UIViewController {
         else {
             return
         }
-        
         // sign user in with email and password
         Auth.auth().signIn(withEmail: email, password: password) { user, error in
             // handle error
@@ -236,8 +213,7 @@ final class LoginVC: UIViewController {
             guard let mainTabVC = UIApplication.shared.windows.filter({$0.isKeyWindow}).first?.rootViewController as? MainTabVC else { return }
 
             mainTabVC.configureViewControllers()
-//
-            
+
             // dismiss login controller
             self.dismiss(animated: true, completion: nil)
             
@@ -245,7 +221,5 @@ final class LoginVC: UIViewController {
             print("Successfully signed user in")
         }
     }
-    
-    
     
 }

@@ -13,8 +13,10 @@ import FirebaseStorage
 
 final class SignUpVC: UIViewController, UINavigationControllerDelegate {
     
+    
+    // MARK: - Properties
     private var imageSelected: Bool = false
-//    let storage = Storage.storage() //인스턴스 생성
+    
 
     
     // MARK: - View
@@ -34,17 +36,13 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
 
         return view
     }()
+    
+    
     // MARK: - ImageView
     private let logoImage: UIImageView = {
         let img = UIImageView(image: UIImage(named: "logo2"))
         return img
     }()
-    
-    
-    
-    
-    
-    
     
     
     // MARK: - TextView
@@ -65,7 +63,6 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
         
         tf.addTarget(self, action: #selector(formValidation), for: .editingChanged)
 
-        
         return tf
     }()
     private let passwordTextField: InsetTextField = {
@@ -128,12 +125,6 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
     }()
     
     
-    
-    
-    
-    
-    
-    
     // MARK: - Button
     private let plusButton: UIButton = {
         let btn = UIButton()
@@ -145,8 +136,6 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
         
         return btn
     }()
-    
-    
     private let signUpButton: UIButton = {
         let btn = UIButton(type: .system)
         
@@ -163,7 +152,6 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
         
         return btn
     }()
-    
     private let alreadyHaveAccountButton: UIButton = {
         let btn = UIButton(type: .system)
 
@@ -172,7 +160,6 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
         attributedTitle.append(NSAttributedString(string: "Sign in",
                                                   attributes: [.font: UIFont.systemFont(ofSize: 14),
                                                                NSAttributedString.Key.foregroundColor: UIColor(red: 7/255, green: 154/255, blue: 237/255, alpha: 1)]))
-
         btn.setAttributedTitle(attributedTitle, for: .normal)
 
         btn.addTarget(self, action: #selector(handleShowLogin), for: .touchUpInside)
@@ -181,26 +168,11 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
     }()
     
     
-//    private let dont: UIButton = {
-//        let btn = UIButton()
-//
-//        let attributedTitle = NSMutableAttributedString(string: "Don't have an account?    ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
-//
-//        attributedTitle.append(NSAttributedString(string: "Sign Up", attributes: [.font: UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor: UIColor(red: 7/255, green: 154/255, blue: 237/255, alpha: 1)]))
-//        btn.setAttributedTitle(attributedTitle, for: .normal)
-//
-//
-//        return btn
-//    }()
-    
-    
-    
     // MARK: - StackView
     private lazy var stackView: UIStackView = {
         let stv = UIStackView(arrangedSubviews: [self.emailTextField, self.passwordTextField,
                                                  self.fullNameTextField, self.userNameTextField,
                                                  self.signUpButton])
-        
         stv.axis = .vertical
         stv.spacing = 10
         stv.alignment = .fill
@@ -214,49 +186,49 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
     
     
     
-    // MARK: - viewDidLoad()
+    // MARK: - Init
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // background color
         self.view.backgroundColor = .white
         
-        
-        
-        
+        // configure UI
         configureUI()
-        
     }
     
     
     private func configureUI() {
+        
         self.view.addSubview(self.plusButton)
-        self.view.addSubview(self.stackView)
-        self.view.addSubview(self.alreadyHaveAccountButton)
-        
-        
-        self.plusButton.anchor(top: self.view.topAnchor, bottom: nil, leading: nil, trailing: nil, paddingTop: 80, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 0, width: 140, height: 140)
         self.plusButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        self.plusButton.anchor(top: self.view.topAnchor, bottom: nil,
+                               leading: nil, trailing: nil,
+                               paddingTop: 80, paddingBottom: 0,
+                               paddingLeading: 0, paddingTrailing: 0,
+                               width: 140, height: 140)
         
-        self.stackView.anchor(top: self.plusButton.bottomAnchor, bottom: nil, leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor, paddingTop: 30, paddingBottom: 0, paddingLeading: 40, paddingTrailing: 40, width: 0, height: 240)
+        self.view.addSubview(self.stackView)
+        self.stackView.anchor(top: self.plusButton.bottomAnchor, bottom: nil,
+                              leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor,
+                              paddingTop: 30, paddingBottom: 0,
+                              paddingLeading: 40, paddingTrailing: 40,
+                              width: 0, height: 240)
         
-        
-        self.alreadyHaveAccountButton.anchor(top: nil, bottom: view.bottomAnchor, leading: view.leadingAnchor, trailing: view.trailingAnchor, paddingTop: 0, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 0, width: 0, height: 50)
+        self.view.addSubview(self.alreadyHaveAccountButton)
+        self.alreadyHaveAccountButton.anchor(top: nil, bottom: view.bottomAnchor,
+                                             leading: view.leadingAnchor, trailing: view.trailingAnchor,
+                                             paddingTop: 0, paddingBottom: 0,
+                                             paddingLeading: 0, paddingTrailing: 0,
+                                             width: 0, height: 50)
     }
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    // MARK: - AddTarget
+    // MARK: - Handlers
     // 뒤로가기
     @objc func handleShowLogin() {
-        _ = navigationController?.popViewController(animated: true)
+        self.navigationController?.popViewController(animated: true)
     }
     
     // 회원가입
@@ -269,13 +241,11 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
         // authentication: 인증
         // 유저를 만듦
         Auth.auth().createUser(withEmail: email, password: password) { user, error in
-            
             // error
             if let error = error {
                 print("Failed to create user with error", error.localizedDescription)
                 return
             }
-            
             
             // set profile image
             guard let profileImage = self.plusButton.imageView?.image else { return }
@@ -283,56 +253,41 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
                 //지정한 이미지를 포함하는 데이터 개체를 JPEG 형식으로 반환, 0.8은 데이터의 품질을 나타낸것 1에 가까울수록 품질이 높은 것
             guard let uploadData = profileImage.jpegData(compressionQuality: 0.3) else { return }
             
-            
-            
             // profile image in firebase storage
             let fileName = NSUUID().uuidString
             
-            
             // 이미지를 저장할 경로 설정
-            let storageRef = Storage.storage().reference().child("profile_images").child(fileName)
+            let storageRef = STORAGE_PROFILE_IMAGES_REF.child(fileName)
             // 이미지 저장
             storageRef.putData(uploadData, metadata: nil) { metaData, error in
-                
-                
                 // handle error
                 if let error = error {
                     print("Failed to upload image to Firebase storage with error", error.localizedDescription)
                     return
                 }
-                
-                
                 // profile image url
-                    // realtime Database에 넣기
+                    
                 storageRef.downloadURL { downloadURL, error in
                     
                     guard let profileImagURL = downloadURL?.absoluteString else {
                         print("DEBUG: Profile image url is nil")
                         return
                     }
-                    
                     // 사용자에 대한 사전 값
                     let dictionaryValues = ["name": fullName,
                                             "userName": userName,
                                             "profileImageUrl": profileImagURL]
-                    
-                    
                     // userID 만들기
                     guard let uid = user?.user.uid else { return }
                     
                     let values = [uid: dictionaryValues]
-                    
-                    
-                    
-                    
                     // realtime database에 저장
                     // save user info to database
-                    Database.database().reference().child("users").updateChildValues(values) { error, ref in
+                    USER_REF.updateChildValues(values) { error, ref in
                         
                         guard let mainTabVC = UIApplication.shared.windows.filter({$0.isKeyWindow}).first?.rootViewController as? MainTabVC else { return }
 
                         mainTabVC.configureViewControllers()
-            //
                         
                         // dismiss login controller
                         self.dismiss(animated: true, completion: nil)
@@ -370,19 +325,7 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
         
         // present iamge picker
         self.present(imagePicker, animated: true)
-        
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
 }
 
@@ -413,8 +356,6 @@ extension SignUpVC: UIImagePickerControllerDelegate {
         
         
         self.dismiss(animated: true, completion: nil)
-        
-        
     }
     
 }

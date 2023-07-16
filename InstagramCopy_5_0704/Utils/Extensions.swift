@@ -8,7 +8,7 @@
 import UIKit
 import Firebase
 
-
+// MARK: - Date
 extension Date {
     func timeAgoToDisplay() -> String {
         let secondsAgo = Int(Date().timeIntervalSince(self))
@@ -48,7 +48,7 @@ extension Date {
 
 
 
-
+// MARK: - UIColor
 extension UIColor {
     static func rgb(red: CGFloat, green: CGFloat, blue: CGFloat) -> UIColor {
         return UIColor(red: red/255, green: green/255, blue: blue/255, alpha: 1)
@@ -56,6 +56,8 @@ extension UIColor {
 }
 
 
+
+// MARK: - UIViewController
 extension UIViewController {
     func getMentionUser(withuserName userName: String) {
         
@@ -122,7 +124,7 @@ extension UIViewController {
     }
 }
 
-
+// MARK: - UIButton
 extension UIButton {
     
     func configure(didFollow: Bool) {
@@ -147,6 +149,8 @@ extension UIButton {
     }
 }
 
+
+// MARK: - UIView
 extension UIView {
     func anchor(top: NSLayoutYAxisAnchor?, bottom: NSLayoutYAxisAnchor?,
                 leading: NSLayoutXAxisAnchor?, trailing: NSLayoutXAxisAnchor?,
@@ -181,10 +185,11 @@ extension UIView {
 
 
 
+// MARK: - Database
 extension Database {
     
     static func fetchUser(with uid: String, completion: @escaping(User) -> ()) {
-        // Database.database().reference().child("users")
+        
         USER_REF.child(uid).observeSingleEvent(of: .value) { snapshot in
             
             guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
@@ -192,7 +197,6 @@ extension Database {
             let user = User(uid: uid, dictionary: dictionary)
             
             completion(user)
-            
         }
     }
     

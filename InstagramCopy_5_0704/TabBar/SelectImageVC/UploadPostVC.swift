@@ -26,15 +26,12 @@ final class UploadPostVC: UIViewController {
         }
     }
     
-    
     var selectedImage: UIImage?
-//    var inEditMode: Bool = false
     var postToEdit: Post?
-    
     var uploadAction: UploadAction!
     
     
-    // MARK: - ImageView
+    // MARK: - Layout
     private var photoImageView: CustomImageView = {
         let img = CustomImageView()
         
@@ -53,8 +50,6 @@ final class UploadPostVC: UIViewController {
         
         tv.autocorrectionType = .no
         tv.autocapitalizationType = .none
-        
-        
         
         return tv
     }()
@@ -86,20 +81,15 @@ final class UploadPostVC: UIViewController {
         self.captionTextView.delegate = self
         
         // configure view components
-        configureViewComponents()
-        
-        
+        self.configureViewComponents()
         
         // load image
-        loadImage()
+        self.loadImage()
         
         self.view.backgroundColor = UIColor.white
-
-        
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
         
         if uploadAction == .SaveChanges {
             self.actionButton.setTitle("SaveChanges", for: .normal)
@@ -108,37 +98,32 @@ final class UploadPostVC: UIViewController {
             self.navigationController?.navigationBar.tintColor = .black
             
             guard let post = self.postToEdit else { return }
-            photoImageView.loadImageView(with: post.imageUrl)
-            captionTextView.text = post.caption
+            self.photoImageView.loadImageView(with: post.imageUrl)
+            self.captionTextView.text = post.caption
         } else {
             self.actionButton.setTitle("ShareButton", for: .normal)
             self.navigationItem.title = "Upload Post"
         }
-        
-        
     }
     
     
     func configureViewComponents() {
         
-        print("UploadPostVC")
-        
         self.view.addSubview(self.photoImageView)
-        self.view.addSubview(self.captionTextView)
-        self.view.addSubview(self.actionButton)
-        
         self.photoImageView.anchor(top: self.view.topAnchor, bottom: nil,
                                    leading: self.view.leadingAnchor, trailing: nil,
                                    paddingTop: 92, paddingBottom: 0,
                                    paddingLeading: 12, paddingTrailing: 0,
                                    width: 100, height: 100)
         
+        self.view.addSubview(self.captionTextView)
         self.captionTextView.anchor(top: self.view.topAnchor, bottom: nil,
                                     leading: self.photoImageView.trailingAnchor, trailing: self.view.trailingAnchor,
                                     paddingTop: 92, paddingBottom: 0,
                                     paddingLeading: 12, paddingTrailing: 12,
                                     width: 0, height: 100)
         
+        self.view.addSubview(self.actionButton)
         self.actionButton.anchor(top: self.photoImageView.bottomAnchor, bottom: nil,
                                 leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor,
                                 paddingTop: 12, paddingBottom: 0,

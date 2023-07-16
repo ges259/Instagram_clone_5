@@ -23,74 +23,24 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     
     
     // MARK: - Layout
-    private lazy var containerView: UIView = {
-        let frame = CGRect(x: 0, y: 0, width: 100, height: 50)
-        let cv = UIView(frame: frame)
+    private lazy var containerView: CommentAccessoryView = {
+        let frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50)
+        let cv = CommentAccessoryView(frame: frame)
+        
+        cv.delegate = self
         
         cv.backgroundColor = .white
-        cv.addSubview(self.postButton)
-        
-        postButton.centerYAnchor.constraint(equalTo: cv.centerYAnchor).isActive = true
-        postButton.anchor(top: cv.topAnchor, bottom: cv.bottomAnchor,
-                          leading: nil, trailing: cv.trailingAnchor,
-                          paddingTop: 0, paddingBottom: 0,
-                          paddingLeading: 0, paddingTrailing: 8,
-                          width: 40, height: 0)
-        
-        cv.addSubview(self.commentTextField)
-        commentTextField.anchor(top: cv.topAnchor, bottom: cv.bottomAnchor,
-                                leading: cv.leadingAnchor, trailing: self.postButton.leadingAnchor,
-                                paddingTop: 0, paddingBottom: 0,
-                                paddingLeading: 8, paddingTrailing: 8,
-                                width: 0, height: 0)
-        
-        let separatorView = UIView()
-        separatorView.backgroundColor = UIColor(red: 230/255, green: 230/255, blue: 230/255, alpha: 1)
-        
-        cv.addSubview(separatorView)
-        separatorView.anchor(top: cv.topAnchor, bottom: nil, leading: cv.leadingAnchor, trailing: cv.trailingAnchor, paddingTop: 0, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 0, width: 0, height: 0.5)
         
         return cv
     }()
-    private lazy var commentTextField: UITextField = {
-        let tf = UITextField()
-        
-        tf.placeholder = "Enter comment..."
-        tf.font = UIFont.systemFont(ofSize: 14)
-        tf.textColor = .black
-        
-        
-        return tf
-    }()
-    private lazy var postButton: UIButton = {
-        let btn = UIButton()
-
-        btn.setTitle("Post", for: .normal)
-        btn.setTitleColor(.black, for: .normal)
-        btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 14)
-        btn.addTarget(self, action: #selector(handleUploadComment), for: .touchUpInside)
-
-        return btn
-    }()
-    
     
     // MARK: - viewDidLoad()
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // configure collectin View
-        self.collectionView.backgroundColor = .white
-        self.collectionView.alwaysBounceVertical = true
-        self.collectionView.keyboardDismissMode = .interactive
         
-        self.collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
-        self.collectionView.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
-        
-        // navigation title
-        self.navigationItem.title = "Comments"
-        
-        // register cell class
-        self.collectionView!.register(CommentCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        // configure collection view
+        self.configureCollectionView()
         
         // fetch comments
         fetchComments()
@@ -118,27 +68,20 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     
     
     // MARK: - Handler
-    @objc private func handleUploadComment() {
+    private func configureCollectionView() {
+        // configure collectin View
+        self.collectionView.backgroundColor = .white
+        self.collectionView.alwaysBounceVertical = true
+        self.collectionView.keyboardDismissMode = .interactive
         
-        guard let postId = self.post?.postId else { return }
-        guard let commentText = commentTextField.text else { return }
-        guard let uid = Auth.auth().currentUser?.uid else  { return }
+        self.collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
+        self.collectionView.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
         
-        let creationDate = Int(NSDate().timeIntervalSince1970)
+        // navigation title
+        self.navigationItem.title = "Comments"
         
-        let values = ["commentText": commentText,
-                      "creationDate": creationDate,
-                      "uid": uid] as [String : Any]
-        
-        
-        COMMENT_REF.child(postId).childByAutoId().updateChildValues(values) { Error, ref in
-            self.uploadCommentNotificationToServer()
-            
-            if commentText.contains("@") {
-                self.uploadMentionNotification(forPostId: postId, withText: commentText, isForComment: true)
-            }
-            self.commentTextField.text = nil
-        }
+        // register cell class
+        self.collectionView!.register(CommentCell.self, forCellWithReuseIdentifier: reuseIdentifier)
     }
 
     
@@ -237,7 +180,29 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         }
     }
     
-    
+}
 
+// MARK: - Delegate
+extension CommentVC: CommentInputAccesoryViewDelegate {
     
+    func didSubmit(forComment comment: String) {
+        
+        guard let postId = self.post?.postId else { return }
+        guard let uid = Auth.auth().currentUser?.uid else  { return }
+        let creationDate = Int(NSDate().timeIntervalSince1970)
+        
+        let values = ["commentText": comment,
+                      "creationDate": creationDate,
+                      "uid": uid] as [String : Any]
+        
+        
+        COMMENT_REF.child(postId).childByAutoId().updateChildValues(values) { Error, ref in
+            self.uploadCommentNotificationToServer()
+            
+            if comment.contains("@") {
+                self.uploadMentionNotification(forPostId: postId, withText: comment, isForComment: true)
+            }
+            self.containerView.clearCommentTextView()
+        }
+    }
 }

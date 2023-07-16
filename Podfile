@@ -7,6 +7,4 @@ target 'InstagramCopy_5_0704' do
 
   # Pods for InstagramCopy_5_0704
     pod 'ActiveLabel'
-
-
 end

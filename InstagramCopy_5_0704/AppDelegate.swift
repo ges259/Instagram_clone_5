@@ -7,9 +7,11 @@
 
 import UIKit
 import FirebaseCore
+import UserNotifications
+import FirebaseMessaging
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
 
 
 
@@ -18,8 +20,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         FirebaseApp.configure()
         
+//        attemptToRegisterForNotifications(application: application)
+        
         return true
     }
+//    func attemptToRegisterForNotifications(application: UIApplication) {
+//
+////        Messaging.messaging().delegate = self
+//
+//        UNUserNotificationCenter.current().delegate = self
+//
+//        let options: UNAuthorizationOptions = [.alert, .badge, .sound]
+//        UNUserNotificationCenter.current().requestAuthorization(options: options) { authorized, error in
+//
+//            if authorized {
+//                print("SUCCESSFULLY REGISTERED FOR NOTIFICATIONS")
+//            }
+//            DispatchQueue.main.async {
+//                application.registerForRemoteNotifications()
+//            }
+//        }
+//    }
+//    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+//        print("DEGUG: Registered for notifications with device token: ", deviceToken)
+//    }
+    
+//
+//    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+//        guard let fcmToken = fcmToken else { return }
+//        print("DEBUG: Registered with FCM Token: ", fcmToken)
+//    }
+    
+    
+    
 
     // MARK: UISceneSession Lifecycle
 

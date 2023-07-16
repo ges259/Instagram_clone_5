@@ -16,14 +16,10 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     
     // MARK: - properties
-    
-    
-    
-    
-    
     var posts = [Post]()
     
     var viewSinglePost: Bool = false
+    
     var post: Post?
     
     var currentKey: String?
@@ -31,16 +27,14 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     var userProfileController: UserProfileVC?
     
     
-    // MARK: - viewDidLoad
+    // MARK: - Init
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.collectionView.backgroundColor = .white
         
-        
         self.collectionView!.register(FeedCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
-
         // configure refresh control
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
@@ -51,10 +45,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         if !viewSinglePost {
             fetchPosts()
         }
-        
-        updateUserFeeds()
-        
-        
+//        updateUserFeeds()
     }
     // MARK: - collection view
     
@@ -72,7 +63,6 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     }
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
-
         if viewSinglePost {
             return 1
         }
@@ -108,15 +98,8 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         height += 50
         height += 60
         
-        
         return CGSize(width: width, height: height)
     }
-    
-    
-    
-    
-    
-    
     
     
     
@@ -126,12 +109,8 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         if !viewSinglePost {
             self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(handleLogout))
         }
-        
-        
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "send2"), style: .plain, target: self, action: #selector(handleShowMessages))
         self.navigationItem.title = "Feed"
-        
-        
     }
     @objc private func handleShowMessages() {
         let messagesVC = MessagesVC()
@@ -206,35 +185,29 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     
     
-    
-    
-    
-    
-    
-    
     // MARK: - API
-    private func updateUserFeeds() {
-        
-        guard let currentId = Auth.auth().currentUser?.uid else { return }
-        
-        USER_FOLLOWING_REF.child(currentId).observe(.childAdded) { snapshot in
-            
-            let followingUserId = snapshot.key
-            // followingUserId: 자신이 follow한 사람들
-            USER_POSTS_REF.child(followingUserId).observe(.childAdded) { snapshot in
-                // snapshot : current-user를 follow한 사람들
-                let postId = snapshot.key
-                
-                USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
-            }
-        }
-        USER_POSTS_REF.child(currentId).observe(.childAdded) { snapshot in
-            let postId = snapshot.key
-            
-            USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
-        }
-    }
-    
+//    private func updateUserFeeds() {
+//
+//        guard let currentId = Auth.auth().currentUser?.uid else { return }
+//
+//        USER_FOLLOWING_REF.child(currentId).observe(.childAdded) { snapshot in
+//
+//            let followingUserId = snapshot.key
+//            // followingUserId: 자신이 follow한 사람들
+//            USER_POSTS_REF.child(followingUserId).observe(.childAdded) { snapshot in
+//                // snapshot : current-user를 follow한 사람들
+//                let postId = snapshot.key
+//
+//                USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
+//            }
+//        }
+//        USER_POSTS_REF.child(currentId).observe(.childAdded) { snapshot in
+//            let postId = snapshot.key
+//
+//            USER_FEED_REF.child(currentId).updateChildValues([postId: 1])
+//        }
+//    }
+//
     
     
     private func fetchPosts() {
@@ -246,6 +219,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         if currentKey == nil {
             // 일단 5개만 받아오기
             USER_FEED_REF.child(currentUid).queryLimited(toLast: 5).observeSingleEvent(of: .value) { snapshot in
+                print(snapshot)
                 self.collectionView.refreshControl?.endRefreshing()
                 
                 guard let first = snapshot.children.allObjects.first as? DataSnapshot else { return }

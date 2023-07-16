@@ -15,7 +15,6 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     // MARK: - Properties
-    
     var images = [UIImage]()
     var assets = [PHAsset]()
     var selectedImage: UIImage?
@@ -24,38 +23,23 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     
-    
-    
-    
+    // MARK: - Init
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("SelectPhotoVC")
         
         configureNavigationButtons()
-        
-        
-        
+    
         // Register cell classes
         self.collectionView.register(SelectPhotoCell.self, forCellWithReuseIdentifier: reuserIdentifier)
         self.collectionView.register(SelectPhotoHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
         
         self.collectionView.backgroundColor = .white
         
-        
         fetchPhotos()
-        
-        
-        
     }
     
     
-    // MARK: - UICollectionVeiw - FlowLayout
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        let width = view.frame.width
-        
-        return CGSize(width: width, height: width)
-    }
-    
+    // MARK: - CollectionView - DataSource
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         // spacing = 1
         let width = (view.frame.width - 3) / 4
@@ -70,39 +54,11 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
         return 1
     }
     
-    
-    
-    // MARK: - UICollectionView - DataSource
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.images.count
-    }
-    
-    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! SelectPhotoHeader
-        
-        self.header = header
-        
-        
-        if let selectedImage = self.selectedImage {
-            // index selected image
-            if let index = self.images.index(of: selectedImage) {
-                // asset associated with selected image
-                let selectedAsses = self.assets[index]
-                
-                let imageManager = PHImageManager.default()
-                let targetSize = CGSize(width: 600, height: 600)
-                
-                imageManager.requestImage(for: selectedAsses, targetSize: targetSize, contentMode: .default, options: nil) { image, info in
-                    
-                    header.photoImageView.image = selectedImage
-                }
-            }
-        }
-        return header
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -121,12 +77,39 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
         
         let indexPath = IndexPath(item: 0, section: 0)
         self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-        
-        
     }
     
+    // header
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        let width = view.frame.width
+        
+        return CGSize(width: width, height: width)
+    }
     
-    
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! SelectPhotoHeader
+        
+        self.header = header
+        
+        
+        if let selectedImage = self.selectedImage {
+            // index selected image
+            if let index = self.images.firstIndex(of: selectedImage) {
+                // asset associated with selected image
+                let selectedAsses = self.assets[index]
+                
+                let imageManager = PHImageManager.default()
+                let targetSize = CGSize(width: 600, height: 600)
+                
+                imageManager.requestImage(for: selectedAsses, targetSize: targetSize, contentMode: .default, options: nil) { image, info in
+                    
+                    header.photoImageView.image = selectedImage
+                }
+            }
+        }
+        return header
+    }
     
     
     // MARK: - Handler
@@ -151,10 +134,10 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     
+    
     // MARK: - 라이브러리에서 사진 가져오기
     private func getAssetFetchOptions() -> PHFetchOptions {
         let options = PHFetchOptions()
-        
         // fetch limit
         options.fetchLimit = 30
         
@@ -186,7 +169,6 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
                 let options = PHImageRequestOptions()
                 options.isSynchronous = true
                 
-                
                 // imageManager를 사용하여 이미지를 요청
                 // request image representation for specified asset
                 imageManger.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: options) { image, info in
@@ -206,7 +188,6 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
                         if self.selectedImage == nil {
                             self.selectedImage = image
                         }
-                        
                         
                         // 이전까지 각 사진을 개별적으로 가져온다.
                         // 가져와기가 완료되면 collectionView.reload()를 한다.
