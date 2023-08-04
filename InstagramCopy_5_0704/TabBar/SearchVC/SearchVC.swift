@@ -14,8 +14,6 @@ private let tableViiewReuserIndetifier: String = "SearchUserCell"
 
 final class SearchVC: UIViewController {
     
-    
-    
     // MARK: - Properties
     var users = [User]()
     
@@ -34,12 +32,11 @@ final class SearchVC: UIViewController {
     var postCurrentKey: String?
     var userCurrentKey: String?
     
-    
     var posts = [Post]()
     
     
     
-    // MARK: - Init
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -68,40 +65,42 @@ final class SearchVC: UIViewController {
         self.fetchUsers()
     }
     
-    // MARK: - handlers
+    // MARK: - Selectors
+    @objc func handleRefresh() {
+        self.posts.removeAll(keepingCapacity: false)
+        self.postCurrentKey = nil
+        self.fetchPosts()
+        self.collectionView.reloadData()
+    }
+    
+    
+    @objc func handleTableRefresh() {
+        self.users.removeAll(keepingCapacity: false)
+        self.userCurrentKey = nil
+        self.fetchUsers()
+        self.tableView.reloadData()
+    }
+    
+    
+    
+    // MARK: - Helper Functions
     private func configureRefreshControl() {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+            refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         self.collectionView.refreshControl = refreshControl
     }
-    @objc func handleRefresh() {
-        posts.removeAll(keepingCapacity: false)
-        self.postCurrentKey = nil
-        fetchPosts()
-        collectionView.reloadData()
-    }
+    
     
     private func configureTableRefreshControl() {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(handleTableRefresh), for: .valueChanged)
+            refreshControl.addTarget(self, action: #selector(handleTableRefresh), for: .valueChanged)
         self.tableView.refreshControl = refreshControl
     }
-    @objc func handleTableRefresh() {
-        users.removeAll(keepingCapacity: false)
-        self.userCurrentKey = nil
-        fetchUsers()
-        tableView.reloadData()
-    }
-    
-    
-    
-    
     
     
     
     // MARK: - API
     private func fetchUsers() {
-        
         if userCurrentKey == nil {
             
             USER_REF.queryLimited(toLast: 18).observeSingleEvent(of: .value) { snapshot in
@@ -178,7 +177,6 @@ final class SearchVC: UIViewController {
         }
     }
     
-    
     private func fetchPost(withPostId postId: String) {
         Database.fetchPost(with: postId) { post in
             self.posts.append(post)
@@ -189,28 +187,27 @@ final class SearchVC: UIViewController {
             self.collectionView.reloadData()
         }
     }
-    
-    
-    
 }
+
+
 
 // MARK: - Search Bar
 extension SearchVC: UISearchBarDelegate {
     
     private func configureSearchBar() {
-        searchBar.sizeToFit()
-        searchBar.delegate = self
+        self.searchBar.sizeToFit()
+        self.searchBar.delegate = self
         self.navigationItem.titleView = searchBar
-        searchBar.barTintColor = UIColor(red: 240/255, green: 240/255, blue: 240/255, alpha: 1)
-        searchBar.tintColor = .black
+        self.searchBar.barTintColor = UIColor.rgb(red: 240, green: 240, blue: 240)
+        self.searchBar.tintColor = .black
     }
     
     // 서치바가 시작되면 ( 취소버튼 표시
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         searchBar.showsCancelButton = true
         
-        collectionView.isHidden = true
-        tableView.isHidden = false
+        self.collectionView.isHidden = true
+        self.tableView.isHidden = false
     }
     // 취소버튼을 눌렀을 때 (
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -220,8 +217,8 @@ extension SearchVC: UISearchBarDelegate {
         
         self.inSearchMode = false
         
-        collectionView.isHidden = false
-        tableView.isHidden = true
+        self.collectionView.isHidden = false
+        self.tableView.isHidden = true
     }
     
     // 텍스트를 적으면 불리는 메서드
@@ -234,7 +231,7 @@ extension SearchVC: UISearchBarDelegate {
             self.tableView.reloadData()
         } else {
             self.inSearchMode = true
-            filteredUsers = users.filter({ user in
+            self.filteredUsers = users.filter({ user in
                 return user.userName.contains(searchText)
             })
             self.tableView.reloadData()
@@ -253,8 +250,7 @@ extension SearchVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColl
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: collectionReuserIndetifier, for: indexPath) as! SearchPostCell
-        
-        cell.post = posts[indexPath.item]
+            cell.post = posts[indexPath.item]
         
         return cell
     }
@@ -262,28 +258,27 @@ extension SearchVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColl
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         let feedVC = FeedVC(collectionViewLayout: UICollectionViewFlowLayout())
-        
-        feedVC.viewSinglePost = true
-        feedVC.post = self.posts[indexPath.item]
+            feedVC.viewSinglePost = true
+            feedVC.post = self.posts[indexPath.item]
         
         self.navigationController?.pushViewController(feedVC, animated: true)
     }
     
     private func configureCollectionView() {
         let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .vertical
+            layout.scrollDirection = .vertical
         
         let frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height - (tabBarController?.tabBar.frame.height)! - (navigationController?.navigationBar.frame.height)!)
         
-        collectionView = UICollectionView(frame: frame, collectionViewLayout: layout)
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.alwaysBounceVertical = true
-        collectionView.backgroundColor = .white
+        self.collectionView = UICollectionView(frame: frame, collectionViewLayout: layout)
+        self.collectionView.delegate = self
+        self.collectionView.dataSource = self
+        self.collectionView.alwaysBounceVertical = true
+        self.collectionView.backgroundColor = .white
         
-        collectionView.register(SearchPostCell.self, forCellWithReuseIdentifier: collectionReuserIndetifier)
+        self.collectionView.register(SearchPostCell.self, forCellWithReuseIdentifier: collectionReuserIndetifier)
 
-        self.view.addSubview(collectionView)
+        self.view.addSubview(self.collectionView)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
@@ -300,7 +295,7 @@ extension SearchVC: UICollectionViewDelegate, UICollectionViewDataSource, UIColl
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if posts.count > 26 {
             if indexPath.item == posts.count - 1 {
-                fetchPosts()
+                self.fetchPosts()
             }
         }
     }
@@ -315,45 +310,33 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
         
         self.tableView = UITableView(frame: frame, style: .grouped)
         
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.backgroundColor = .white
-        tableView.separatorColor = .clear
+        self.tableView.delegate = self
+        self.tableView.dataSource = self
+        self.tableView.backgroundColor = .white
+        self.tableView.separatorColor = .clear
         
-        tableView.register(SearchUserCell.self, forCellReuseIdentifier: tableViiewReuserIndetifier)
+        self.tableView.register(SearchUserCell.self, forCellReuseIdentifier: tableViiewReuserIndetifier)
         
-        self.view.addSubview(tableView)
+        self.view.addSubview(self.tableView)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if users.count > 15 {
             if indexPath.row == users.count - 1 {
-                fetchUsers()
+                self.fetchUsers()
             }
         }
     }
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if inSearchMode {
-            return self.filteredUsers.count
-        } else {
-            return users.count
-        }
+        return inSearchMode ? self.filteredUsers.count : users.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: tableViiewReuserIndetifier, for: indexPath) as! SearchUserCell
         
-        var user: User!
-        
-        if self.inSearchMode {
-            user = self.filteredUsers[indexPath.row]
-        } else {
-            user = users[indexPath.row]
-        }
-        cell.user = user
-        
+            cell.user = self.inSearchMode ? self.filteredUsers[indexPath.row] : users[indexPath.row]
         return cell
     }
     
@@ -363,22 +346,15 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
-        var user: User!
-        
-        if self.inSearchMode {
-            user = self.filteredUsers[indexPath.row]
-        } else {
-            user = users[indexPath.row]
-        }
-        
+        var user: User = self.inSearchMode ? self.filteredUsers[indexPath.row] : users[indexPath.row]
         
         // create instance of user profile vc
         let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
         
         // passes user from searchVC to userProfileVC
-        userProfileVC.user = user
+            userProfileVC.user = user
 //        userProfileVC.title = "Followers"
         // push view controller
-        navigationController?.pushViewController(userProfileVC, animated: true)
+        self.navigationController?.pushViewController(userProfileVC, animated: true)
     }
 }

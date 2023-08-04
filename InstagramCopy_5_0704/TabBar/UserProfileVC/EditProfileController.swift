@@ -23,121 +23,119 @@ final class EditProfileController: UIViewController {
     
     // MARK: - View
     private lazy var backgroundView: UIView = {
-        
         let frame = CGRect(x: 0, y: 88, width: view.frame.width, height: 150)
         
         let view = UIView(frame: frame)
         
-        view.addSubview(self.profileImageView)
-        view.addSubview(self.changePhotoButton)
-        
         // profileImageView autoLayout
-        self.profileImageView.anchor(top: view.topAnchor, bottom: nil, leading: nil, trailing: nil, paddingTop: 16, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 0, width: 80, height: 80)
-        self.profileImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        self.profileImageView.clipsToBounds = true
-        self.profileImageView.layer.cornerRadius = 80 / 2
+            view.addSubview(self.profileImageView)
+            self.profileImageView.anchor(top: view.topAnchor, paddingTop: 16,
+                                     width: 80, height: 80, centerX: view)
+            self.profileImageView.clipsToBounds = true
+            self.profileImageView.layer.cornerRadius = 80 / 2
+        
         
         // changePhotoButton autoLayout
-        self.changePhotoButton.anchor(top: self.profileImageView.bottomAnchor, bottom: nil, leading: nil, trailing: nil, paddingTop: 8, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 0, width: 0, height: 0)
-        self.changePhotoButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        
+            view.addSubview(self.changePhotoButton)
+            self.changePhotoButton.anchor(top: self.profileImageView.bottomAnchor, paddingTop: 8,
+                                          centerX: view)
         view.backgroundColor = .systemGray4
         
         return view
     }()
-    private let fullNameSeparatorView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .lightGray
-        return view
+    private lazy var fullNameSeparatorView: UIView = {
+        return UIView().backgrouncColorView(backgroundColor: UIColor.lightGray)
     }()
-    private let userNameSeparatorView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .lightGray
-        return view
+    private lazy var userNameSeparatorView: UIView = {
+        return UIView().backgrouncColorView(backgroundColor: UIColor.lightGray)
     }()
+    
     
     
     // MARK: - ImageView
-    private let profileImageView: CustomImageView = {
+    private lazy var profileImageView: CustomImageView = {
         let img = CustomImageView()
         
-        img.clipsToBounds = true
-        img.contentMode = .scaleAspectFill
-        img.backgroundColor = .lightGray
-        
-        
+            img.clipsToBounds = true
+            img.contentMode = .scaleAspectFill
+            img.backgroundColor = .lightGray
         return img
     }()
     
     
+    
     // MARK: - Button
-    private let changePhotoButton: UIButton = {
-        let btn = UIButton()
-        
-        btn.setTitle("Change Profile Photo", for: .normal)
-        btn.titleLabel?.textColor = .blue
-        btn.titleLabel?.font = UIFont.systemFont(ofSize: 14)
-        btn.addTarget(self, action: #selector(handleChangeProfilePhoto), for: .touchUpInside)
-        
-        
+    private lazy var changePhotoButton: UIButton = {
+        let btn = UIButton().button(title: "Change Profile Photo",
+                                    titleColor: UIColor.blue,
+                                    fontName: .system,
+                                    fontSize: 14)
+        btn.addTarget(self, action: #selector(self.handleChangeProfilePhoto),
+                      for: .touchUpInside)
         return btn
     }()
     
     
     
-    
     // MARK: - Label
-    private let fullNameLabel: UILabel = {
-        let lbl = UILabel()
-        
-        lbl.text = "Full Name"
-        lbl.font = UIFont.systemFont(ofSize: 16)
-        
-        return lbl
+    private lazy var fullNameLabel: UILabel = {
+        return UILabel().label(labelText: "Full Name",
+                                  fontName: .system,
+                                  fontSize: 16)
     }()
-    private let userNameLabel: UILabel = {
-        let lbl = UILabel()
-        
-        lbl.text = "User Name"
-        lbl.font = UIFont.systemFont(ofSize: 16)
-        
-        return lbl
+    private lazy var userNameLabel: UILabel = {
+        return UILabel().label(labelText: "User Name",
+                                  fontName: .system,
+                                  fontSize: 16)
     }()
 
     
     
     // MARK: - TextField
-    private let fullNameTextField: UITextField = {
+    private lazy var fullNameTextField: UITextField = {
         let txt = UITextField()
-        
-        txt.textAlignment = .left
-        txt.borderStyle = .none
-        txt.isUserInteractionEnabled = false
-        
+            txt.textAlignment = .left
+            txt.borderStyle = .none
+            txt.isUserInteractionEnabled = false
         return txt
     }()
     
-    private let userNameTextField: UITextField = {
+    private lazy var userNameTextField: UITextField = {
         let txt = UITextField()
-        
-        txt.textAlignment = .left
-        txt.borderStyle = .none
-        
+            txt.textAlignment = .left
+            txt.borderStyle = .none
         return txt
     }()
     
 
     
-    // MARK: - Handlers
+    // MARK: - Helper Funcions
     private func configureNavigationBar() {
         self.navigationItem.title = "Edit Profile"
         self.navigationController?.navigationBar.tintColor = .black
         
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel",
+                                                                style: .plain,
+                                                                target: self,
+                                                                action: #selector(self.handleCancel))
         
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "done", style: .done, target: self, action: #selector(handleDone))
-        
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "done",
+                                                                 style: .done,
+                                                                 target: self,
+                                                                 action: #selector(self.handleDone))
     }
+    
+    private func loadUserData() {
+        guard let user = self.user else  { return }
+        
+        self.profileImageView.loadImageView(with: user.profileImageUrl)
+        self.fullNameTextField.text = user.name
+        self.userNameTextField.text = user.userName
+    }
+    
+    
+    
+    // MARK: - Selectors
     @objc func handleCancel() {
         self.dismiss(animated: true, completion: nil)
     }
@@ -152,20 +150,10 @@ final class EditProfileController: UIViewController {
             self.updateProfileImage()
         }
     }
-    private func loadUserData() {
-        guard let user = self.user else  { return }
-        
-        self.profileImageView.loadImageView(with: user.profileImageUrl)
-        self.fullNameTextField.text = user.name
-        self.userNameTextField.text = user.userName
-        
-    }
+
     
     
     // MARK: - API
-    
-    
-    
     private func updateProfileImage() {
         guard imageChanged == true else { return }
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
@@ -235,6 +223,7 @@ final class EditProfileController: UIViewController {
     private func updateUserName() {
         guard let updatedUsername = self.updatedUserName else { return }
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
+        // userNameChanged가 true 일 때만 진행
         guard userNameChanged == true else { return }
         
         USER_REF.child(currentUid).child("userName").setValue(updatedUsername) { (err, ref) in
@@ -248,10 +237,7 @@ final class EditProfileController: UIViewController {
     
     
     
-    
-    
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -264,53 +250,52 @@ final class EditProfileController: UIViewController {
         
         self.loadUserData()
     }
+    
+    
+    
+    // MARK: - Configure UI
     private func configureViewComponents() {
         self.view.addSubview(self.backgroundView)
+        
+        // fullNameLabel
         self.view.addSubview(self.fullNameLabel)
+        self.fullNameLabel.anchor(top: self.backgroundView.bottomAnchor, paddingTop: 20,
+                                  leading: self.view.leadingAnchor, paddingLeading: 12)
+        
+        // userNameLabel
         self.view.addSubview(self.userNameLabel)
+        self.userNameLabel.anchor(top: self.fullNameLabel.bottomAnchor, paddingTop: 20,
+                                  leading: self.view.leadingAnchor, paddingLeading: 12)
+        
+        // fullNameTextField
         self.view.addSubview(self.fullNameTextField)
+        self.fullNameTextField.anchor(top: self.backgroundView.bottomAnchor, paddingTop: 16,
+                                      leading: self.fullNameLabel.trailingAnchor, paddingLeading: 12,
+                                      trailing: self.view.trailingAnchor, paddingTrailing: 12,
+                                      width: self.view.frame.width / 1.6)
+        
+        // userNameTextField
         self.view.addSubview(self.userNameTextField)
+        self.userNameTextField.anchor(top: self.fullNameTextField.bottomAnchor, paddingTop: 16,
+                                      leading: self.userNameLabel.trailingAnchor, paddingLeading: 12,
+                                      trailing: self.view.trailingAnchor, paddingTrailing: 12,
+                                      width: self.view.frame.width / 1.6)
+        
+        // fullNameSeparatorView
         self.view.addSubview(self.fullNameSeparatorView)
+        self.fullNameSeparatorView.anchor(bottom: self.fullNameTextField.bottomAnchor, paddingBottom: -8,
+                                          leading: self.fullNameTextField.leadingAnchor,
+                                          trailing: self.view.trailingAnchor, paddingTrailing: 12,
+                                          height: 0.5)
+        
+        // userNameSeparatorView
         self.view.addSubview(self.userNameSeparatorView)
-        
-        self.fullNameLabel.anchor(top: self.backgroundView.bottomAnchor, bottom: nil,
-                                  leading: self.view.leadingAnchor,     trailing: nil,
-                                  paddingTop: 20,                       paddingBottom: 0,
-                                  paddingLeading: 12,                    paddingTrailing: 0,
-                                  width: 0,                             height: 0)
-        
-        self.userNameLabel.anchor(top: self.fullNameLabel.bottomAnchor, bottom: nil,
-                                  leading: self.view.leadingAnchor,     trailing: nil,
-                                  paddingTop: 20,                       paddingBottom: 0,
-                                  paddingLeading: 12,                    paddingTrailing: 0,
-                                  width: 0,                             height: 0)
-        
-        self.fullNameTextField.anchor(top: self.backgroundView.bottomAnchor,        bottom: nil,
-                                      leading: self.fullNameLabel.trailingAnchor,   trailing: self.view.trailingAnchor,
-                                      paddingTop: 16,                               paddingBottom: 0,
-                                      paddingLeading: 12,                           paddingTrailing: 12,
-                                      width: self.view.frame.width / 1.6,             height: 0)
-        
-        self.userNameTextField.anchor(top: self.fullNameTextField.bottomAnchor,     bottom: nil,
-                                      leading: self.userNameLabel.trailingAnchor,   trailing: self.view.trailingAnchor,
-                                      paddingTop: 16,                               paddingBottom: 0,
-                                      paddingLeading: 12,                           paddingTrailing: 12,
-                                      width: self.view.frame.width / 1.6,           height: 0)
-        
-        self.fullNameSeparatorView.anchor(top: nil, bottom: self.fullNameTextField.bottomAnchor,
-                                          leading: self.fullNameTextField.leadingAnchor, trailing: self.view.trailingAnchor,
-                                          paddingTop: 0, paddingBottom: -8,
-                                          paddingLeading: 0, paddingTrailing: 12,
-                                          width: 0, height: 0.5)
-        
-        self.userNameSeparatorView.anchor(top: nil, bottom: self.userNameTextField.bottomAnchor,
-                                          leading: self.userNameTextField.leadingAnchor, trailing: self.view.trailingAnchor,
-                                          paddingTop: 0, paddingBottom: -8,
-                                          paddingLeading: 0, paddingTrailing: 12,
-                                          width: 0, height: 0.5)
+        self.userNameSeparatorView.anchor(bottom: self.userNameTextField.bottomAnchor, paddingBottom: -8,
+                                          leading: self.userNameTextField.leadingAnchor,
+                                          trailing: self.view.trailingAnchor, paddingTrailing: 12,
+                                          height: 0.5)
     }
 }
-
 
 
 
@@ -319,27 +304,25 @@ extension EditProfileController: UIImagePickerControllerDelegate & UINavigationC
     
     @objc func handleChangeProfilePhoto() {
         let imagePickerController = UIImagePickerController()
-        imagePickerController.delegate = self
-        imagePickerController.allowsEditing = true
-        present(imagePickerController, animated: true, completion: nil)
+            imagePickerController.delegate = self
+            imagePickerController.allowsEditing = true
+        self.present(imagePickerController, animated: true, completion: nil)
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         // Local variable inserted by Swift 4.2 migrator.
         let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
 
-        
         if let selectedImage = info[convertFromUIImagePickerControllerInfoKey(UIImagePickerController.InfoKey.editedImage)] as? UIImage {
-            profileImageView.image = selectedImage
+            self.profileImageView.image = selectedImage
             self.imageChanged = true
         }
-        
-        dismiss(animated: true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
-    
-    
-    
 }
+
+
+
 // Helper function inserted by Swift 4.2 migrator.
 fileprivate func convertFromUIImagePickerControllerInfoKeyDictionary(_ input: [UIImagePickerController.InfoKey: Any]) -> [String: Any] {
     return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
@@ -351,9 +334,7 @@ fileprivate func convertFromUIImagePickerControllerInfoKey(_ input: UIImagePicke
 
 
 
-
-
-
+// MARK: - UITextFieldDelegate
 extension EditProfileController: UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
@@ -363,13 +344,13 @@ extension EditProfileController: UITextFieldDelegate {
         
         guard user.userName != trimmedString else {
             print("You did not change you userName")
-            userNameChanged = false
+            self.userNameChanged = false
             return
         }
         
         guard trimmedString != "" else {
             print("ERROR: Please enter a valid userName")
-            userNameChanged = false
+            self.userNameChanged = false
             return
         }
         

@@ -18,16 +18,16 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     // MARK: - properties
     var posts = [Post]()
     
-    var viewSinglePost: Bool = false
-    
     var post: Post?
+    
+    var viewSinglePost: Bool = false
     
     var currentKey: String?
     
     var userProfileController: UserProfileVC?
     
     
-    // MARK: - Init
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -35,20 +35,20 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         
         self.collectionView!.register(FeedCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
-        // configure refresh control
-        let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
-        collectionView.refreshControl = refreshControl
+        // refresh
+        self.refreshController()
         
-        configureNavigationBar()
+        self.configureNavigationBar()
         
         if !viewSinglePost {
             fetchPosts()
         }
 //        updateUserFeeds()
     }
-    // MARK: - collection view
     
+    
+    
+    // MARK: - collection view
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if posts.count > 4 {
             if indexPath.item == posts.count - 1 {
@@ -72,14 +72,14 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! FeedCell
         
-        cell.delegate = self
+            cell.delegate = self
         
         if viewSinglePost {
             if let post = self.post {
                 cell.post = post
             }
         } else {
-            cell.post = posts[indexPath.row]
+            cell.post = self.posts[indexPath.row]
         }
         
         self.handleHashtagTapped(forCell: cell)
@@ -90,28 +90,21 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     }
     
     
+    
     // MARK: - FlowLayout
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         let width = self.view.frame.width
         var height = width + 8 + 40 + 8
-        height += 50
-        height += 60
+            height += 50
+            height += 60
         
         return CGSize(width: width, height: height)
     }
     
     
     
-    // MARK: - Handlers
-    func configureNavigationBar() {
-        
-        if !viewSinglePost {
-            self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(handleLogout))
-        }
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "send2"), style: .plain, target: self, action: #selector(handleShowMessages))
-        self.navigationItem.title = "Feed"
-    }
+    // MARK: - Selectors
     @objc private func handleShowMessages() {
         let messagesVC = MessagesVC()
         self.navigationController?.pushViewController(messagesVC, animated: true)
@@ -142,21 +135,38 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         // add cancel action
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
-        present(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
+    @objc private func handleRefresh() {
+        self.posts.removeAll(keepingCapacity: false)
+        self.currentKey = nil
+        self.fetchPosts()
+        self.collectionView.reloadData()
     }
     
     
-    @objc private func handleRefresh() {
-        posts.removeAll(keepingCapacity: false)
-        self.currentKey = nil
-        fetchPosts()
-        collectionView.reloadData()
+    
+    // MARK: - Helper Functions
+    private func configureNavigationBar() {
+        if !viewSinglePost {
+            self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(self.handleLogout))
+        }
+        self.navigationItem.title = "Feed"
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "send2"), style: .plain, target: self, action: #selector(self.handleShowMessages))
+    }
+    
+    private func refreshController() {
+        // configure refresh control
+        let refreshControl = UIRefreshControl()
+            refreshControl.addTarget(self, action: #selector(self.handleRefresh), for: .valueChanged)
+        self.collectionView.refreshControl = refreshControl
     }
     
     private func handleHashtagTapped(forCell cell: FeedCell) {
         cell.captionLabel.handleHashtagTap { hashtag in
             let hashtagVC = HashtagVC(collectionViewLayout: UICollectionViewFlowLayout())
-            hashtagVC.hashtag = hashtag
+                hashtagVC.hashtag = hashtag
             self.navigationController?.pushViewController(hashtagVC, animated: true)
         }
     }
@@ -168,11 +178,10 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         
         let customType = ActiveType.custom(pattern: "^\(userName)\\b")
 
-        
         cell.captionLabel.handleCustomTap(for: customType) { _ in
             let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
-            userProfileVC.user = user
-            userProfileVC.modalPresentationStyle = .fullScreen
+                userProfileVC.user = user
+                userProfileVC.modalPresentationStyle = .fullScreen
             self.navigationController?.pushViewController(userProfileVC, animated: true)
         }
     }
@@ -211,7 +220,6 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     
     private func fetchPosts() {
-        
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
         
         // cueernetKey가 nil이면 -> 처음 화면은 무조건 nil.
@@ -254,18 +262,14 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     private func fetchPost(withPostId postId: String) {
         Database.fetchPost(with: postId) { post in
             self.posts.append(post)
-            
+            // 날짜 순으로 정렬
             self.posts.sort { post1, post2 -> Bool in
                 return post1.creationDate > post2.creationDate
             }
             self.collectionView.reloadData()
         }
     }
-    
-    
 }
-
-
 
 
 
@@ -278,15 +282,14 @@ extension FeedVC: FeedCellDelegate {
         
         let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
         
-        userProfileVC.user = post.user
+            userProfileVC.user = post.user
         self.navigationController?.pushViewController(userProfileVC, animated: true)
     }
-    
-    
     
     func handleOptionsTapped(for cell: FeedCell) {
         guard let post = cell.post else { return }
         
+        // 자신(사용자)가 올린 포스트에만 반응
         if post.ownerUid == Auth.auth().currentUser?.uid {
             let alertController = UIAlertController(title: "Options", message: nil, preferredStyle: .actionSheet)
             
@@ -305,10 +308,13 @@ extension FeedVC: FeedCellDelegate {
             
             alertController.addAction(UIAlertAction(title: "Edit Post", style: .default, handler: { _ in
                 let uploadPostVC = UploadPostVC()
+                
                 let navigationController = UINavigationController(rootViewController: uploadPostVC)
-                navigationController.modalPresentationStyle = .fullScreen
+                    navigationController.modalPresentationStyle = .fullScreen
+                
                 uploadPostVC.postToEdit = post
                 uploadPostVC.uploadAction = UploadPostVC.UploadAction(index: 1)
+                
                 self.present(navigationController, animated: true)
                 
             }))
@@ -317,7 +323,7 @@ extension FeedVC: FeedCellDelegate {
                 print("Handle cancel post..")
             }))
             
-            present(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         }
     }
     
@@ -370,15 +376,11 @@ extension FeedVC: FeedCellDelegate {
         guard let postId = post.postId else { return }
         
         let followLikeVC = FollowLikeVC()
-        followLikeVC.viewingMode = FollowLikeVC.ViewingMode(index: 2)
-        followLikeVC.postId = postId
+            followLikeVC.viewingMode = FollowLikeVC.ViewingMode(index: 2)
+            followLikeVC.postId = postId
         
-        navigationController?.pushViewController(followLikeVC, animated: true)
+        self.navigationController?.pushViewController(followLikeVC, animated: true)
     }
-    
-    
-    
-    
     
     func handleCommentTapped(for cell: FeedCell) {
         
@@ -386,7 +388,7 @@ extension FeedVC: FeedCellDelegate {
 
         let commentVC = CommentVC(collectionViewLayout: UICollectionViewFlowLayout())
         
-        commentVC.post = post
+            commentVC.post = post
         
         self.navigationController?.pushViewController(commentVC, animated: true)
     }

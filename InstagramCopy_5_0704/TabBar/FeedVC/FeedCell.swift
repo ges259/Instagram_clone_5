@@ -42,22 +42,23 @@ final class FeedCell: UICollectionViewCell {
     private let profileImageView: CustomImageView = {
         let img = CustomImageView()
         
-        img.contentMode = .scaleAspectFill
-        img.clipsToBounds = true
-        img.backgroundColor = .lightGray
+            img.contentMode = .scaleAspectFill
+            img.clipsToBounds = true
+            img.backgroundColor = .lightGray
         
         return img
     }()
     private lazy var postImageView: CustomImageView = {
         let img = CustomImageView()
         
-        img.contentMode = .scaleAspectFill
-        img.clipsToBounds = true
-        img.backgroundColor = .lightGray
+            img.contentMode = .scaleAspectFill
+            img.clipsToBounds = true
+            img.backgroundColor = .lightGray
         
         // add gesture recognizer for double tap to like
-        let likeTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTappedToLike))
-        likeTap.numberOfTapsRequired = 2
+        let likeTap = UITapGestureRecognizer(target: self, action: #selector(self.handleDoubleTappedToLike))
+            likeTap.numberOfTapsRequired = 2
+        
         img.isUserInteractionEnabled = true
         img.addGestureRecognizer(likeTap)
         
@@ -68,115 +69,79 @@ final class FeedCell: UICollectionViewCell {
     
     // MARK: - Button
     private lazy var userName: UIButton = {
-        let btn = UIButton(type: .system)
-        
-        btn.setTitle("UserName", for: .normal)
-        btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        btn.setTitleColor(.black, for: .normal)
-        
-        btn.addTarget(self, action: #selector(handleUserNameTapped), for: .touchUpInside)
-        
+        let btn = UIButton().button(title: "UserName",
+                                    titleColor: UIColor.black,
+                                    fontSize: 12)
+            btn.addTarget(self, action: #selector(self.handleUserNameTapped), for: .touchUpInside)
         return btn
     }()
     private lazy var optionButton: UIButton = {
-        let btn = UIButton(type: .system)
-        
-        btn.setTitle("•••", for: .normal)
-        btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 14)
-        btn.setTitleColor(.black, for: .normal)
-        
-        btn.addTarget(self, action: #selector(handleOptionsTapped), for: .touchUpInside)
-
+        let btn = UIButton().button(title: "•••",
+                                    titleColor: UIColor.black,
+                                    fontSize: 14)
+            btn.addTarget(self, action: #selector(self.handleOptionsTapped), for: .touchUpInside)
         return btn
     }()
     lazy var likeButton: UIButton = {
-        let btn = UIButton(type: .system)
+        let btn = UIButton().button(image: "like_unselected")
         
-        btn.setImage(#imageLiteral(resourceName: "like_unselected"), for: .normal)
-        btn.tintColor = .black
-        
-        btn.addTarget(self, action: #selector(handleLikeTapped), for: .touchUpInside)
-
+            btn.addTarget(self, action: #selector(self.handleLikeTapped), for: .touchUpInside)
         return btn
     }()
     private lazy var commentButton: UIButton = {
-        let btn = UIButton(type: .system)
+        let btn = UIButton().button(image: "comment")
         
-        btn.setImage(#imageLiteral(resourceName: "comment"), for: .normal)
-        btn.tintColor = .black
-        
-        btn.addTarget(self, action: #selector(handleCommentTapped), for: .touchUpInside)
-
+            btn.addTarget(self, action: #selector(self.handleCommentTapped), for: .touchUpInside)
         return btn
     }()
     private let messageButton: UIButton = {
-        let btn = UIButton(type: .system)
-        
-        btn.setImage(#imageLiteral(resourceName: "send2"), for: .normal)
-        btn.tintColor = .black
-        
-        return btn
+        return UIButton().button(image: "send2")
     }()
     private let bookPostButton: UIButton = {
-        let btn = UIButton(type: .system)
-         
-        btn.setImage(#imageLiteral(resourceName: "ribbon"), for: .normal)
-        btn.tintColor = .black
-        
-        return btn
+        return UIButton().button(image: "ribbon")
     }()
     
     
     
     // MARK: - StackView
     private lazy var stackView: UIStackView = {
-        let stv = UIStackView(arrangedSubviews: [self.likeButton, self.commentButton, self.messageButton])
-        
-        stv.axis = .horizontal
-        stv.distribution = .fillEqually
-        
-        return stv
+        return UIStackView().stackView(arrangedSubviews:
+                                            [self.likeButton,
+                                             self.commentButton,
+                                             self.messageButton],
+                                       axis: .horizontal,
+                                       distribution: .fillEqually)
     }()
     
     
-    // MARK: - Lbael
+    
+    // MARK: - Label
     lazy var likesLabel: UILabel = {
-        let lbl = UILabel()
-        
-        lbl.font = UIFont.boldSystemFont(ofSize: 12)
-        lbl.text = "3 likes"
-        
+        let lbl = UILabel().label(fontName: .bold,
+                                  fontSize: 12)
         // add gesture recognizer to label
-        let likeTap = UITapGestureRecognizer(target: self, action: #selector(handleShowLikes))
-        likeTap.numberOfTapsRequired = 1
+        let likeTap = UITapGestureRecognizer(target: self, action: #selector(self.handleShowLikes))
+            likeTap.numberOfTapsRequired = 1
         lbl.isUserInteractionEnabled = true
         lbl.addGestureRecognizer(likeTap)
-        
         
         return lbl
     }()
     let captionLabel: ActiveLabel = {
         let lbl = ActiveLabel()
-        lbl.numberOfLines = 0
+            lbl.numberOfLines = 0
 
         return lbl
     }()
     private let postTimeLabel: UILabel = {
-        let lbl = UILabel()
-        
-        lbl.textColor = .lightGray
-        lbl.font = UIFont.boldSystemFont(ofSize: 12)
-        lbl.text = "2 DAYS AGO"
-        
-        return lbl
+        return UILabel().label(LabelTextColor: UIColor.lightGray,
+                               fontName: .bold,
+                               fontSize: 12)
     }()
     
     
     
-    
-    
-    
-    // MARK: - caption()
+    // MARK: - Helper Functions
     private func configurePostCaption(user: User) {
         guard let post = self.post else { return }
         guard let caption = post.caption else { return }
@@ -186,10 +151,10 @@ final class FeedCell: UICollectionViewCell {
         let customType = ActiveType.custom(pattern: "^\(userName)\\b")
         
         // enable userName as custom type
-        captionLabel.enabledTypes = [.mention, .hashtag, .url, customType]
+        self.captionLabel.enabledTypes = [.mention, .hashtag, .url, customType]
         
         // configure userName link attributes
-        captionLabel.configureLinkAttribute = { ( type, attributes, isSelected) in
+        self.captionLabel.configureLinkAttribute = { ( type, attributes, isSelected) in
             var atts = attributes
             switch type {
             case .custom:
@@ -198,22 +163,19 @@ final class FeedCell: UICollectionViewCell {
             }
             return atts
         }
-        captionLabel.customize { label in
+        self.captionLabel.customize { label in
             label.text = "\(userName) \(caption)"
             label.customColor[customType] = .black
             label.font = UIFont.systemFont(ofSize: 12)
             label.textColor = .black
             captionLabel.numberOfLines = 2
         }
-        
-        postTimeLabel.text = post.creationDate.timeAgoToDisplay()
+        self.postTimeLabel.text = post.creationDate.timeAgoToDisplay()
     }
     
     
     
-    
-    
-    // MARK: - Handler
+    // MARK: - Selector
     @objc private func handleUserNameTapped() {
         self.delegate?.handleUserNameTapped(for: self)
     }
@@ -230,8 +192,6 @@ final class FeedCell: UICollectionViewCell {
         self.delegate?.handleConfigureLikeButton(for: self)
     }
     
-    
-    
     // gesture
     @objc private func handleShowLikes() {
         self.delegate?.handleShowLikes(for: self)
@@ -242,84 +202,69 @@ final class FeedCell: UICollectionViewCell {
     
     
     
-    
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        self.addSubview(self.profileImageView)
-        self.profileImageView.layer.cornerRadius = 40 / 2
-        self.profileImageView.anchor(top: self.topAnchor, bottom: nil,
-                                     leading: self.leadingAnchor, trailing: nil,
-                                     paddingTop: 8, paddingBottom: 0,
-                                     paddingLeading: 8, paddingTrailing: 0,
-                                     width: 40, height: 40)
-        
-        
-        self.addSubview(self.userName)
-        self.userName.centerYAnchor.constraint(equalTo: self.profileImageView.centerYAnchor).isActive = true
-        self.userName.anchor(top: nil, bottom: nil,
-                             leading: self.profileImageView.trailingAnchor, trailing: nil,
-                             paddingTop: 0, paddingBottom: 0,
-                             paddingLeading: 8, paddingTrailing: 0,
-                             width: 0, height: 0)
-        
-        self.addSubview(self.optionButton)
-        self.optionButton.centerYAnchor.constraint(equalTo: self.profileImageView.centerYAnchor).isActive = true
-        self.optionButton.anchor(top: nil, bottom: nil,
-                                 leading: nil, trailing: self.trailingAnchor,
-                                 paddingTop: 0, paddingBottom: 0,
-                                 paddingLeading: 0, paddingTrailing: 8,
-                                 width: 0, height: 0)
-        
-        
-        self.addSubview(self.postImageView)
-        self.postImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
-        self.postImageView.anchor(top: self.profileImageView.bottomAnchor, bottom: nil,
-                                  leading: self.leadingAnchor, trailing: self.trailingAnchor,
-                                  paddingTop: 8, paddingBottom: 0,
-                                  paddingLeading: 0, paddingTrailing: 0,
-                                  width: 0, height: 0)
-        
-        self.addSubview(self.stackView)
-        self.stackView.anchor(top: self.postImageView.bottomAnchor, bottom: nil,
-                              leading: nil, trailing: nil,
-                              paddingTop: 0, paddingBottom: 0,
-                              paddingLeading: 0, paddingTrailing: 0,
-                              width: 120, height: 50)
-        
-        self.addSubview(self.bookPostButton)
-        self.bookPostButton.anchor(top: self.postImageView.bottomAnchor, bottom: nil,
-                                   leading: nil, trailing: self.trailingAnchor,
-                                   paddingTop: 9, paddingBottom: 0,
-                                   paddingLeading: 0, paddingTrailing: 8,
-                                   width: 20, height: 24)
-        
-        self.addSubview(self.likesLabel)
-        self.likesLabel.anchor(top: self.likeButton.bottomAnchor, bottom: nil,
-                               leading: self.leadingAnchor, trailing: nil,
-                               paddingTop: -4, paddingBottom: 0,
-                               paddingLeading: 8, paddingTrailing: 0,
-                               width: 0, height: 0)
-        
-        
-        self.addSubview(self.captionLabel)
-        self.captionLabel.anchor(top: self.likesLabel.bottomAnchor, bottom: nil,
-                                 leading: self.leadingAnchor, trailing: self.trailingAnchor,
-                                 paddingTop: 8, paddingBottom: 0,
-                                 paddingLeading: 8, paddingTrailing: 8,
-                                 width: 0, height: 0)
-        
-        
-        self.addSubview(self.postTimeLabel)
-        self.postTimeLabel.anchor(top: self.captionLabel.bottomAnchor, bottom: nil,
-                                  leading: self.leadingAnchor, trailing: nil,
-                                  paddingTop: 8, paddingBottom: 0,
-                                  paddingLeading: 8, paddingTrailing: 0,
-                                  width: 0, height: 0)
+        self.configureUI()
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    
+    
+    // MARK: - Configure UI
+    private func configureUI() {
+        // profileImageView
+        self.addSubview(self.profileImageView)
+        self.profileImageView.layer.cornerRadius = 40 / 2
+        self.profileImageView.anchor(top: self.topAnchor, paddingTop: 8,
+                                     leading: self.leadingAnchor, paddingLeading: 8,
+                                     width: 40, height: 40)
+        
+        // userName
+        self.addSubview(self.userName)
+        self.userName.centerYAnchor.constraint(equalTo: self.profileImageView.centerYAnchor).isActive = true
+        self.userName.anchor(leading: self.profileImageView.trailingAnchor, paddingLeading: 8)
+        
+        // optionButton
+        self.addSubview(self.optionButton)
+        self.optionButton.centerYAnchor.constraint(equalTo: self.profileImageView.centerYAnchor).isActive = true
+        self.optionButton.anchor(trailing: self.trailingAnchor, paddingTrailing: 8)
+        
+        // postImageView
+        self.addSubview(self.postImageView)
+        self.postImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
+        self.postImageView.anchor(top: self.profileImageView.bottomAnchor, paddingTop: 8,
+                                  leading: self.leadingAnchor,
+                                  trailing: self.trailingAnchor)
+        
+        // stackView
+        self.addSubview(self.stackView)
+        self.stackView.anchor(top: self.postImageView.bottomAnchor, paddingTop: 0,
+                              width: 120, height: 50)
+        
+        // bookPostButton
+        self.addSubview(self.bookPostButton)
+        self.bookPostButton.anchor(top: self.postImageView.bottomAnchor, paddingTop: 9,
+                                   trailing: self.trailingAnchor, paddingTrailing: 8,
+                                   width: 20, height: 24)
+        
+        // likesLabel
+        self.addSubview(self.likesLabel)
+        self.likesLabel.anchor(top: self.likeButton.bottomAnchor, paddingTop: -4,
+                               leading: self.leadingAnchor, paddingLeading: 8)
+        
+        // captionLabel
+        self.addSubview(self.captionLabel)
+        self.captionLabel.anchor(top: self.likesLabel.bottomAnchor, paddingTop: 8,
+                                 leading: self.leadingAnchor, paddingLeading: 8,
+                                 trailing: self.trailingAnchor, paddingTrailing: 8)
+        
+        // postTimeLabel
+        self.addSubview(self.postTimeLabel)
+        self.postTimeLabel.anchor(top: self.captionLabel.bottomAnchor, paddingTop: 8,
+                                  leading: self.leadingAnchor, paddingLeading: 8)
     }
 }

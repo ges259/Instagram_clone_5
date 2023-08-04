@@ -11,37 +11,24 @@ import Firebase
 private let reuseIdentifier = "HashtagCell"
 final class HashtagVC: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     
-    
     // MARK: - Properties
     var posts = [Post]()
     var hashtag: String?
     
     
     
-    
-    
-    
-    
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         
         self.configureNavigationBar()
         
         self.collectionView.backgroundColor = .white
         self.collectionView.register(HashtagCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
-        
         // fetch post
-        fetchPost()
-        
-        
+        self.fetchPost()
     }
-    
-    
-    
     
     
     
@@ -59,7 +46,6 @@ final class HashtagVC: UICollectionViewController, UICollectionViewDelegateFlowL
         return CGSize(width: width, height: width)
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        
         return CGSize(width: view.frame.width, height: 0)
     }
     
@@ -71,47 +57,32 @@ final class HashtagVC: UICollectionViewController, UICollectionViewDelegateFlowL
     }
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! HashtagCell
-    
-        // Configure the cell
-        cell.post = posts[indexPath.item]
-        
-        
-    
+            // Configure the cell
+            cell.post = self.posts[indexPath.item]
         return cell
     }
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let feedVC = FeedVC(collectionViewLayout: UICollectionViewFlowLayout())
-        
-        feedVC.viewSinglePost = true
-        feedVC.post = self.posts[indexPath.item]
+            feedVC.viewSinglePost = true
+            feedVC.post = self.posts[indexPath.item]
         
         self.navigationController?.pushViewController(feedVC, animated: true)
-        
-        
     }
-    
-    
     
     
     
     // MARK: - Handler
     private func configureNavigationBar() {
-        guard let hashtag = hashtag else { return }
+        guard let hashtag = self.hashtag else { return }
         
         self.navigationItem.title = hashtag
-
     }
-    
-    
-    
     
     
     
     // MARK: - API
     private func fetchPost() {
-        
         guard let hashtag = self.hashtag else { return }
-        
         
         HASHTAG_POST_REF.child(hashtag).observe(.childAdded) { snapshot in
             let postId = snapshot.key
@@ -122,5 +93,4 @@ final class HashtagVC: UICollectionViewController, UICollectionViewDelegateFlowL
             }
         }
     }
-    
 }

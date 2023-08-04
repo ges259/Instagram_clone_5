@@ -12,8 +12,6 @@ private let reuseIdentifier: String = "NewMessageCell"
 final class NewMessageVC: UITableViewController {
     
     // MARK: - Properties
-    
-    
     var users = [User]()
     
     var messageVC = MessagesVC()
@@ -24,19 +22,13 @@ final class NewMessageVC: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         self.configureNavigationBar()
         
         self.tableView.register(NewMessageCell.self, forCellReuseIdentifier: reuseIdentifier)
         
-        
         // fetch user
-        fetchUser()
+        self.fetchUser()
     }
-    
-    
-    
-    
     
     
     
@@ -49,14 +41,14 @@ final class NewMessageVC: UITableViewController {
     }
     
     
+    
     // MARK: - DataSource
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath) as! NewMessageCell
-        
-        cell.user = users[indexPath.row]
-        
+            cell.user = users[indexPath.row]
         return cell
     }
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.dismiss(animated: true) {
             let chatPartnerUser = self.users[indexPath.row]
@@ -66,19 +58,22 @@ final class NewMessageVC: UITableViewController {
     
     
     
-    // MARK: - Handler
+    // MARK: - Helper Functions
     func configureNavigationBar() {
         self.navigationItem.title = "New Message"
-        
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
         self.navigationItem.leftBarButtonItem?.tintColor = .black
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel",
+                                                                style: .plain,
+                                                                target: self,
+                                                                action: #selector(handleCancel))
     }
+    
+    
+    
+    // MARK: - Selectors
     @objc private func handleCancel() {
         self.dismiss(animated: true)
     }
-    
-    
-    
     
     
     
@@ -95,5 +90,4 @@ final class NewMessageVC: UITableViewController {
             }
         }
     }
-    
 }

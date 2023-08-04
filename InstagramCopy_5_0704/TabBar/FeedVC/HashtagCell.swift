@@ -9,8 +9,6 @@ import UIKit
 
 final class HashtagCell: UICollectionViewCell {
     
-    
-    
     // MARK: - Properties
     var post: Post? {
         didSet {
@@ -21,8 +19,7 @@ final class HashtagCell: UICollectionViewCell {
     
     
     
-    
-    
+    // MARK: - ImageView
     private let postIamgeView: CustomImageView = {
         let img = CustomImageView()
         
@@ -35,21 +32,17 @@ final class HashtagCell: UICollectionViewCell {
     
     
     
-    
-    
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         print("HastagCell")
         
         self.contentView.addSubview(self.postIamgeView)
-        self.postIamgeView.anchor(top: self.topAnchor, bottom: self.bottomAnchor,
-                                  leading: self.leadingAnchor, trailing: self.trailingAnchor,
-                                  paddingTop: 0, paddingBottom: 0,
-                                  paddingLeading: 0, paddingTrailing: 0,
-                                  width: 0, height: 0)
+        self.postIamgeView.anchor(top: self.topAnchor,
+                                  bottom: self.bottomAnchor,
+                                  leading: self.leadingAnchor,
+                                  trailing: self.trailingAnchor)
         
     }
     required init?(coder: NSCoder) {

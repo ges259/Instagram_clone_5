@@ -10,132 +10,97 @@ import FirebaseAuth
 
 final class LoginVC: UIViewController {
     
-    
-    
     // MARK: - View
     private lazy var logoContainerView: UIView = {
-        let view = UIView()
-
-        view.addSubview(self.logoImage)
-
-        logoImage.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-
-        logoImage.anchor(top: view.topAnchor, bottom: nil, leading: nil, trailing: nil,
-                         paddingTop: 80, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 0,
-                         width: 250, height: 70)
-
-        logoImage.contentMode = .scaleAspectFill
-
-        view.backgroundColor = UIColor(red: 0/255, green: 120/255, blue: 175/255, alpha: 1)
-
-        return view
+        return UIView().backgrouncColorView(backgroundColor: UIColor.rgb(red: 0, green: 120, blue: 175))
     }()
     
     
-    private let logoImage: UIImageView = {
-        let img = UIImageView(image: UIImage(named: "Instagram_logo_white"))
-        return img
+    
+    // MARK: - ImageView
+    private lazy var logoImage: UIImageView = {
+        return UIImageView(image: UIImage(named: "Instagram_logo_white"))
     }()
+    
+    
     
     // MARK: - TextField
-    private let emailTextField: InsetTextField = {
-        let tf = InsetTextField()
-        
-        tf.placeholder = "Email"
-        tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
-        tf.font = UIFont.systemFont(ofSize: 14)
-        
-        tf.insetX = 16
-        
-        tf.clipsToBounds = true
-        tf.layer.cornerRadius = 10
-        
-        tf.autocorrectionType = .no
-        tf.autocapitalizationType = .none
-        
+    private lazy var emailTextField: UITextField = {
+        let tf = UITextField().textField(withPlaceholder: "Email",
+                                         fontSize: 14,
+                                         backgroundColor: UIColor(white: 0, alpha: 0.03),
+                                         paddingLeftView: true,
+                                         cornerRadius: 10)
+  
         tf.addTarget(self, action: #selector(formValidation), for: .editingChanged)
         
         return tf
     }()
-    private let passwordTextField: InsetTextField = {
-        let tf = InsetTextField()
-        
-        tf.placeholder = "Password"
-        tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
-        tf.font = UIFont.systemFont(ofSize: 14)
-        
-        tf.isSecureTextEntry = true
-        
-        tf.insetX = 16
-        
-        tf.autocorrectionType = .no
-        tf.autocapitalizationType = .none
+    private lazy var passwordTextField: UITextField = {
+        let tf = UITextField().textField(withPlaceholder: "Password",
+                                         fontSize: 14,
+                                         backgroundColor: UIColor(white: 0, alpha: 0.03),
+                                         isSecureTextEntry: true,
+                                         paddingLeftView: true,
+                                         cornerRadius: 10)
 
-        tf.clipsToBounds = true
-        tf.layer.cornerRadius = 10
-        
         tf.addTarget(self, action: #selector(formValidation), for: .editingChanged)
-
         return tf
     }()
+    
     
     
     // MARK: - Button
-    private let loginButton: UIButton = {
-        let btn = UIButton(type: .system)
+    private lazy var loginButton: UIButton = {
+        let btn = UIButton().button(title: "Login",
+                                    titleColor: .white,
+                                    
+                                    fontName: .bold,
+                                    fontSize: 18,
+                                    backgroundColor: UIColor.rgb(red: 149, green: 204, blue: 244),
+                                    
+                                    cornerRadius: 10,
+                                    isEnable: false)
         
-        btn.setTitle("Login", for: .normal)
-        btn.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
-        btn.setTitleColor(.white, for: .normal)
-        btn.backgroundColor = UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1)
-        btn.isEnabled = false
-        
-        btn.clipsToBounds = true
-        btn.layer.cornerRadius = 10
-         
         btn.addTarget(self, action: #selector(handleLogin), for: .touchUpInside)
-        
         return btn
     }()
-    private let dontHaveAccountButton: UIButton = {
-        let btn = UIButton(type: .system)
-        
-        let attributedTitle = NSMutableAttributedString(string: "Dont't have an account?   ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
-        
-        attributedTitle.append(NSAttributedString(string: "Sign Up", attributes: [.font: UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor: UIColor(red: 7/255, green: 154/255, blue: 237/255, alpha: 1)]))
-        
-        btn.setAttributedTitle(attributedTitle, for: .normal)
-        
+    private lazy var dontHaveAccountButton: UIButton = {
+        let btn = UIButton().mutableAttributedString(buttonType: .system,
+                                                     
+                                                     type1TextString: "Dont't have an account?   ",
+                                                     type1FontName: .system,
+                                                     type1FontSize: 14,
+                                                     type1Foreground: .lightGray,
+                                                     
+                                                     type2TextString: "Sign in",
+                                                     type2FontName: .bold,
+                                                     type2FontSize: 14,
+                                                     type2Foreground: UIColor.rgb(red: 7, green: 154, blue: 237))
+ 
         btn.addTarget(self, action: #selector(handleShowSignUp), for: .touchUpInside)
-        
         return btn
     }()
+    
     
     
     // MARK: - StackView
     private lazy var stackView: UIStackView = {
-        let stv = UIStackView(arrangedSubviews: [self.emailTextField,
-                                                 self.passwordTextField,
-                                                 self.loginButton])
-        stv.axis = .vertical
-        stv.spacing = 10
-        stv.alignment = .fill
-        stv.distribution = .fillEqually
-        
-        return stv
+        return UIStackView().stackView(arrangedSubviews:
+                                            [self.emailTextField,
+                                             self.passwordTextField,
+                                             self.loginButton],
+                                          axis: .vertical,
+                                          spacing: 10,
+                                          alignment: .fill,
+                                          distribution: .fillEqually)
     }()
     
     
     
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // background color
-        self.view.backgroundColor = .white
-        
-        self.navigationController?.navigationBar.isHidden = true
         
         // configre UI
         self.configureUI()
@@ -145,32 +110,40 @@ final class LoginVC: UIViewController {
     
     // MARK: - configureUI()
     private func configureUI() {
+        // background color
+        self.view.backgroundColor = .white
         
+        self.navigationController?.navigationBar.isHidden = true
+        
+        // logoContainerView
         self.view.addSubview(self.logoContainerView)
-        self.logoContainerView.anchor(top: self.view.topAnchor, bottom: nil,
-                                      leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor,
-                                      paddingTop: 0, paddingBottom: 0,
-                                      paddingLeading: 0, paddingTrailing: 0,
-                                      width: 0, height: 200)
-        
+        self.logoContainerView.anchor(top: self.view.topAnchor,
+                                      leading: self.view.leadingAnchor,
+                                      trailing: self.view.trailingAnchor,
+                                      height: 200)
+        // logoImage
+        self.logoContainerView.addSubview(self.logoImage)
+        self.logoImage.contentMode = .scaleAspectFill
+        self.logoImage.anchor(top: self.logoContainerView.topAnchor, paddingTop: 80,
+                              width: 250, height: 70,
+                              centerX: self.logoContainerView)
+        // stackView
         self.view.addSubview(self.stackView)
-        self.stackView.anchor(top: self.logoContainerView.bottomAnchor, bottom: nil,
-                              leading: view.leadingAnchor, trailing: view.trailingAnchor,
-                              paddingTop: 40, paddingBottom: 0,
-                              paddingLeading: 20, paddingTrailing: 20,
-                              width: 0, height: 150)
-        
+        self.stackView.anchor(top: self.logoContainerView.bottomAnchor, paddingTop: 40,
+                              leading: view.leadingAnchor, paddingLeading: 20,
+                              trailing: view.trailingAnchor, paddingTrailing: 20,
+                              height: 150)
+        // dontHaveAccountButton
         self.view.addSubview(self.dontHaveAccountButton)
-        self.dontHaveAccountButton.anchor(top: nil, bottom: self.view.bottomAnchor,
-                                          leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor,
-                                          paddingTop: 0, paddingBottom: 0,
-                                          paddingLeading: 0, paddingTrailing: 0,
-                                          width: 0, height: 50)
+        self.dontHaveAccountButton.anchor(bottom: self.view.bottomAnchor, paddingBottom: 15,
+                                          leading: self.view.leadingAnchor,
+                                          trailing: self.view.trailingAnchor,
+                                          height: 50)
     }
     
     
     
-    // MARK: - Handlers
+    // MARK: - Selectors
     @objc func handleShowSignUp() {
         let signUpVC = SignUpVC()
         self.navigationController?.pushViewController(signUpVC, animated: true)
@@ -185,12 +158,12 @@ final class LoginVC: UIViewController {
         else {
             // handle case for above conditions not met
             self.loginButton.isEnabled = false
-            self.loginButton.backgroundColor = UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1)
+            self.loginButton.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
             return
         }
         // handle case for conditions were met
         self.loginButton.isEnabled = true
-        self.loginButton.backgroundColor = UIColor(red: 17/255, green: 154/255, blue: 237/255, alpha: 1)
+        self.loginButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
     }
     
     

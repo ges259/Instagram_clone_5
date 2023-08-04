@@ -10,7 +10,6 @@ import ActiveLabel
 
 final class CommentCell: UICollectionViewCell {
     
-    
     // MARK: - Properties
     var comment: Comment? {
         didSet{
@@ -36,7 +35,6 @@ final class CommentCell: UICollectionViewCell {
         
         return img
     }()
-    
 
     let commentLabel: ActiveLabel = {
         let lbl = ActiveLabel()
@@ -48,16 +46,12 @@ final class CommentCell: UICollectionViewCell {
     }()
     
     private let separatorView: UIView = {
-        let view = UIView()
-        
-        view.backgroundColor = .lightGray
-        
-        return view
+        return UIView().backgrouncColorView(backgroundColor: UIColor.lightGray)
     }()
     
     
     
-    // MARK: - Handler
+    // MARK: - Helper Functions
     private func getCommentTimeStamp() -> String? {
         
         guard let comment = self.comment else { return nil }
@@ -91,7 +85,6 @@ final class CommentCell: UICollectionViewCell {
             }
             return atts
         }
-        
         commentLabel.customize { label in
             label.text = "\(userName) \(commentText)"
             label.customColor[customType] = .black
@@ -102,38 +95,38 @@ final class CommentCell: UICollectionViewCell {
     }
     
     
-
     
-    
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        self.addSubview(self.profileImageView)
-        self.profileImageView.layer.cornerRadius = 40 / 2
-        self.profileImageView.anchor(top: self.topAnchor, bottom: nil,
-                                     leading: self.leadingAnchor, trailing: nil,
-                                     paddingTop: 8, paddingBottom: 0,
-                                     paddingLeading: 8, paddingTrailing: 0,
-                                     width: 40, height: 40)
-
-        self.addSubview(self.commentLabel)
-        self.commentLabel.anchor(top: self.topAnchor, bottom: self.bottomAnchor,
-                                    leading: self.profileImageView.trailingAnchor, trailing: self.trailingAnchor,
-                             paddingTop: 4, paddingBottom: 4,
-                             paddingLeading: 4, paddingTrailing: 4,
-                             width: 0, height: 0)
-        
-        self.addSubview(self.separatorView)
-        self.separatorView.anchor(top: nil, bottom: self.bottomAnchor,
-                                  leading: self.leadingAnchor, trailing: self.trailingAnchor,
-                                  paddingTop: 0, paddingBottom: 0,
-                                  paddingLeading: 60, paddingTrailing: 0,
-                                  width: 0, height: 0.5)
-
+        self.configureUI()
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    
+    
+    // MARK: - Configure UI
+    private func configureUI() {
+        // profileImageView
+        self.addSubview(self.profileImageView)
+        self.profileImageView.layer.cornerRadius = 40 / 2
+        self.profileImageView.anchor(top: self.topAnchor, paddingTop: 8,
+                                     leading: self.leadingAnchor, paddingLeading: 8,
+                                     width: 40, height: 40)
+        // commentLabel
+        self.addSubview(self.commentLabel)
+        self.commentLabel.anchor(top: self.topAnchor, paddingTop: 4,
+                                 bottom: self.bottomAnchor, paddingBottom: 4,
+                                 leading: self.profileImageView.trailingAnchor, paddingLeading: 4,
+                                 trailing: self.trailingAnchor, paddingTrailing: 4)
+        // separatorView
+        self.addSubview(self.separatorView)
+        self.separatorView.anchor(bottom: self.bottomAnchor,
+                                  leading: self.leadingAnchor, paddingLeading: 60,
+                                  trailing: self.trailingAnchor,
+                                  height: 0.5)
     }
 }

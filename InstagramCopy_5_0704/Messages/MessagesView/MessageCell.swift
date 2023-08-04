@@ -77,18 +77,12 @@ final class MessageCell: UITableViewCell {
         self.addSubview(self.profileImageView)
         self.profileImageView.layer.cornerRadius = 50 / 2
         self.profileImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.profileImageView.anchor(top: nil, bottom: nil,
-                                     leading: self.leadingAnchor, trailing: nil,
-                                     paddingTop: 0, paddingBottom: 0,
-                                     paddingLeading: 12, paddingTrailing: 0,
+        self.profileImageView.anchor(leading: self.leadingAnchor, paddingLeading: 12,
                                      width: 50, height: 50)
         
         self.addSubview(self.timestampLabel)
-        self.timestampLabel.anchor(top: self.topAnchor, bottom: nil,
-                                   leading: nil, trailing: self.trailingAnchor,
-                                   paddingTop: 20, paddingBottom: 0,
-                                   paddingLeading: 0, paddingTrailing: 12,
-                                   width: 0, height: 0)
+        self.timestampLabel.anchor(top: self.topAnchor, paddingTop: 20,
+                                   trailing: self.trailingAnchor, paddingTrailing: 12)
         
         
         

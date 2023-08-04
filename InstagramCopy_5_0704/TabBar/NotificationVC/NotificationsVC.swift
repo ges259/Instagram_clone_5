@@ -13,11 +13,8 @@ private let reuseIdentifier: String = "NotificationCell"
 
 final class NotificationVC: UITableViewController {
     
-    
     // MARK: - Properties
     var notifications = [Notification]()
-    
-    
     
     var timer: Timer?
 
@@ -35,64 +32,56 @@ final class NotificationVC: UITableViewController {
         
         self.navigationItem.title = "Notifications"
         
-        
         // fetch notifications
-        fetchNotifications()
-        
+        self.fetchNotifications()
     }
     
-    // MARK: - DataSource
+    // MARK: - TableView
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 60
     }
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         return notifications.count
     }
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) as! NotificationCell
-        
-        cell.delegate = self
-        
-        
-        cell.notification = notifications[indexPath.row]
-        
+            cell.delegate = self
+            cell.notification = notifications[indexPath.row]
         return cell
     }
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let notification = notifications[indexPath.row]
+        
         let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
-        userProfileVC.modalPresentationStyle = .fullScreen
-        userProfileVC.user = notification.user
+            userProfileVC.modalPresentationStyle = .fullScreen
+            userProfileVC.user = notification.user
         self.navigationController?.pushViewController(userProfileVC, animated: true)
     }
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if self.notifications.count > 4 {
             if indexPath.row == self.notifications.count - 1 {
-                fetchNotifications()
+                self.fetchNotifications()
             }
         }
     }
     
     
     
-    // MARK: - Handlers
-    
+    // MARK: - Helper Functions
     private func handleReloadTable() {
         self.timer?.invalidate()
-        self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(handleSortNotifications), userInfo: nil, repeats: false)
+        self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.handleSortNotifications), userInfo: nil, repeats: false)
     }
     
     
+    
+    // MARK: - Selectors
     @objc private func handleSortNotifications() {
         self.notifications.sort { notifications1, notifications2 in
             return notifications1.creationDate > notifications2.creationDate
         }
         self.tableView.reloadData()
     }
-    
-    
-    
     
     
     
@@ -120,7 +109,6 @@ final class NotificationVC: UITableViewController {
                 guard let first = snapshot.children.allObjects.first as? DataSnapshot else { return }
                 guard let allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
                 
-                
                 allObjects.forEach { snapshot in
                     
                     let notificationId = snapshot.key
@@ -133,7 +121,6 @@ final class NotificationVC: UITableViewController {
             }
         }
     }
-    
     
     private func fetchNotifications(withNotificationId notificationId: String, dataSnapshot snapshot: DataSnapshot) {
         
@@ -157,14 +144,8 @@ final class NotificationVC: UITableViewController {
             }
         }
         NOTIFICATIONS_REF.child(currentUid).child(notificationId).child("checked").setValue(1)
-        
-        
-        
     }
-    
-    
 }
-
 
 
 
@@ -187,10 +168,9 @@ extension NotificationVC: NotificationCellDelegate {
         guard let post = cell.notification?.post else { return }
         
         let feedController = FeedVC(collectionViewLayout: UICollectionViewFlowLayout())
-        feedController.post = post
-        feedController.modalPresentationStyle = .fullScreen
-        feedController.viewSinglePost = true
+            feedController.post = post
+            feedController.modalPresentationStyle = .fullScreen
+            feedController.viewSinglePost = true
         self.navigationController?.pushViewController(feedController, animated: true)
-        
     }
 }

@@ -10,31 +10,26 @@ import Firebase
 
 
 private let reuseIdentifier: String = "MessagesCell"
+
 final class MessagesVC: UITableViewController {
-    
     
     // MARK: - Properties
     var messages = [Message]()
     var messagesDictionary = [String: Message]()
     
     
-    // MARK: - Init
+    
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         
         self.configureNavigationBar()
         
         self.tableView.register(MessageCell.self, forCellReuseIdentifier: reuseIdentifier)
         
         // fetch messages
-        fetchMessages()
-        
+        self.fetchMessages()
     }
-    
-    
-    
-    
     
     
     
@@ -47,17 +42,17 @@ final class MessagesVC: UITableViewController {
     }
     
     
+    
     // MARK: - DataSource
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath) as! MessageCell
-        
-        cell.message = messages[indexPath.row]
-        
+            cell.message = messages[indexPath.row]
         return cell
     }
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let message = messages[indexPath.row]
         let chatParnerId = message.getChatPartnerId()
+        
         Database.fetchUser(with: chatParnerId) { user in
             self.showChatController(withUser: user)
         }
@@ -65,34 +60,35 @@ final class MessagesVC: UITableViewController {
     
     
     
-    // MARK: - Handler
+    // MARK: - Helper Functions
     func configureNavigationBar() {
         self.navigationItem.title = "Message"
-        
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(handleNewMessage))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add,
+                                                                 target: self,
+                                                                 action: #selector(self.handleNewMessage))
     }
-    @objc private func handleNewMessage() {
-        let newMessageVC = NewMessageVC()
-        newMessageVC.messageVC = self
-        let navigationController = UINavigationController(rootViewController: newMessageVC)
-        navigationController.modalPresentationStyle = .fullScreen
-        self.present(navigationController, animated: true)
-    }
-    
     
     func showChatController(withUser chatPartnerUser: User) {
         let chatVC = ChatVC(collectionViewLayout: UICollectionViewFlowLayout())
-        chatVC.chatPartnerUser = chatPartnerUser
-        navigationController?.pushViewController(chatVC, animated: true)
+            chatVC.chatPartnerUser = chatPartnerUser
+        self.navigationController?.pushViewController(chatVC, animated: true)
     }
     
+    
+    // MARK: - Selectors
+    @objc private func handleNewMessage() {
+        let newMessageVC = NewMessageVC()
+            newMessageVC.messageVC = self
+        let navigationController = UINavigationController(rootViewController: newMessageVC)
+            navigationController.modalPresentationStyle = .fullScreen
+        self.present(navigationController, animated: true)
+    }
     
     
     
     // MARK: - API
     private func fetchMessages() {
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
-        
         // 중복되지 않게 정리
         self.messages.removeAll()
         self.messagesDictionary.removeAll()
@@ -107,7 +103,6 @@ final class MessagesVC: UITableViewController {
                 
                 self.fetchMessage(withMessageId: messageId)
             }
-            
         }
     }
     
@@ -129,6 +124,4 @@ final class MessagesVC: UITableViewController {
             self.tableView?.reloadData()
         }
     }
-    
-    
 }

@@ -18,10 +18,6 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     
     
     
-    
-    
-    
-    
     // MARK: - Layout
     private lazy var containerView: CommentAccessoryView = {
         let frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50)
@@ -34,16 +30,17 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         return cv
     }()
     
-    // MARK: - viewDidLoad()
+    
+    
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         
         // configure collection view
         self.configureCollectionView()
         
         // fetch comments
-        fetchComments()
+        self.fetchComments()
         
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -54,7 +51,6 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         super.viewWillDisappear(animated)
         self.tabBarController?.tabBar.isHidden = false
     }
-    
     
     override var inputAccessoryView: UIView? {
         get {
@@ -67,7 +63,7 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     
     
     
-    // MARK: - Handler
+    // MARK: - Helper Functions
     private func configureCollectionView() {
         // configure collectin View
         self.collectionView.backgroundColor = .white
@@ -83,7 +79,6 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         // register cell class
         self.collectionView!.register(CommentCell.self, forCellWithReuseIdentifier: reuseIdentifier)
     }
-
     
     private func uploadCommentNotificationToServer() {
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
@@ -104,11 +99,12 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
             NOTIFICATIONS_REF.child(uid).childByAutoId().updateChildValues(values)
         }
     }
+    
     private func handleHastagTapped(forcell cell: CommentCell) {
         cell.commentLabel.handleHashtagTap { hashtag in
             let hashtagVC = HashtagVC(collectionViewLayout: UICollectionViewFlowLayout())
-            hashtagVC.hashtag = hashtag
-            hashtagVC.modalPresentationStyle = .fullScreen
+                hashtagVC.hashtag = hashtag
+                hashtagVC.modalPresentationStyle = .fullScreen
             self.navigationController?.pushViewController(hashtagVC, animated: true)
         }
     }
@@ -122,24 +118,21 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     
     
     
-    
-    
-    // MARK: - DataSource
+    // MARK: - CollectionView
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         let width = self.view.frame.width
         
         let frame = CGRect(x: 0, y: 0, width: width, height: 50)
         let dummyCell = CommentCell(frame: frame)
-        dummyCell.comment = comments[indexPath.row]
-        dummyCell.layoutIfNeeded()
+            dummyCell.comment = comments[indexPath.row]
+            dummyCell.layoutIfNeeded()
         
         // 대상의 크기르 만듦, 높이의 상한값처럼 작용하는 임의의 큰 숫자
         let targetSize = CGSize(width: width, height: 1000)
         let estimatedSize = dummyCell.systemLayoutSizeFitting(targetSize)
         
         let height = max(40 + 8 + 8, estimatedSize.height)
-        
         
         return CGSize(width: width, height: height)
     }
@@ -149,22 +142,18 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     }
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! CommentCell
+            cell.comment = self.comments[indexPath.item]
         
-        cell.comment = self.comments[indexPath.item]
-        handleHastagTapped(forcell: cell)
-        handleMentionTapped(forCell: cell)
+        self.handleHastagTapped(forcell: cell)
+        self.handleMentionTapped(forCell: cell)
         
         return cell
     }
     
     
     
-    
-    
-    
     // MARK: - API
     private func fetchComments() {
-        
         guard let postId = self.post?.postId else { return }
 
         COMMENT_REF.child(postId).observe(.childAdded) { snapshot in

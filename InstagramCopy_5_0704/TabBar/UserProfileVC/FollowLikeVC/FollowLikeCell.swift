@@ -112,20 +112,14 @@ final class FollowLikeCell: UITableViewCell {
         self.addSubview(self.profileImageView)
         self.profileImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         self.profileImageView.layer.cornerRadius = 48 / 2
-        self.profileImageView.anchor(top: nil, bottom: nil,
-                                     leading: self.leadingAnchor, trailing: nil,
-                                     paddingTop: 0, paddingBottom: 0,
-                                     paddingLeading: 8, paddingTrailing: 0,
+        self.profileImageView.anchor(leading: self.leadingAnchor, paddingLeading: 8,
                                      width: 48, height: 48)
         
         
         self.addSubview(self.followButton)
         self.followButton.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         self.followButton.layer.cornerRadius = 3
-        self.followButton.anchor(top: nil, bottom: nil,
-                                 leading: nil, trailing: self.trailingAnchor,
-                                 paddingTop: 0, paddingBottom: 0,
-                                 paddingLeading: 0, paddingTrailing: 12,
+        self.followButton.anchor(trailing: self.trailingAnchor, paddingTrailing: 12,
                                  width: 90, height: 30)
         
 

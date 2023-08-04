@@ -10,14 +10,10 @@ import Firebase
 
 final class ChatCell: UICollectionViewCell {
     
-    
     // MARK: - Properties
-    
     var bubbleWidthAnchor: NSLayoutConstraint?
     var bubbleViewRightAnchor: NSLayoutConstraint?
     var bubbleViewLeftAnchor: NSLayoutConstraint?
-    
-    
     
     var message: Message? {
         didSet {
@@ -34,16 +30,11 @@ final class ChatCell: UICollectionViewCell {
     
     
     
-    
-    
     // MARK: - ImageView
     let profileImageView: CustomImageView = {
         let img = CustomImageView()
-        
-        img.contentMode = .scaleAspectFill
-        img.backgroundColor = .lightGray
-        img.clipsToBounds = true
-        
+            img.contentMode = .scaleAspectFill
+            img.backgroundColor = .lightGray
         return img
     }()
     
@@ -52,6 +43,7 @@ final class ChatCell: UICollectionViewCell {
         let view = UIView()
         
         view.backgroundColor = UIColor.rgb(red: 0, green: 137, blue: 249)
+        
         view.clipsToBounds = true
         view.layer.cornerRadius = 16
         view.layer.masksToBounds = true
@@ -75,58 +67,49 @@ final class ChatCell: UICollectionViewCell {
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override init(frame: CGRect) {
         super.init(frame: frame)
-//        self.backgroundColor = .red
         
-        
+        self.configureUI()
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
+    
+    // MARK: - Configure UI
+    private func configureUI() {
+        // profileImageView
         self.addSubview(self.profileImageView)
-        self.profileImageView.layer.cornerRadius = 32 / 2
-        self.profileImageView.anchor(top: nil, bottom: self.bottomAnchor,
-                                     leading: self.leadingAnchor, trailing: nil,
-                                     paddingTop: 0, paddingBottom: -4,
-                                     paddingLeading: 8, paddingTrailing: 0,
-                                     width: 32, height: 32)
+        self.profileImageView.anchor(bottom: self.bottomAnchor, paddingBottom: -4,
+                                     leading: self.leadingAnchor, paddingLeading: 8,
+                                     width: 32, height: 32,
+                                     cornerRadius: 32 / 2)
         
-
-//ㅌ
-        
+        // bubbleView
         self.addSubview(self.bubbleView)
-        // bubble view right anchor
-        bubbleViewRightAnchor = bubbleView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -8)
-        bubbleViewRightAnchor?.isActive = true
+        self.bubbleViewRightAnchor = self.bubbleView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -8)
+        self.bubbleViewRightAnchor?.isActive = true
         
         // bubble view left anchor
-        bubbleViewLeftAnchor = bubbleView.trailingAnchor.constraint(equalTo: self.profileImageView.trailingAnchor, constant: 8)
-        bubbleViewLeftAnchor?.isActive = false
+        self.bubbleViewLeftAnchor = self.bubbleView.trailingAnchor.constraint(equalTo: self.profileImageView.trailingAnchor, constant: 8)
+        self.bubbleViewLeftAnchor?.isActive = false
         
         // bubble view width and top anchor
-        bubbleView.topAnchor.constraint(equalTo: self.topAnchor, constant: 8).isActive = true
-        bubbleWidthAnchor = bubbleView.widthAnchor.constraint(equalToConstant: 200)
-        bubbleWidthAnchor?.isActive = true
-        bubbleView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
-        
+        self.bubbleView.topAnchor.constraint(equalTo: self.topAnchor, constant: 8).isActive = true
+        self.bubbleWidthAnchor = self.bubbleView.widthAnchor.constraint(equalToConstant: 200)
+        self.bubbleWidthAnchor?.isActive = true
+        self.bubbleView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
         
         
         
         // bubble view text view anchor
         self.addSubview(self.textView)
-        textView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 8).isActive = true
-        textView.topAnchor.constraint(equalTo: self.topAnchor, constant: 8).isActive = true
-        textView.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor).isActive = true
-        textView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
-        
-        
-    }
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        self.textView.leadingAnchor.constraint(equalTo: self.bubbleView.leadingAnchor, constant: 8).isActive = true
+        self.textView.topAnchor.constraint(equalTo: self.topAnchor, constant: 8).isActive = true
+        self.textView.trailingAnchor.constraint(equalTo: self.bubbleView.trailingAnchor).isActive = true
+        self.textView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
     }
 }

@@ -84,11 +84,7 @@ final class NotificationCell: UITableViewCell {
     
     
     
-    
-    
-    
-    
-    // MARK: - Delegate
+    // MARK: - Selectors
     @objc private func handleFollowTapped() {
         delegate?.handleFollowTapped(for: self)
     }
@@ -97,39 +93,44 @@ final class NotificationCell: UITableViewCell {
     }
     
     
-    // MARK: - Handler
-    
+    // MARK: - Helper Functions
     private func configureNotificationLabel() {
         guard let notification = self.notification else { return }
         guard let user = notification.user else { return }
         guard let userName = user.userName else { return }
-        let notificationsMessage = notification.notificationType.description
-
         guard let notificationDate = getNotificationTimeStamp() else { return }
         
-        let attributedText = NSMutableAttributedString(string: userName, attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 12)])
-        attributedText.append(NSAttributedString(string: notificationsMessage, attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 14)]))
-        attributedText.append(NSAttributedString(string: " \(notificationDate)", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 12), NSAttributedString.Key.foregroundColor: UIColor.lightGray]))
-        notificationLabel.attributedText = attributedText
+        let notificationsMessage = notification.notificationType.description
+        
+        let attributedText = NSMutableAttributedString().mutableAttributedText(type1TextString: userName,
+                                                                               type1FontName: .bold,
+                                                                               type1FontSize: 12,
+                                                                               type1Foreground: UIColor.black,
+                                                                               
+                                                                               type2TextString: notificationsMessage,
+                                                                               type2FontName: .bold,
+                                                                               type2FontSize: 15,
+                                                                               type2Foreground: UIColor.black,
+                                                                               
+                                                                               type3TextString: "  \(notificationDate)",
+                                                                               type3FontName: .bold,
+                                                                               type3FontSize: 12,
+                                                                               type3Foreground: UIColor.lightGray)
+        self.notificationLabel.attributedText = attributedText
     }
     
     private func configureNotificationType() {
         guard let notification = self.notification else { return }
         guard let user = notification.user else { return }
         
-        
-        
         if notification.notificationType != .Follow {
             // notification type is comment or like
-            self.contentView.addSubview(postImageView)
+            self.contentView.addSubview(self.postImageView)
             self.postImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-            self.postImageView.anchor(top: nil, bottom: nil,
-                                      leading: nil, trailing: self.trailingAnchor,
-                                      paddingTop: 0, paddingBottom: 0,
-                                      paddingLeading: 0, paddingTrailing: 8,
+            self.postImageView.anchor(trailing: self.trailingAnchor, paddingTrailing: 8,
                                       width: 40, height: 40)
-            followButton.isHidden = true
-            postImageView.isHidden = false
+            self.followButton.isHidden = true
+            self.postImageView.isHidden = false
 
 
         } else {
@@ -137,15 +138,12 @@ final class NotificationCell: UITableViewCell {
             self.contentView.addSubview(self.followButton)
             self.followButton.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
             self.followButton.layer.cornerRadius = 3
-            self.followButton.anchor(top: nil, bottom: nil,
-                                     leading: nil, trailing: self.trailingAnchor,
-                                     paddingTop: 0, paddingBottom: 0,
-                                     paddingLeading: 0, paddingTrailing: 8,
+            self.followButton.anchor(trailing: self.trailingAnchor, paddingTrailing: 8,
                                      width: 90, height: 30)
             
             
-            followButton.isHidden = false
-            postImageView.isHidden = true
+            self.followButton.isHidden = false
+            self.postImageView.isHidden = true
             
             user.checkIfUserIsFollowed(completion: { (followed) in
                 
@@ -165,59 +163,44 @@ final class NotificationCell: UITableViewCell {
         }
         self.addSubview(self.notificationLabel)
         self.notificationLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.notificationLabel.anchor(top: nil, bottom: nil,
-                                      leading: self.profileImageView.trailingAnchor, trailing: self.trailingAnchor,
-                                      paddingTop: 0, paddingBottom: 0,
-                                      paddingLeading: 8, paddingTrailing: 108,
-                                      width: 0, height: 0)
+        self.notificationLabel.anchor(leading: self.profileImageView.trailingAnchor, paddingLeading: 8,
+                                      trailing: self.trailingAnchor, paddingTrailing: 108)
     }
     
     private func getNotificationTimeStamp() -> String? {
-        
         guard let notification = self.notification else { return nil }
         
-        let dateFormatter = DateComponentsFormatter()
-        dateFormatter.allowedUnits = [.second, .minute, .hour, .day, .weekOfMonth]
-        dateFormatter.maximumUnitCount = 1
-        dateFormatter.unitsStyle = .abbreviated
         let now = Date()
         
+        let dateFormatter = DateComponentsFormatter()
+            dateFormatter.allowedUnits = [.second, .minute, .hour, .day, .weekOfMonth]
+            dateFormatter.maximumUnitCount = 1
+            dateFormatter.unitsStyle = .abbreviated
         return dateFormatter.string(from: notification.creationDate, to: now)
     }
     
     
     
-    
-    
-    
-    
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-//        self.selectionStyle = .none
+        self.selectionStyle = .none
         
-        self.addSubview(self.profileImageView)
-        self.profileImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.profileImageView.layer.cornerRadius = 40 / 2
-        self.profileImageView.anchor(top: nil, bottom: nil,
-                                     leading: self.leadingAnchor, trailing: nil,
-                                     paddingTop: 0, paddingBottom: 0,
-                                     paddingLeading: 8, paddingTrailing: 0,
-                                     width: 40, height: 40)
-
-        
-        
+        self.configureUI()
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    
+    
+    // MARK: - Configure UI
+    private func configureUI() {
+        self.addSubview(self.profileImageView)
+        self.profileImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        self.profileImageView.layer.cornerRadius = 40 / 2
+        self.profileImageView.anchor(leading: self.leadingAnchor, paddingLeading: 8,
+                                     width: 40, height: 40)
+    }
 }
-
-//extension UITableViewCell {
-//    open override func addSubview(_ view: UIView) {
-//        super.addSubview(view)
-//        sendSubviewToBack(contentView)
-//    }
-//}

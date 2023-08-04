@@ -24,69 +24,57 @@ final class SearchUserCell: UITableViewCell {
     
     
     
-    
-    
     // MARK: - ImageView
     private let profileImageView: CustomImageView = {
         let img = CustomImageView()
         
-        img.image = UIImage(named: "profile_unselected")
-        img.contentMode = .scaleAspectFill
-        img.backgroundColor = .lightGray
-        img.clipsToBounds = true
+            img.image = UIImage(named: "profile_unselected")
+            img.contentMode = .scaleAspectFill
+            img.backgroundColor = .lightGray
+            img.clipsToBounds = true
         
         return img
     }()
     
     
     
-    
-    
-    
-   
-    
-    
+    // MARK: - LifeCycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        self.selectionStyle = .none
-        
-        // add profile image view
-        self.addSubview(self.profileImageView)
-        self.profileImageView.anchor(top: nil, bottom: nil, leading: leadingAnchor, trailing: nil, paddingTop: 0, paddingBottom: 0, paddingLeading: 8, paddingTrailing: 0, width: 48, height: 48)
-        self.profileImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.profileImageView.layer.cornerRadius = 48 / 2
-        self.profileImageView.clipsToBounds = true
-        
-        self.textLabel?.text = "UserName"
-        
-        self.detailTextLabel?.text = "Full name"
+        self.configureUI()
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    
-    
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        
+        // textLabel
+        self.textLabel?.font = UIFont.boldSystemFont(ofSize: 12)
         self.textLabel?.frame = CGRect(x: 68, y: (textLabel?.frame.origin.y)! - 2,
                                        width: (self.textLabel?.frame.width)!,
                                        height: (self.textLabel?.frame.height)!)
-        self.textLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        
-        
+        // detailTextLabel
+        self.detailTextLabel?.textColor = .lightGray
+        self.detailTextLabel?.font = UIFont.boldSystemFont(ofSize: 12)
         self.detailTextLabel?.frame = CGRect(x: 68, y: (detailTextLabel?.frame.origin.y)!,
                                              width: self.frame.width - 108,
                                              height: (self.detailTextLabel?.frame.height)!)
-        self.detailTextLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        self.detailTextLabel?.textColor = .lightGray
     }
     
     
-
     
-    
+    // MARK: - Configure UI
+    private func configureUI() {
+        self.selectionStyle = .none
+        
+        // add profile image view
+        self.addSubview(self.profileImageView)
+        self.profileImageView.anchor(leading: leadingAnchor, paddingLeading: 8,
+                                     width: 48, height: 48)
+        self.profileImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        self.profileImageView.layer.cornerRadius = 48 / 2
+        self.profileImageView.clipsToBounds = true
+    }
 }

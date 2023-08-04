@@ -17,215 +17,140 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
     // MARK: - Properties
     private var imageSelected: Bool = false
     
-
-    
-    // MARK: - View
-    private lazy var logoContainerView: UIView = {
-        let view = UIView()
-
-        view.addSubview(self.logoImage)
-
-        logoImage.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        
-        logoImage.anchor(top: view.topAnchor, bottom: nil, leading: nil, trailing: nil,
-                         paddingTop: 80, paddingBottom: 0, paddingLeading: 0, paddingTrailing: 0,
-                         width: 250, height: 70)
-        logoImage.contentMode = .scaleAspectFill
-
-        view.backgroundColor = UIColor(red: 0/255, green: 120/255, blue: 175/255, alpha: 1)
-
-        return view
-    }()
-    
-    
-    // MARK: - ImageView
-    private let logoImage: UIImageView = {
-        let img = UIImageView(image: UIImage(named: "logo2"))
-        return img
-    }()
-    
-    
     // MARK: - TextView
-    private let emailTextField: InsetTextField = {
-        let tf = InsetTextField()
-        
-        tf.placeholder = "Email"
-        tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
-        tf.font = UIFont.systemFont(ofSize: 14)
-        
-        tf.insetX = 16
-        
-        tf.autocapitalizationType = .none
-        tf.autocorrectionType = .no
-        
-        tf.clipsToBounds = true
-        tf.layer.cornerRadius = 10
-        
-        tf.addTarget(self, action: #selector(formValidation), for: .editingChanged)
+    private lazy var emailTextField: UITextField = {
+        let tf = UITextField().textField(withPlaceholder: "Email",
+                                         fontSize: 14,
+                                         backgroundColor: UIColor(white: 0, alpha: 0.03),
+                                         paddingLeftView: true,
+                                         cornerRadius: 10)
+ 
+            tf.addTarget(self, action: #selector(self.formValidation), for: .editingChanged)
 
         return tf
     }()
-    private let passwordTextField: InsetTextField = {
-        let tf = InsetTextField()
+    private lazy var passwordTextField: UITextField = {
+        let tf = UITextField().textField(withPlaceholder: "Password",
+                                         fontSize: 14,
+                                         backgroundColor: UIColor(white: 0, alpha: 0.03),
+                                         isSecureTextEntry: true,
+                                         paddingLeftView: true,
+                                         cornerRadius: 10)
         
-        tf.placeholder = "Password"
-        tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
-        tf.font = UIFont.systemFont(ofSize: 14)
-        tf.isSecureTextEntry = true
-        
-        tf.insetX = 16
-        
-        tf.autocapitalizationType = .none
-        tf.autocorrectionType = .no
-        
-        tf.clipsToBounds = true
-        tf.layer.cornerRadius = 10
-        
-        tf.addTarget(self, action: #selector(formValidation), for: .editingChanged)
-        
+            tf.addTarget(self, action: #selector(self.formValidation), for: .editingChanged)
         return tf
     }()
-    private let fullNameTextField: InsetTextField = {
-        let tf = InsetTextField()
+    private lazy var fullNameTextField: UITextField = {
+        let tf = UITextField().textField(withPlaceholder: "Full Name",
+                                         fontSize: 14,
+                                         backgroundColor: UIColor(white: 0, alpha: 0.03),
+                                         paddingLeftView: true,
+                                         cornerRadius: 10)
         
-        tf.placeholder = "Full Name"
-        tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
-        tf.font = UIFont.systemFont(ofSize: 14)
-        
-        tf.insetX = 16
-        
-        tf.autocapitalizationType = .none
-        tf.autocorrectionType = .no
-
-        tf.clipsToBounds = true
-        tf.layer.cornerRadius = 10
-        
-        tf.addTarget(self, action: #selector(formValidation), for: .editingChanged)
-
+            tf.addTarget(self, action: #selector(self.formValidation), for: .editingChanged)
         return tf
     }()
-    private let userNameTextField: InsetTextField = {
-        let tf = InsetTextField()
+    private lazy var userNameTextField: UITextField = {
+        let tf = UITextField().textField(withPlaceholder: "User Name",
+                                         fontSize: 14,
+                                         backgroundColor: UIColor(white: 0, alpha: 0.03),
+                                         paddingLeftView: true,
+                                         cornerRadius: 10)
         
-        tf.placeholder = "User Name"
-        tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
-        tf.font = UIFont.systemFont(ofSize: 14)
-        
-        tf.insetX = 16
-        
-        tf.autocapitalizationType = .none
-        tf.autocorrectionType = .no
-
-        tf.clipsToBounds = true
-        tf.layer.cornerRadius = 10
-        
-        tf.addTarget(self, action: #selector(formValidation), for: .editingChanged)
-
+            tf.addTarget(self, action: #selector(self.formValidation), for: .editingChanged)
         return tf
     }()
+    
     
     
     // MARK: - Button
-    private let plusButton: UIButton = {
-        let btn = UIButton()
+    private lazy var plusButton: UIButton = {
+        let btn = UIButton().button(title: nil, fontSize: nil,
+                                    image: "plus_photo")
         
-        btn.setImage(UIImage(named: "plus_photo"), for: .normal)
-        btn.imageView?.contentMode = .scaleAspectFit
-        
-        btn.addTarget(self, action: #selector(handleSelectProfilePhoto), for: .touchUpInside)
-        
+            btn.addTarget(self, action: #selector(self.handleSelectProfilePhoto), for: .touchUpInside)
         return btn
     }()
-    private let signUpButton: UIButton = {
-        let btn = UIButton(type: .system)
+    private lazy var signUpButton: UIButton = {
+        let btn = UIButton().button(title: "Sign Up",
+                                    titleColor: .white,
+                                    
+                                    fontName: .bold,
+                                    fontSize: 18,
+                                    backgroundColor: UIColor.rgb(red: 149, green: 204, blue: 244),
+                                    
+                                    cornerRadius: 10,
+                                    isEnable: false)
         
-        btn.setTitle("Login", for: .normal)
-        btn.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
-        btn.setTitleColor(.white, for: .normal)
-        btn.backgroundColor = UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1)
-        
-        btn.clipsToBounds = true
-        btn.layer.cornerRadius = 10
-        
-        btn.isEnabled = false
-        btn.addTarget(self, action: #selector(handleSignUp), for: .touchUpInside)
-        
+            btn.addTarget(self, action: #selector(self.handleSignUp), for: .touchUpInside)
         return btn
     }()
-    private let alreadyHaveAccountButton: UIButton = {
-        let btn = UIButton(type: .system)
+    private lazy var alreadyHaveAccountButton: UIButton = {
+        let btn = UIButton().mutableAttributedString(buttonType: .system,
+                                                     
+                                                     type1TextString: "Already have an account?   ",
+                                                     type1FontName: .system,
+                                                     type1FontSize: 14,
+                                                     type1Foreground: .lightGray,
+                                                     
+                                                     type2TextString: "Sign in",
+                                                     type2FontName: .bold,
+                                                     type2FontSize: 14,
+                                                     type2Foreground: UIColor.rgb(red: 7, green: 154, blue: 237))
 
-        let attributedTitle = NSMutableAttributedString(string: "Already have an account?   ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
-
-        attributedTitle.append(NSAttributedString(string: "Sign in",
-                                                  attributes: [.font: UIFont.systemFont(ofSize: 14),
-                                                               NSAttributedString.Key.foregroundColor: UIColor(red: 7/255, green: 154/255, blue: 237/255, alpha: 1)]))
-        btn.setAttributedTitle(attributedTitle, for: .normal)
-
-        btn.addTarget(self, action: #selector(handleShowLogin), for: .touchUpInside)
-
+            btn.addTarget(self, action: #selector(self.handleShowLogin), for: .touchUpInside)
         return btn
     }()
     
     
     // MARK: - StackView
     private lazy var stackView: UIStackView = {
-        let stv = UIStackView(arrangedSubviews: [self.emailTextField, self.passwordTextField,
-                                                 self.fullNameTextField, self.userNameTextField,
-                                                 self.signUpButton])
-        stv.axis = .vertical
-        stv.spacing = 10
-        stv.alignment = .fill
-        stv.distribution = .fillEqually
-        
-        return stv
+        return UIStackView().stackView(arrangedSubviews:
+                                        [self.emailTextField, self.passwordTextField,
+                                         self.fullNameTextField, self.userNameTextField,
+                                         self.signUpButton],
+                                       axis: .vertical,
+                                       spacing: 10,
+                                       alignment: .fill,
+                                       distribution: .fillEqually)
     }()
     
     
     
-    
-    
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // configure UI
+        self.configureUI()
+    }
+    
+    private func configureUI() {
         // background color
         self.view.backgroundColor = .white
         
-        // configure UI
-        configureUI()
-    }
-    
-    
-    private func configureUI() {
-        
+        // plusButton
         self.view.addSubview(self.plusButton)
         self.plusButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        self.plusButton.anchor(top: self.view.topAnchor, bottom: nil,
-                               leading: nil, trailing: nil,
-                               paddingTop: 80, paddingBottom: 0,
-                               paddingLeading: 0, paddingTrailing: 0,
+        self.plusButton.anchor(top: self.view.topAnchor, paddingTop: 80,
                                width: 140, height: 140)
-        
+        // stackView
         self.view.addSubview(self.stackView)
-        self.stackView.anchor(top: self.plusButton.bottomAnchor, bottom: nil,
-                              leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor,
-                              paddingTop: 30, paddingBottom: 0,
-                              paddingLeading: 40, paddingTrailing: 40,
-                              width: 0, height: 240)
-        
+        self.stackView.anchor(top: self.plusButton.bottomAnchor, paddingTop: 30,
+                              leading: self.view.leadingAnchor, paddingLeading: 40,
+                              trailing: self.view.trailingAnchor, paddingTrailing: 40,
+                              height: 240)
+        // alreadyHaveAccountButton
         self.view.addSubview(self.alreadyHaveAccountButton)
-        self.alreadyHaveAccountButton.anchor(top: nil, bottom: view.bottomAnchor,
-                                             leading: view.leadingAnchor, trailing: view.trailingAnchor,
-                                             paddingTop: 0, paddingBottom: 0,
-                                             paddingLeading: 0, paddingTrailing: 0,
-                                             width: 0, height: 50)
+        self.alreadyHaveAccountButton.anchor(bottom: view.bottomAnchor, paddingBottom: 15,
+                                             leading: view.leadingAnchor,
+                                             trailing: view.trailingAnchor,
+                                             height: 50)
     }
     
     
     
-    // MARK: - Handlers
+    // MARK: - Selectors
     // 뒤로가기
     @objc func handleShowLogin() {
         self.navigationController?.popViewController(animated: true)
@@ -310,11 +235,11 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
             self.userNameTextField.hasText
         else {
             self.signUpButton.isEnabled = false
-            self.signUpButton.backgroundColor = UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1)
+            self.signUpButton.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
             return
         }
         self.signUpButton.isEnabled = true
-        self.signUpButton.backgroundColor = UIColor(red: 17/255, green: 154/255, blue: 237/255, alpha: 1)
+        self.signUpButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
     }
     
     @objc func handleSelectProfilePhoto() {
@@ -328,8 +253,6 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
     }
     
 }
-
-
 
 
 

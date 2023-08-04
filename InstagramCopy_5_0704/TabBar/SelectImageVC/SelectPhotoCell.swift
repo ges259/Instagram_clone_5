@@ -13,28 +13,32 @@ final class SelectPhotoCell: UICollectionViewCell {
     let photoImageView: UIImageView = {
         let img = UIImageView()
         
-        img.contentMode = .scaleAspectFill
-        img.backgroundColor = .lightGray
-        img.clipsToBounds = true
-        
+            img.contentMode = .scaleAspectFill
+            img.backgroundColor = .lightGray
+            img.clipsToBounds = true
         return img
     }()
     
     
     
-    // MARK: - Init
+    // MARK: - LifeCycle
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        self.addSubview(self.photoImageView)
-        self.photoImageView.anchor(top: self.topAnchor, bottom: self.bottomAnchor,
-                                   leading: self.leadingAnchor, trailing: self.trailingAnchor,
-                                   paddingTop: 0, paddingBottom: 0,
-                                   paddingLeading: 0, paddingTrailing: 0,
-                                   width: 0, height: 0)
+        self.configureUI()
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    
+    
+    // MARK: - Configure UI
+    private func configureUI() {
+        self.addSubview(self.photoImageView)
+        self.photoImageView.anchor(top: self.topAnchor,
+                                   bottom: self.bottomAnchor,
+                                   leading: self.leadingAnchor,
+                                   trailing: self.trailingAnchor)
+    }
 }

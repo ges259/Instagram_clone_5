@@ -13,7 +13,6 @@ private let headerIdentifier: String = "SelectePhotoHeader"
 
 final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     
-    
     // MARK: - Properties
     var images = [UIImage]()
     var assets = [PHAsset]()
@@ -22,12 +21,11 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        configureNavigationButtons()
+        self.configureNavigationButtons()
     
         // Register cell classes
         self.collectionView.register(SelectPhotoCell.self, forCellWithReuseIdentifier: reuserIdentifier)
@@ -35,11 +33,11 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
         
         self.collectionView.backgroundColor = .white
         
-        fetchPhotos()
+        self.fetchPhotos()
     }
     
     
-    // MARK: - CollectionView - DataSource
+    // MARK: - CollectionView
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         // spacing = 1
         let width = (view.frame.width - 3) / 4
@@ -64,10 +62,7 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuserIdentifier, for: indexPath) as! SelectPhotoCell
         
-        cell.backgroundColor = .red
-        
-        cell.photoImageView.image = images[indexPath.row]
-        
+            cell.photoImageView.image = images[indexPath.row]
         return cell
     }
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -79,7 +74,8 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
         self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
     }
     
-    // header
+    
+    // MARK: - CollectionView - Header
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         let width = view.frame.width
         
@@ -91,7 +87,6 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! SelectPhotoHeader
         
         self.header = header
-        
         
         if let selectedImage = self.selectedImage {
             // index selected image
@@ -112,41 +107,39 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
     }
     
     
-    // MARK: - Handler
-    private func configureNavigationButtons() {
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(handleNext))
-    }
+    
+    // MARK: - Selectors
     @objc func handleCancel() {
         self.dismiss(animated: true)
     }
     @objc func handleNext() {
         let uploadPostVC = UploadPostVC()
-        uploadPostVC.selectedImage = self.header?.photoImageView.image
-        uploadPostVC.uploadAction = UploadPostVC.UploadAction(index: 0)
+            uploadPostVC.selectedImage = self.header?.photoImageView.image
+            uploadPostVC.uploadAction = UploadPostVC.UploadAction(index: 0)
         
         self.navigationController?.pushViewController(uploadPostVC, animated: true)
     }
     
     
     
-    
-    
+    // MARK: - Helper Functions
+    private func configureNavigationButtons() {
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(handleNext))
+    }
     
     
     
     // MARK: - 라이브러리에서 사진 가져오기
     private func getAssetFetchOptions() -> PHFetchOptions {
         let options = PHFetchOptions()
-        // fetch limit
-        options.fetchLimit = 30
         
         // sort photos by date
         let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
-        
+        // fetch limit
+            options.fetchLimit = 30
         // set sort descriptor for options
-        options.sortDescriptors = [sortDescriptor]
-        
+            options.sortDescriptors = [sortDescriptor]
         return options
     }
     private func fetchPhotos() {
@@ -205,10 +198,4 @@ final class SelectImageVC: UICollectionViewController, UICollectionViewDelegateF
             }
         }
     }
-    
-
-    
-    
-    
-    
 }

@@ -20,70 +20,55 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     private lazy var containerView: UIView = {
         let containerView = UIView()
         
-        containerView.frame = CGRect(x: 0, y: 0, width: 100, height: 55)
-        
-        
-        
-        containerView.addSubview(self.sendButton)
-        self.sendButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
-        self.sendButton.anchor(top: nil, bottom: nil,
-                               leading: nil, trailing: containerView.trailingAnchor,
-                               paddingTop: 0, paddingBottom: 0,
-                               paddingLeading: 0, paddingTrailing: 16,
-                               width: 50, height: 0)
-        
-        containerView.addSubview(self.messageTextField)
-        self.messageTextField.anchor(top: containerView.topAnchor, bottom: containerView.bottomAnchor,
-                                     leading: containerView.leadingAnchor, trailing: self.sendButton.leadingAnchor,
-                                     paddingTop: 0, paddingBottom: 0,
-                                     paddingLeading: 12, paddingTrailing: 20,
-                                     width: 0, height: 0)
-        
-        containerView.addSubview(self.separatorView)
-        self.separatorView.anchor(top: containerView.topAnchor, bottom: nil,
-                                  leading: containerView.leadingAnchor, trailing: containerView.trailingAnchor,
-                                  paddingTop: 0, paddingBottom: 0,
-                                  paddingLeading: 0, paddingTrailing: 0,
-                                  width: 0, height: 0.5)
-        
-        
-        
+            containerView.frame = CGRect(x: 0, y: 0, width: 100, height: 55)
+            // sendButton
+            containerView.addSubview(self.sendButton)
+            self.sendButton.anchor(trailing: containerView.trailingAnchor, paddingTrailing: 16,
+                                   width: 50,
+                                   centerY: containerView)
+            // messageTextField
+            containerView.addSubview(self.messageTextField)
+            self.messageTextField.anchor(top: containerView.topAnchor,
+                                         bottom: containerView.bottomAnchor,
+                                         leading: containerView.leadingAnchor, paddingLeading: 12,
+                                         trailing: self.sendButton.leadingAnchor, paddingTrailing: 20)
+            // separatorView
+            containerView.addSubview(self.separatorView)
+            self.separatorView.anchor(top: containerView.topAnchor,
+                                      leading: containerView.leadingAnchor,
+                                      trailing: containerView.trailingAnchor,
+                                      height: 0.5)
         return containerView
     }()
-    private let messageTextField: UITextField = {
-        let tf = UITextField()
-        tf.placeholder = "Enter message.."
-        
-        return tf
+    private lazy var messageTextField: UITextField = {
+        return UITextField().textField(withPlaceholder: "Enter message..")
     }()
-    private let sendButton: UIButton = {
-        let btn = UIButton(type: .system)
-        btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 14)
-        btn.setTitle("Send", for: .normal)
-        btn.addTarget(self, action: #selector(handleSend), for: .touchUpInside)
-        
+    
+    private lazy var sendButton: UIButton = {
+        let btn = UIButton().button(title: "Send",
+                                    fontName: .bold,
+                                    fontSize: 14)
+            btn.addTarget(self, action: #selector(self.handleSend), for: .touchUpInside)
         return btn
     }()
     
-    private let separatorView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .darkGray
-        return view
+    private lazy var separatorView: UIView = {
+        return UIView().backgrouncColorView(backgroundColor: UIColor.darkGray)
     }()
     
     
     
-    // MARK: - Init
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        configureNavigationBar()
+        self.configureNavigationBar()
         
         self.collectionView.backgroundColor = .white
         self.collectionView.register(ChatCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
         
-        observeMessages()
+        self.observeMessages()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -96,7 +81,7 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     override var inputAccessoryView: UIView? {
         get {
-            return containerView
+            return self.containerView
         }
     }
     override var canBecomeFirstResponder: Bool {
@@ -107,19 +92,17 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     // MARK: - UICollectionView
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-//        return messages.count
         return messages.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
+        return
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! ChatCell
-        
-        cell.message = messages[indexPath.item]
-        configureMessage(cell: cell, message: messages[indexPath.item])
+            cell.message = messages[indexPath.item]
+        self.configureMessage(cell: cell, message: messages[indexPath.item])
         
         return cell
     }
@@ -134,14 +117,7 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
      
     
     
-    
-    
-    
-    
-    
-    
-    
-    // MARK: - Handlers
+    // MARK: - Helper Functions
     private func configureNavigationBar() {
         guard let user = self.chatPartnerUser else { return }
         
@@ -155,31 +131,21 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         
         navigationItem.rightBarButtonItem = infoButtonItem
     }
-    @objc private func handleInfoTapped() {
-        let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
-        userProfileVC.user = chatPartnerUser
-        navigationController?.pushViewController(userProfileVC, animated: true)
-    }
-    
-    
-    
-    @objc private func handleSend() {
-        uploadMessageToServer()
-        messageTextField.text = nil
-    }
     
     private func estimateFrameForText( _ text: String) -> CGRect {
         let size = CGSize(width: 200, height: 1000)
         let options = NSStringDrawingOptions.usesFontLeading.union(.usesLineFragmentOrigin)
-        return NSString(string: text).boundingRect(with: size, options: options, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16)], context: nil)
+        return NSString(string: text).boundingRect(with: size,
+                                                   options: options,
+                                                   attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16)],
+                                                   context: nil)
     }
     
     private func configureMessage(cell: ChatCell, message: Message) {
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
         
-        
-        cell.bubbleWidthAnchor?.constant = estimateFrameForText(message.messageText).width + 32
-        cell.frame.size.height = estimateFrameForText(message.messageText).height + 20
+            cell.bubbleWidthAnchor?.constant = estimateFrameForText(message.messageText).width + 32
+            cell.frame.size.height = estimateFrameForText(message.messageText).height + 20
         
         if message.fromId == currentUid {
             cell.bubbleViewRightAnchor?.isActive = true
@@ -194,6 +160,22 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
             cell.profileImageView.isHidden = false
         }
     }
+    
+    
+    
+    // MARK: - Selectors
+    @objc private func handleInfoTapped() {
+        let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
+            userProfileVC.user = chatPartnerUser
+        self.navigationController?.pushViewController(userProfileVC, animated: true)
+    }
+    
+    @objc private func handleSend() {
+        self.uploadMessageToServer()
+        self.messageTextField.text = nil
+    }
+    
+
     
     
     
@@ -233,7 +215,6 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
              -N_Eg89xLGV3lrVHOrxg
              */
             self.fetchMessage(withMessageId: messageId)
-            
         }
     }
     private func fetchMessage(withMessageId messageId: String) {
@@ -248,7 +229,4 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
             self.collectionView?.reloadData()
         }
     }
-    
-    
-    
 }

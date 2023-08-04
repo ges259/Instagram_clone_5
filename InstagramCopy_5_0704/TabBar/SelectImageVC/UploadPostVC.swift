@@ -35,10 +35,9 @@ final class UploadPostVC: UIViewController {
     private var photoImageView: CustomImageView = {
         let img = CustomImageView()
         
-        img.contentMode = .scaleAspectFill
-        img.backgroundColor = .lightGray
-        img.clipsToBounds = true
-        
+            img.contentMode = .scaleAspectFill
+            img.backgroundColor = .lightGray
+            img.clipsToBounds = true
         return img
     }()
     
@@ -54,26 +53,19 @@ final class UploadPostVC: UIViewController {
         return tv
     }()
     
-    let actionButton: UIButton = {
-        let btn = UIButton(type: .system)
-        
-        btn.backgroundColor = UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1)
-        btn.setTitle("Share", for: .normal)
-        btn.setTitleColor(.white, for: .normal)
-        btn.clipsToBounds = true
-        btn.layer.cornerRadius = 5
-        btn.isEnabled = false
-        
-        btn.addTarget(self, action: #selector(handleUploadAction), for: .touchUpInside)
-        
+    lazy var actionButton: UIButton = {
+        let btn = UIButton().button(title: "Share",
+                                    titleColor: .white,
+                                    backgroundColor: UIColor.rgb(red: 149, green: 204, blue: 244),
+                                    cornerRadius: 5,
+                                    isEnable: false)
+            btn.addTarget(self, action: #selector(self.handleUploadAction), for: .touchUpInside)
         return btn
     }()
     
     
     
-    
-    
-    // MARK: - Init
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
             
@@ -107,119 +99,55 @@ final class UploadPostVC: UIViewController {
     }
     
     
+    
+    // MARK: - Helper Functions
     func configureViewComponents() {
-        
+        // photoImageView
         self.view.addSubview(self.photoImageView)
-        self.photoImageView.anchor(top: self.view.topAnchor, bottom: nil,
-                                   leading: self.view.leadingAnchor, trailing: nil,
-                                   paddingTop: 92, paddingBottom: 0,
-                                   paddingLeading: 12, paddingTrailing: 0,
+        self.photoImageView.anchor(top: self.view.topAnchor, paddingTop: 92,
+                                   leading: self.view.leadingAnchor, paddingLeading: 12,
                                    width: 100, height: 100)
-        
+        // captionTextView
         self.view.addSubview(self.captionTextView)
-        self.captionTextView.anchor(top: self.view.topAnchor, bottom: nil,
-                                    leading: self.photoImageView.trailingAnchor, trailing: self.view.trailingAnchor,
-                                    paddingTop: 92, paddingBottom: 0,
-                                    paddingLeading: 12, paddingTrailing: 12,
-                                    width: 0, height: 100)
-        
+        self.captionTextView.anchor(top: self.view.topAnchor, paddingTop: 92,
+                                    leading: self.photoImageView.trailingAnchor, paddingLeading: 12,
+                                    trailing: self.view.trailingAnchor, paddingTrailing: 12,
+                                    height: 100)
+        // actionButton
         self.view.addSubview(self.actionButton)
-        self.actionButton.anchor(top: self.photoImageView.bottomAnchor, bottom: nil,
-                                leading: self.view.leadingAnchor, trailing: self.view.trailingAnchor,
-                                paddingTop: 12, paddingBottom: 0,
-                                paddingLeading: 24, paddingTrailing: 24,
-                                width: 0, height: 40)
+        self.actionButton.anchor(top: self.photoImageView.bottomAnchor, paddingTop: 12,
+                                 leading: self.view.leadingAnchor, paddingLeading: 24,
+                                 trailing: self.view.trailingAnchor, paddingTrailing: 24,
+                                 height: 40)
     }
-    
-    
     
     func loadImage() {
         guard let selectedImage = selectedImage else { return }
         
         self.photoImageView.image = selectedImage
-        
     }
     
     
     
-    // MARK: - API
-    private func uploadHashtagToServer(withPostId postId: String) {
-        
-        guard let caption = captionTextView.text else { return }
-        
-        // 단어들을 배열에 넣기
-        let words: [String] = caption.components(separatedBy: .whitespacesAndNewlines)
-        
-        // 배열에 있는 단어들을 하나하나씩 살펴보기(?)
-        for var word in words {
-            // #이 앞에 있는 경우
-            if word.hasPrefix("#") {
-                
-                word = word.trimmingCharacters(in: .punctuationCharacters)
-                word = word.trimmingCharacters(in: .symbols)
-                
-                let hashtagValues = [postId: 1]
-                
-                HASHTAG_POST_REF.child(word.lowercased()).updateChildValues(hashtagValues)
-            }
-        }
-    }
-    
-    
-    
-    // MARK: - handler
-    func updateUserFeeds(with postId: String) {
-        // current user id
-        guard let currentUid = Auth.auth().currentUser?.uid else { return }
-        
-        // database values
-        let values = [postId: 1]
-        
-        // update follow feed
-        USER_FOLLOWER_REF.child(currentUid).observe(.childAdded) { snapshot in
-            
-            let followUid = snapshot.key
-            // update user-feed
-            // 자신이 follow한 모든 사람의 user-feed에 자신의 포스트를 올림
-            USER_FEED_REF.child(followUid).updateChildValues(values)
-            print("************* follow Id is: \(followUid) *************")
-        }
-        // update current user feed
-        // 자신의 user-post에 포스트를 올림
-        USER_FEED_REF.child(currentUid).updateChildValues(values)
-        print("current id is \(currentUid)")
-    }
-    
-    
-    
-    @objc private func handleUploadAction() {
-        buttonSelector(uploadAction: uploadAction)
-    }
+    // buttonSelector
     private func buttonSelector(uploadAction: UploadAction) {
         switch uploadAction {
         case .UploadPost:
-            handleUploadPost()
+            self.handleUploadPost()
         case .SaveChanges:
-            handleSavePostChanges()
+            self.handleSavePostChanges()
         }
     }
     private func handleSavePostChanges() {
         guard let post = self.postToEdit else { return }
         let updateCaption = captionTextView.text
         
-        uploadHashtagToServer(withPostId: post.postId)
+        self.uploadHashtagToServer(withPostId: post.postId)
         
         POSTS_REF.child(post.postId).child("caption").setValue(updateCaption) { err, ref in
             self.dismiss(animated: true, completion: nil)
         }
     }
-    
-    @objc private func handleCancel() {
-        self.dismiss(animated: true, completion: nil)
-    }
-    
-    
-    
     private func handleUploadPost() {
         
         // paramaters
@@ -238,7 +166,6 @@ final class UploadPostVC: UIViewController {
         // update storage
         let fileName = NSUUID().uuidString
         
-        
         let storageRef = Storage.storage().reference().child("post_images").child(fileName)
         
         storageRef.putData(uploadData) { metaData, error in
@@ -248,7 +175,6 @@ final class UploadPostVC: UIViewController {
                 print("Failed to upload image to stoage with error", error.localizedDescription)
                 return
             }
-            
             
             storageRef.downloadURL { downloadURL, error in
                 
@@ -298,9 +224,65 @@ final class UploadPostVC: UIViewController {
         }
     }
     
+    func updateUserFeeds(with postId: String) {
+        // current user id
+        guard let currentUid = Auth.auth().currentUser?.uid else { return }
+        
+        // database values
+        let values = [postId: 1]
+        
+        // update follow feed
+        USER_FOLLOWER_REF.child(currentUid).observe(.childAdded) { snapshot in
+            
+            let followUid = snapshot.key
+            // update user-feed
+            // 자신이 follow한 모든 사람의 user-feed에 자신의 포스트를 올림
+            USER_FEED_REF.child(followUid).updateChildValues(values)
+            print("************* follow Id is: \(followUid) *************")
+        }
+        // update current user feed
+        // 자신의 user-post에 포스트를 올림
+        USER_FEED_REF.child(currentUid).updateChildValues(values)
+        print("current id is \(currentUid)")
+    }
     
     
+    // MARK: - API
+    private func uploadHashtagToServer(withPostId postId: String) {
+        
+        guard let caption = captionTextView.text else { return }
+        
+        // 단어들을 배열에 넣기
+        let words: [String] = caption.components(separatedBy: .whitespacesAndNewlines)
+        
+        // 배열에 있는 단어들을 하나하나씩 살펴보기(?)
+        for var word in words {
+            // #이 앞에 있는 경우
+            if word.hasPrefix("#") {
+                
+                word = word.trimmingCharacters(in: .punctuationCharacters)
+                word = word.trimmingCharacters(in: .symbols)
+                
+                let hashtagValues = [postId: 1]
+                
+                HASHTAG_POST_REF.child(word.lowercased()).updateChildValues(hashtagValues)
+            }
+        }
+    }
+    
+    
+    
+    // MARK: - Selectors
+    // Helper Functions ->
+    @objc private func handleUploadAction() {
+        self.buttonSelector(uploadAction: self.uploadAction)
+    }
+    
+    @objc private func handleCancel() {
+        self.dismiss(animated: true, completion: nil)
+    }
 }
+
 
 
 // MARK: - UITextView - Delegate
