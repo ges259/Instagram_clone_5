@@ -26,19 +26,13 @@ final class NewMessageCell: UITableViewCell {
     
     // MARK: - ImageView
     private let profileImageView: CustomImageView = {
-        let img = CustomImageView()
-            img.contentMode = .scaleAspectFill
-            img.backgroundColor = .lightGray
-            img.clipsToBounds = true
-        return img
+        return CustomImageView().configureCustomImageView()
     }()
     
     
     // MARK: - LifeCycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
-        
-        print("fdasl;fhj;sadljsf;dl")
         
         self.selectionStyle = .none
         
@@ -63,7 +57,6 @@ final class NewMessageCell: UITableViewCell {
                                              y: (self.detailTextLabel?.frame.origin.y)!,
                                              width: self.frame.width - 108,
                                              height: (self.detailTextLabel?.frame.height)!)
-        
     }
     
     

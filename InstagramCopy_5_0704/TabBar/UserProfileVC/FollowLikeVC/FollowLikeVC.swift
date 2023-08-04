@@ -11,9 +11,7 @@ import FirebaseDatabase
 
 private let reuseIdentifer = "FollowLikeCell"
 
-
 final class FollowLikeVC: UITableViewController {
-    
     
     // MARK: - Properties
     enum ViewingMode: Int {
@@ -29,6 +27,7 @@ final class FollowLikeVC: UITableViewController {
             }
         }
     }
+    
     var postId: String?
     
     var viewingMode: ViewingMode!
@@ -41,20 +40,17 @@ final class FollowLikeVC: UITableViewController {
     
     
     
-    
     // MARK: - LifeSycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.tableView.register(FollowLikeCell.self, forCellReuseIdentifier: reuseIdentifer)
         
-        
         // configure nav titles
-        configureNavigationTitle()
+        self.configureNavigationTitle()
         
         // fetch users
-        fetchUsers()
-        
+        self.fetchUsers()
     }
     
     
@@ -63,16 +59,15 @@ final class FollowLikeVC: UITableViewController {
     // MARK: - tableView _ DataSource
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifer) as! FollowLikeCell
-        
-        cell.delegate = self
-        
-        cell.user = users[indexPath.row]
-        
+            cell.delegate = self
+            cell.user = users[indexPath.row]
         return cell
     }
+    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
+    
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         // 처음 fetch르 4명으로 설정했으면 3명 이상이 될 때 새로 fetch를 시작
         if self.users.count > 3 {
@@ -87,24 +82,22 @@ final class FollowLikeVC: UITableViewController {
     }
     // tableView _ Delegate
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
         let user = self.users[indexPath.row]
         
         let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
-        
-        userProfileVC.user = user
-        
+            userProfileVC.user = user
         self.navigationController?.pushViewController(userProfileVC, animated: true)
         
     }
+    
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 60
     }
     
     
+    
     // MARK: - Handler
     private func configureNavigationTitle() {
-        
         guard let viewingMode = self.viewingMode else { return }
 
         // configure nav controller
@@ -114,7 +107,6 @@ final class FollowLikeVC: UITableViewController {
         case .Likes: self.navigationItem.title = "Likes"
         }
     }
-    
     
     
     
@@ -135,9 +127,6 @@ final class FollowLikeVC: UITableViewController {
             self.tableView.reloadData()
         }
     }
-    
-    
-    
     
     private func fetchUsers() {
         guard let viewingMode = self.viewingMode else { return }
@@ -160,6 +149,7 @@ final class FollowLikeVC: UITableViewController {
                     }
                     self.followCurrentKey = first.key
                 }
+                
             } else {
                 ref.child(uid).queryOrderedByKey().queryEnding(atValue: self.followCurrentKey).queryLimited(toLast: 5).observeSingleEvent(of: .value) { snapshot in
                     
@@ -173,9 +163,10 @@ final class FollowLikeVC: UITableViewController {
                             self.fetchUser(withUserId: followUid)
                         }
                     }
-                    self.followCurrentKey = first.key                }
-                
+                    self.followCurrentKey = first.key
+                }
             }
+            
             
         case .Likes:
             guard let postId = self.postId else { return }
@@ -193,6 +184,7 @@ final class FollowLikeVC: UITableViewController {
                     }
                     self.likeCurrentKey = first.key
                 }
+                
             } else {
                 ref.child(postId).queryOrderedByKey().queryEnding(atValue: self.likeCurrentKey).queryLimited(toLast: 5).observeSingleEvent(of: .value) { snapshot in
                     
@@ -209,8 +201,6 @@ final class FollowLikeVC: UITableViewController {
                     self.likeCurrentKey = first.key
                 }
             }
-            
-            
         }
     }
 }
@@ -221,7 +211,6 @@ final class FollowLikeVC: UITableViewController {
 extension FollowLikeVC: FollowCellDelegate {
     
     func handleFollowTapped(for cell: FollowLikeCell) {
-        
         guard let user = cell.user else { return }
 
         // isFollowed가 true이면 => follow상태
@@ -232,7 +221,6 @@ extension FollowLikeVC: FollowCellDelegate {
         // isFollowed가 false이면 => unfollow상태
         } else {
             user.follow()
-            
             cell.followButton.configure(didFollow: true)
         }
     }

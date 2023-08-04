@@ -40,28 +40,17 @@ final class FeedCell: UICollectionViewCell {
     
     // MARK: - ImageView
     private let profileImageView: CustomImageView = {
-        let img = CustomImageView()
-        
-            img.contentMode = .scaleAspectFill
-            img.clipsToBounds = true
-            img.backgroundColor = .lightGray
-        
-        return img
+        return CustomImageView().configureCustomImageView()
     }()
     private lazy var postImageView: CustomImageView = {
-        let img = CustomImageView()
-        
-            img.contentMode = .scaleAspectFill
-            img.clipsToBounds = true
-            img.backgroundColor = .lightGray
+        let img = CustomImageView().configureCustomImageView()
         
         // add gesture recognizer for double tap to like
         let likeTap = UITapGestureRecognizer(target: self, action: #selector(self.handleDoubleTappedToLike))
             likeTap.numberOfTapsRequired = 2
         
-        img.isUserInteractionEnabled = true
-        img.addGestureRecognizer(likeTap)
-        
+            img.isUserInteractionEnabled = true
+            img.addGestureRecognizer(likeTap)
         return img
     }()
     
@@ -90,7 +79,7 @@ final class FeedCell: UICollectionViewCell {
     }()
     private lazy var commentButton: UIButton = {
         let btn = UIButton().button(image: "comment")
-        
+
             btn.addTarget(self, action: #selector(self.handleCommentTapped), for: .touchUpInside)
         return btn
     }()
@@ -122,15 +111,14 @@ final class FeedCell: UICollectionViewCell {
         // add gesture recognizer to label
         let likeTap = UITapGestureRecognizer(target: self, action: #selector(self.handleShowLikes))
             likeTap.numberOfTapsRequired = 1
-        lbl.isUserInteractionEnabled = true
-        lbl.addGestureRecognizer(likeTap)
         
+            lbl.isUserInteractionEnabled = true
+            lbl.addGestureRecognizer(likeTap)
         return lbl
     }()
     let captionLabel: ActiveLabel = {
         let lbl = ActiveLabel()
             lbl.numberOfLines = 0
-
         return lbl
     }()
     private let postTimeLabel: UILabel = {
@@ -176,6 +164,7 @@ final class FeedCell: UICollectionViewCell {
     
     
     // MARK: - Selector
+    // FeedVC
     @objc private func handleUserNameTapped() {
         self.delegate?.handleUserNameTapped(for: self)
     }
@@ -218,20 +207,20 @@ final class FeedCell: UICollectionViewCell {
     private func configureUI() {
         // profileImageView
         self.addSubview(self.profileImageView)
-        self.profileImageView.layer.cornerRadius = 40 / 2
         self.profileImageView.anchor(top: self.topAnchor, paddingTop: 8,
                                      leading: self.leadingAnchor, paddingLeading: 8,
-                                     width: 40, height: 40)
-        
+                                     width: 40, height: 40,
+                                     cornerRadius: 40 / 2)
+
         // userName
         self.addSubview(self.userName)
-        self.userName.centerYAnchor.constraint(equalTo: self.profileImageView.centerYAnchor).isActive = true
-        self.userName.anchor(leading: self.profileImageView.trailingAnchor, paddingLeading: 8)
+        self.userName.anchor(leading: self.profileImageView.trailingAnchor, paddingLeading: 8,
+                             centerY: self.profileImageView)
         
         // optionButton
         self.addSubview(self.optionButton)
-        self.optionButton.centerYAnchor.constraint(equalTo: self.profileImageView.centerYAnchor).isActive = true
-        self.optionButton.anchor(trailing: self.trailingAnchor, paddingTrailing: 8)
+        self.optionButton.anchor(trailing: self.trailingAnchor, paddingTrailing: 8,
+                                 centerY: self.profileImageView)
         
         // postImageView
         self.addSubview(self.postImageView)

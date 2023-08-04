@@ -32,10 +32,7 @@ final class ChatCell: UICollectionViewCell {
     
     // MARK: - ImageView
     let profileImageView: CustomImageView = {
-        let img = CustomImageView()
-            img.contentMode = .scaleAspectFill
-            img.backgroundColor = .lightGray
-        return img
+        return CustomImageView().configureCustomImageView()
     }()
     
     
@@ -58,7 +55,6 @@ final class ChatCell: UICollectionViewCell {
         tv.text = "Sample text for now"
         tv.font = UIFont.systemFont(ofSize: 16)
         tv.backgroundColor = .clear
-        tv.textColor = .white
         tv.isEditable = false
         tv.translatesAutoresizingMaskIntoConstraints = false
         
@@ -90,19 +86,21 @@ final class ChatCell: UICollectionViewCell {
         
         // bubbleView
         self.addSubview(self.bubbleView)
+        // bubble view width and top anchor
+        self.bubbleView.topAnchor.constraint(equalTo: self.topAnchor, constant: 8).isActive = true
+        self.bubbleView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+        
+        
+        self.bubbleWidthAnchor = self.bubbleView.widthAnchor.constraint(equalToConstant: 200)
+        self.bubbleWidthAnchor?.isActive = true
+        
+        
         self.bubbleViewRightAnchor = self.bubbleView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -8)
         self.bubbleViewRightAnchor?.isActive = true
         
         // bubble view left anchor
-        self.bubbleViewLeftAnchor = self.bubbleView.trailingAnchor.constraint(equalTo: self.profileImageView.trailingAnchor, constant: 8)
+        self.bubbleViewLeftAnchor = self.bubbleView.leadingAnchor.constraint(equalTo: self.profileImageView.trailingAnchor, constant: 8)
         self.bubbleViewLeftAnchor?.isActive = false
-        
-        // bubble view width and top anchor
-        self.bubbleView.topAnchor.constraint(equalTo: self.topAnchor, constant: 8).isActive = true
-        self.bubbleWidthAnchor = self.bubbleView.widthAnchor.constraint(equalToConstant: 200)
-        self.bubbleWidthAnchor?.isActive = true
-        self.bubbleView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
-        
         
         
         // bubble view text view anchor

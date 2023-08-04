@@ -13,20 +13,18 @@ private let reuseIdentifier = "CommentCell"
 final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     // MARK: - Properties
     var comments = [Comment]()
-    
+    // 어떤 포스트의 comment Controller인지 판단하기 위한 변수
     var post: Post?
     
     
     
     // MARK: - Layout
+    // commentVC 하단 텍스트필드 및 버튼 구성
     private lazy var containerView: CommentAccessoryView = {
         let frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50)
         let cv = CommentAccessoryView(frame: frame)
-        
-        cv.delegate = self
-        
-        cv.backgroundColor = .white
-        
+            cv.delegate = self
+            cv.backgroundColor = .white
         return cv
     }()
     
@@ -51,10 +49,10 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         super.viewWillDisappear(animated)
         self.tabBarController?.tabBar.isHidden = false
     }
-    
+    // accessoryView 넣기
     override var inputAccessoryView: UIView? {
         get {
-            return containerView
+            return self.containerView
         }
     }
     override var canBecomeFirstResponder: Bool {
@@ -100,6 +98,10 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         }
     }
     
+    
+    // MARK: - ActiveLabel Functions
+    // cocoapod의 'ActiveLabel' 기능, completion을 통해 기능
+        // -> 미리 기능들을 넣어둠
     private func handleHastagTapped(forcell cell: CommentCell) {
         cell.commentLabel.handleHashtagTap { hashtag in
             let hashtagVC = HashtagVC(collectionViewLayout: UICollectionViewFlowLayout())
@@ -111,7 +113,6 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     
     private func handleMentionTapped(forCell cell: CommentCell) {
         cell.commentLabel.handleMentionTap { userName in
-            print("Mentioned username is \(userName)")
             self.getMentionUser(withuserName: userName)
         }
     }
@@ -138,12 +139,14 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     }
     // collectionView item
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return comments.count
+        return self.comments.count
     }
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! CommentCell
             cell.comment = self.comments[indexPath.item]
-        
+        // ActiveLabel
+        // cocoapod의 'ActiveLabel' 기능, completion을 통해 기능
+            // -> 미리 기능들을 넣어둠
         self.handleHastagTapped(forcell: cell)
         self.handleMentionTapped(forCell: cell)
         
@@ -153,14 +156,15 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
     
     
     // MARK: - API
+    // comment를 가져오는 API 함수
     private func fetchComments() {
         guard let postId = self.post?.postId else { return }
-
+        // observe로 셋팅 -> comment가 추가되면 추적
         COMMENT_REF.child(postId).observe(.childAdded) { snapshot in
-
             guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
             guard let uid = dictionary["uid"] as? String else { return }
-
+            
+            // extension에 있는 fetchUser를 통해서 user들의 데이터들을 가져온다.
             Database.fetchUser(with: uid) { (user) in
                 let comment = Comment(user: user, dictionary: dictionary)
                 self.comments.append(comment)
@@ -168,14 +172,14 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
             }
         }
     }
-    
 }
+
+
 
 // MARK: - Delegate
 extension CommentVC: CommentInputAccesoryViewDelegate {
     
     func didSubmit(forComment comment: String) {
-        
         guard let postId = self.post?.postId else { return }
         guard let uid = Auth.auth().currentUser?.uid else  { return }
         let creationDate = Int(NSDate().timeIntervalSince1970)
@@ -184,10 +188,11 @@ extension CommentVC: CommentInputAccesoryViewDelegate {
                       "creationDate": creationDate,
                       "uid": uid] as [String : Any]
         
-        
+        // comment를 DB에 저장
         COMMENT_REF.child(postId).childByAutoId().updateChildValues(values) { Error, ref in
             self.uploadCommentNotificationToServer()
             
+            // 맨션이 있다면 따로 저장
             if comment.contains("@") {
                 self.uploadMentionNotification(forPostId: postId, withText: comment, isForComment: true)
             }

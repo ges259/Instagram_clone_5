@@ -16,43 +16,57 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     
     // MARK: - properties
+    // 포스트들을 담아두는 배열
     var posts = [Post]()
-    
+    // norificationVC, userPorileVC, SearchVC, HashtagVC 등에서 포스트를 선택해서 들어가는 상황
+        // -> 포스터가 하나만 필요한 상황에서 사용
     var post: Post?
-    
+    // post가 사용될 때 viewSinglePost를 true로 바꿔 해당 포스터 1개만 나오도록 함
     var viewSinglePost: Bool = false
     
+    // 포스터를 5개씩 가져오는데 해당 키(currentKey)를 통해서 구별
     var currentKey: String?
-    
+    //
     var userProfileController: UserProfileVC?
     
     
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        // background Color
         self.collectionView.backgroundColor = .white
-        
+        // register cell
         self.collectionView!.register(FeedCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
         // refresh
         self.refreshController()
-        
+        // configure Nav
         self.configureNavigationBar()
-        
+        // viewSinglePost가 아닐 경우 -> 처음 feed에 들어올 때
+            // 즉, 여러개의 포스터들을 가져오는 경우
         if !viewSinglePost {
-            fetchPosts()
+            self.fetchPosts()
         }
-//        updateUserFeeds()
     }
     
     
     
     // MARK: - collection view
+    // posts의 개수가
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if posts.count > 4 {
+        // 해당 함수의 작동 방식:
+        // fetchPosts는 처음에 viewDidLoad()에서 5개가 불림.
+            // 그 이후 사용자가 5번째 포스터를 보는 순간 fetchPosts()를 호출하여 6개를 더 가져옴.
+        
+        // fetchPosts를 하면 항상 4개 이상(처음 5개, 이후 6개씩)이지만
+            // 처음 feed를 들어왔을 때를 대비하여 if문을 사용
+        if self.posts.count > 4 {
+            // 스크롤을 내리면서 cell을 그리다가 (indexPath.item이 1씩 증가함)
+                // -1을 하는 이유 ====>>> indexPath는 0부터 시작하므로, posts의 개수에서 1을 빼주어야 한다.
+            
+            // 결론: 사용자가 마지막 포스트를 보는 순간 (indexPath.item <<- 마지막 셀이 그려지는 순간) 추가적으로 posts를 가져온다.s
             if indexPath.item == posts.count - 1 {
-                fetchPosts()
+                self.fetchPosts()
             }
         }
     }
@@ -62,19 +76,17 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         return 1
     }
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of items
-        if viewSinglePost {
-            return 1
-        }
-        return self.posts.count
+        // viewSingPost가 true이면 1개
+            // false이면 posts의 개수만큼 표시ß
+        return self.viewSinglePost ? 1 : self.posts.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! FeedCell
-        
             cell.delegate = self
         
-        if viewSinglePost {
+        if self.viewSinglePost {
+            // 포스트가 맞는지 확인
             if let post = self.post {
                 cell.post = post
             }
@@ -82,8 +94,13 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
             cell.post = self.posts[indexPath.row]
         }
         
+        // -> 셀에 있는 Layout에 기능을 넣어주는 코드
+            // delegate를 사용할 수 있지만 이렇게도 사용할 수 있음
+        // 해당 이름으로 해쉬태그 된 포스터들을 보여줌
         self.handleHashtagTapped(forCell: cell)
+        // 해당 유저 이름의 userProfile로 이동
         self.handleUserNameLabelTapped(forCell: cell)
+        // 해당 유저 이름의 userProfile로 이동
         self.handleMentionTapped(forCell: cell)
         
         return cell
@@ -131,7 +148,6 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
                 print("Failed to sign out")
             }
         }))
-        
         // add cancel action
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
@@ -140,6 +156,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     @objc private func handleRefresh() {
         self.posts.removeAll(keepingCapacity: false)
+        // currentKey를 nil로 설정하여 다시 5개의 post를 가져옴
         self.currentKey = nil
         self.fetchPosts()
         self.collectionView.reloadData()
@@ -153,9 +170,12 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
             self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(self.handleLogout))
         }
         self.navigationItem.title = "Feed"
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "send2"), style: .plain, target: self, action: #selector(self.handleShowMessages))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "send2"),
+                                                                 style: .plain,
+                                                                 target: self,
+                                                                 action: #selector(self.handleShowMessages))
     }
-    
+    // refresh 설정
     private func refreshController() {
         // configure refresh control
         let refreshControl = UIRefreshControl()
@@ -163,6 +183,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         self.collectionView.refreshControl = refreshControl
     }
     
+    // 해당 이름으로 해쉬태그 된 포스터들을 보여줌
     private func handleHashtagTapped(forCell cell: FeedCell) {
         cell.captionLabel.handleHashtagTap { hashtag in
             let hashtagVC = HashtagVC(collectionViewLayout: UICollectionViewFlowLayout())
@@ -170,7 +191,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
             self.navigationController?.pushViewController(hashtagVC, animated: true)
         }
     }
-    
+    // 해당 유저 이름의 userProfile로 이동
     private func handleUserNameLabelTapped(forCell cell: FeedCell) {
         
         guard let user = cell.post?.user else { return }
@@ -185,7 +206,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
             self.navigationController?.pushViewController(userProfileVC, animated: true)
         }
     }
-    
+    // 해당 유저 이름의 userProfile로 이동
     private func handleMentionTapped(forCell cell: FeedCell) {
         cell.captionLabel.handleMentionTap { userName in
             self.getMentionUser(withuserName: userName)
@@ -195,6 +216,11 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     
     // MARK: - API
+    // 모든 포스터들을 가져오는 코드
+        // 하지만 모든 포스터들을 가져오는 것은 비효율적
+            // -> 5개 -> 3개 등 나눠서 가져와야 하기 때문에
+                // 해당 함수(updateUserFeeds) 대신 ===>>> fetchPosts()를 사용
+    
 //    private func updateUserFeeds() {
 //
 //        guard let currentId = Auth.auth().currentUser?.uid else { return }
@@ -219,15 +245,17 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
 //
     
     
+    
+    
+    
     private func fetchPosts() {
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
         
         // cueernetKey가 nil이면 -> 처음 화면은 무조건 nil.
         // 첫 시작은 if문으로 시작되고 그 이후에 fetchPosts가 불리면 else로 빠짐
-        if currentKey == nil {
+        if self.currentKey == nil {
             // 일단 5개만 받아오기
             USER_FEED_REF.child(currentUid).queryLimited(toLast: 5).observeSingleEvent(of: .value) { snapshot in
-                print(snapshot)
                 self.collectionView.refreshControl?.endRefreshing()
                 
                 guard let first = snapshot.children.allObjects.first as? DataSnapshot else { return }
@@ -235,6 +263,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
                 
                 allObjects.forEach { snapshot in
                     let postId = snapshot.key
+                    // post 데이터 가져오기
                     self.fetchPost(withPostId: postId)
                 }
                 self.currentKey = first.key
@@ -251,6 +280,8 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
                     let postId = snapshot.key
                     
                     if postId != self.currentKey {
+                        // post 데이터 가져오기
+                        self.fetchPost(withPostId: postId)
                         self.fetchPost(withPostId: postId)
                     }
                 }
@@ -258,7 +289,8 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
             }
         }
     }
-    
+    // 포스터를 데이터베이스에서 가져오는 코드
+        // 정렬까지 해줌
     private func fetchPost(withPostId postId: String) {
         Database.fetchPost(with: postId) { post in
             self.posts.append(post)
@@ -277,11 +309,9 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
 extension FeedVC: FeedCellDelegate {
     // User Name Button Tapped
     func handleUserNameTapped(for cell: FeedCell) {
-        
         guard let post = cell.post else { return }
         
         let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
-        
             userProfileVC.user = post.user
         self.navigationController?.pushViewController(userProfileVC, animated: true)
     }
@@ -300,8 +330,8 @@ extension FeedVC: FeedCellDelegate {
                     self.handleRefresh()
                 } else {
                     if let userProfileController = self.userProfileController {
+                            userProfileController.handleRefresh()
                         self.navigationController?.popViewController(animated: true)
-                        userProfileController.handleRefresh()
                     }
                 }
             }))
@@ -329,7 +359,6 @@ extension FeedVC: FeedCellDelegate {
     
     // Like Button Tapped
     func handleLikeTapped(for cell: FeedCell, isDoubleTapped: Bool) {
-        
         guard let post = cell.post else { return }
         
         // post.didLike가 true이면,
@@ -352,7 +381,6 @@ extension FeedVC: FeedCellDelegate {
     }
     
     func handleConfigureLikeButton(for cell: FeedCell) {
-        
         guard let post = cell.post else { return }
         guard let postId = post.postId else { return }
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
@@ -387,7 +415,6 @@ extension FeedVC: FeedCellDelegate {
         guard let post = cell.post else { return }
 
         let commentVC = CommentVC(collectionViewLayout: UICollectionViewFlowLayout())
-        
             commentVC.post = post
         
         self.navigationController?.pushViewController(commentVC, animated: true)

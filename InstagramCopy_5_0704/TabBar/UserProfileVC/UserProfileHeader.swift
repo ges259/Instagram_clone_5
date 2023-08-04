@@ -36,16 +36,11 @@ final class UserProfileHeader: UICollectionViewCell {
     
     // MARK: - ImageView
     private let profileImageView: CustomImageView = {
-        let img = CustomImageView()
-        
+        let img = CustomImageView().configureCustomImageView()
+            // 기본 이미지
             img.image = UIImage(named: "profile_unselected")
-            img.contentMode = .scaleAspectFill
-            img.backgroundColor = .lightGray
-            img.clipsToBounds = true
         return img
     }()
-    
-    
     
     
     
@@ -141,7 +136,7 @@ final class UserProfileHeader: UICollectionViewCell {
     
     private let gridButton: UIButton = {
         return UIButton().button(tintColor: UIColor(white: 0, alpha: 0.2),
-                                    image: "grid")
+                                 image: "grid")
     }()
     
     private let listButton: UIButton = {
@@ -151,7 +146,7 @@ final class UserProfileHeader: UICollectionViewCell {
     
     private let bookmarkButton: UIButton = {
         return UIButton().button(tintColor: UIColor(white: 0, alpha: 0.2),
-                                    image: "ribbon")
+                                 image: "ribbon")
     }()
     
     
@@ -241,8 +236,6 @@ final class UserProfileHeader: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        self.backgroundColor = .white
-        
         self.configureUI()
     }
     required init?(coder: NSCoder) {
@@ -253,12 +246,15 @@ final class UserProfileHeader: UICollectionViewCell {
     
     // MARK: - Configure UI
     private func configureUI() {
+        // background Color
+        self.backgroundColor = .white
+        
         // profileImageView
         self.addSubview(self.profileImageView)
-        self.profileImageView.layer.cornerRadius = 80 / 2
         self.profileImageView.anchor(top: self.topAnchor, paddingTop: 16,
                                      leading: self.leadingAnchor, paddingLeading: 12,
-                                     width: 80, height: 80)
+                                     width: 80, height: 80,
+                                     cornerRadius: 80 / 2)
         
         // fullNameLabel
         self.addSubview(self.fullNameLabel)

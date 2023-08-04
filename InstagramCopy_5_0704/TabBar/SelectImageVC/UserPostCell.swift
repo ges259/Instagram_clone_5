@@ -21,12 +21,7 @@ final class UserPostCell: UICollectionViewCell {
     
     // MARK: - Layout
     private let postIamgeView: CustomImageView = {
-        let img = CustomImageView()
-        
-            img.contentMode = .scaleAspectFill
-            img.clipsToBounds = true
-            img.backgroundColor = .lightGray
-        return img
+        return CustomImageView().configureCustomImageView()
     }()
     
     

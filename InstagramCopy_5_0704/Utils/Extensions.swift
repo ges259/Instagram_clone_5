@@ -97,8 +97,6 @@ extension UIViewController {
             mentionIntegerValue = POST_MENTION_INT_VALUE
         }
         
-        
-        
         for var word in words {
             if word.hasPrefix("@") {
                 word = word.trimmingCharacters(in: .symbols)
@@ -249,9 +247,8 @@ extension UIButton {
                                                                       type2Foreground: type2Foreground)
         // 버튼 만들기
         let attributedButton = UIButton(type: buttonType)
-        // 버튼에 string 추가
-        attributedButton.setAttributedTitle(attributedTitle, for: .normal)
-        
+            // 버튼에 string 추가
+            attributedButton.setAttributedTitle(attributedTitle, for: .normal)
         return attributedButton
     }
 }
@@ -308,7 +305,6 @@ extension NSMutableAttributedString {
                              NSAttributedString.Key.foregroundColor : type3Foreground])
             )
         }
-        
         return attributedTitle
     }
 }
@@ -351,12 +347,10 @@ extension UILabel {
         if let numberOfLines = numberOfLines {
             lbl.numberOfLines = numberOfLines
         }
-        
         // textAlignment
         if let textAlignment = textAlignment {
             lbl.textAlignment = textAlignment
         }
-        
         return lbl
     }
     
@@ -374,8 +368,8 @@ extension UILabel {
                                       type2Foreground: UIColor,
                                       
                                       numberOfLines: Int? = nil,
-                                      textAlignment: NSTextAlignment? = nil) -> UILabel {
-        
+                                      textAlignment: NSTextAlignment? = nil)
+    -> UILabel {
         // 레이블 만들기
         let lbl = UILabel()
         
@@ -403,7 +397,6 @@ extension UILabel {
         if let textAlignment = textAlignment {
             lbl.textAlignment = textAlignment
         }
-        
         return lbl
     }
 }
@@ -471,13 +464,9 @@ extension UIView {
     // MARK: - backgroundColorView
     func backgrouncColorView(backgroundColor color: UIColor) -> UIView {
         let view = UIView()
-        
-        view.backgroundColor = color
-        
+            view.backgroundColor = color
         return view
     }
-    
-
 }
 
 

@@ -33,12 +33,7 @@ final class UploadPostVC: UIViewController {
     
     // MARK: - Layout
     private var photoImageView: CustomImageView = {
-        let img = CustomImageView()
-        
-            img.contentMode = .scaleAspectFill
-            img.backgroundColor = .lightGray
-            img.clipsToBounds = true
-        return img
+        return CustomImageView().configureCustomImageView()
     }()
     
     let captionTextView: UITextView = {

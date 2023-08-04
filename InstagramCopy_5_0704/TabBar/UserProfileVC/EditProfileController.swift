@@ -26,21 +26,17 @@ final class EditProfileController: UIViewController {
         let frame = CGRect(x: 0, y: 88, width: view.frame.width, height: 150)
         
         let view = UIView(frame: frame)
+            view.backgroundColor = .systemGray4
         
         // profileImageView autoLayout
             view.addSubview(self.profileImageView)
             self.profileImageView.anchor(top: view.topAnchor, paddingTop: 16,
-                                     width: 80, height: 80, centerX: view)
-            self.profileImageView.clipsToBounds = true
-            self.profileImageView.layer.cornerRadius = 80 / 2
-        
-        
+                                     width: 80, height: 80, centerX: view,
+                                         cornerRadius: 80 / 2)
         // changePhotoButton autoLayout
             view.addSubview(self.changePhotoButton)
             self.changePhotoButton.anchor(top: self.profileImageView.bottomAnchor, paddingTop: 8,
                                           centerX: view)
-        view.backgroundColor = .systemGray4
-        
         return view
     }()
     private lazy var fullNameSeparatorView: UIView = {
@@ -54,12 +50,7 @@ final class EditProfileController: UIViewController {
     
     // MARK: - ImageView
     private lazy var profileImageView: CustomImageView = {
-        let img = CustomImageView()
-        
-            img.clipsToBounds = true
-            img.contentMode = .scaleAspectFill
-            img.backgroundColor = .lightGray
-        return img
+        return CustomImageView().configureCustomImageView()
     }()
     
     
@@ -142,11 +133,11 @@ final class EditProfileController: UIViewController {
     @objc func handleDone() {
         self.view.endEditing(true)
         
-        if userNameChanged {
+        if self.userNameChanged {
             self.updateUserName()
         }
         
-        if imageChanged {
+        if self.imageChanged {
             self.updateProfileImage()
         }
     }
@@ -155,12 +146,12 @@ final class EditProfileController: UIViewController {
     
     // MARK: - API
     private func updateProfileImage() {
-        guard imageChanged == true else { return }
+        guard self.imageChanged == true else { return }
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
         guard let user = self.user else { return }
         
+        // 이전에 있던 이미지 지우기
         Storage.storage().reference(forURL: user.profileImageUrl).delete(completion: nil)
-        
         
         let filename = NSUUID().uuidString
         guard let updatedProfileImage = profileImageView.image else { return    }
@@ -189,37 +180,7 @@ final class EditProfileController: UIViewController {
             })
         }
     }
-//    private func updateProfileImage() {
-//        guard imageChanged == true else { return }
-//        guard let currentUid = Auth.auth().currentUser?.uid else { return }
-//        guard let user = self.user else { return }
-//
-//        Storage.storage().reference(forURL: user.profileImageUrl).delete(completion: nil)
-//
-//        let filename = NSUUID().uuidString
-//
-//        guard let updatedProfileImage = profileImageView.image else { return }
-//
-//        guard let imageData = updatedProfileImage.jpegData(compressionQuality: 0.3) else { return }
-//
-//        STORAGE_PROFILE_IMAGES_REF.child(filename).putData(imageData, metadata: nil) { (metadata, error) in
-//
-//            if let error = error {
-//                print("Failed to upload image to storage with error: ", error.localizedDescription)
-//            }
-//
-//            STORAGE_PROFILE_IMAGES_REF.downloadURL(completion: { (url, error) in
-//                USER_REF.child(currentUid).child("profileImageUrl").setValue(url?.absoluteString, withCompletionBlock: { (err, ref) in
-//
-//                    guard let userProfileController = self.userProfileController else { return }
-//                    userProfileController.fetchCurrentUserData()
-//
-//                    self.dismiss(animated: true, completion: nil)
-//                })
-//            })
-//        }
-//    }
-//
+    
     private func updateUserName() {
         guard let updatedUsername = self.updatedUserName else { return }
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
@@ -241,8 +202,6 @@ final class EditProfileController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = .white
-
         self.configureNavigationBar()
         self.configureViewComponents()
         
@@ -255,6 +214,10 @@ final class EditProfileController: UIViewController {
     
     // MARK: - Configure UI
     private func configureViewComponents() {
+        // background Color
+        self.view.backgroundColor = .white
+        
+        // backgroundView
         self.view.addSubview(self.backgroundView)
         
         // fullNameLabel
@@ -301,7 +264,7 @@ final class EditProfileController: UIViewController {
 
 // MARK: - PickerView
 extension EditProfileController: UIImagePickerControllerDelegate & UINavigationControllerDelegate {
-    
+    // changePhotoButton - Selector
     @objc func handleChangeProfilePhoto() {
         let imagePickerController = UIImagePickerController()
             imagePickerController.delegate = self
@@ -340,7 +303,9 @@ extension EditProfileController: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         guard let user = self.user else { return }
         
-        let trimmedString = userNameTextField.text?.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
+        let trimmedString = userNameTextField.text?.replacingOccurrences(of: "\\s+$",
+                                                                         with: "",
+                                                                         options: .regularExpression)
         
         guard user.userName != trimmedString else {
             print("You did not change you userName")

@@ -21,13 +21,7 @@ final class HashtagCell: UICollectionViewCell {
     
     // MARK: - ImageView
     private let postIamgeView: CustomImageView = {
-        let img = CustomImageView()
-        
-        img.contentMode = .scaleAspectFill
-        img.clipsToBounds = true
-        img.backgroundColor = .lightGray
-        
-        return img
+        return CustomImageView().configureCustomImageView()
     }()
     
     
@@ -36,14 +30,11 @@ final class HashtagCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        print("HastagCell")
-        
         self.contentView.addSubview(self.postIamgeView)
         self.postIamgeView.anchor(top: self.topAnchor,
                                   bottom: self.bottomAnchor,
                                   leading: self.leadingAnchor,
                                   trailing: self.trailingAnchor)
-        
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

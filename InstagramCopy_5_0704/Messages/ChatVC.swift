@@ -67,7 +67,6 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         self.collectionView.backgroundColor = .white
         self.collectionView.register(ChatCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
-        
         self.observeMessages()
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -78,7 +77,6 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         super.viewWillDisappear(animated)
         self.tabBarController?.tabBar.isHidden = false
     }
-    
     override var inputAccessoryView: UIView? {
         get {
             return self.containerView
@@ -90,9 +88,9 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     
     
-    // MARK: - UICollectionView
+    // MARK: - CollectionView
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return messages.count
+        return self.messages.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -101,16 +99,17 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! ChatCell
-            cell.message = messages[indexPath.item]
-        self.configureMessage(cell: cell, message: messages[indexPath.item])
+            cell.message = self.messages[indexPath.item]
         
+        self.configureMessage(cell: cell, message: self.messages[indexPath.item])
         return cell
     }
+    // cell의 height를 동적으로 조절
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        var height: CGFloat = 80
         let message = messages[indexPath.row]
         
-        height = estimateFrameForText(message.messageText).height + 20
+        var height: CGFloat = 80
+            height = estimateFrameForText(message.messageText).height + 20
         
         return CGSize(width: view.frame.width, height: height)
     }
@@ -121,15 +120,15 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     private func configureNavigationBar() {
         guard let user = self.chatPartnerUser else { return }
         
-        navigationItem.title = user.userName
+        self.navigationItem.title = user.userName
         
         let infoButton = UIButton(type: .infoLight)
-        infoButton.tintColor = .black
-        infoButton.addTarget(self, action: #selector(handleInfoTapped), for: .touchUpInside)
+            infoButton.tintColor = .black
+            infoButton.addTarget(self, action: #selector(self.handleInfoTapped), for: .touchUpInside)
         
         let infoButtonItem = UIBarButtonItem(customView: infoButton)
         
-        navigationItem.rightBarButtonItem = infoButtonItem
+        self.navigationItem.rightBarButtonItem = infoButtonItem
     }
     
     private func estimateFrameForText( _ text: String) -> CGRect {
@@ -140,18 +139,22 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
                                                    attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16)],
                                                    context: nil)
     }
-    
+       
     private func configureMessage(cell: ChatCell, message: Message) {
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
         
             cell.bubbleWidthAnchor?.constant = estimateFrameForText(message.messageText).width + 32
-            cell.frame.size.height = estimateFrameForText(message.messageText).height + 20
+            cell.frame.size.height = self.estimateFrameForText(message.messageText).height + 20
         
+        // 사용자가 보낸 메세지
         if message.fromId == currentUid {
             cell.bubbleViewRightAnchor?.isActive = true
             cell.bubbleViewLeftAnchor?.isActive = false
-            cell.bubbleView.backgroundColor = UIColor.rgb(red: 0, green: 137, blue: 249)
+            cell.bubbleView.backgroundColor = UIColor.rgb(red: 210, green: 240, blue: 240)
             cell.profileImageView.isHidden = true
+            
+            
+            // 상대가 보낸 메세지
         } else {
             cell.bubbleViewRightAnchor?.isActive = false
             cell.bubbleViewLeftAnchor?.isActive = true
@@ -166,7 +169,7 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     // MARK: - Selectors
     @objc private func handleInfoTapped() {
         let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
-            userProfileVC.user = chatPartnerUser
+            userProfileVC.user = self.chatPartnerUser
         self.navigationController?.pushViewController(userProfileVC, animated: true)
     }
     
@@ -174,8 +177,6 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         self.uploadMessageToServer()
         self.messageTextField.text = nil
     }
-    
-
     
     
     
@@ -186,9 +187,9 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
         // to user
         guard let userId = self.chatPartnerUser?.uid else { return }
+        // 날짜 생성
         let creationDate = Int(NSDate().timeIntervalSince1970)
-        
-        
+        // 배열 생성
         let messageValues = ["creationDate": creationDate,
                              "fromId": currentUid,
                              "toId": userId,

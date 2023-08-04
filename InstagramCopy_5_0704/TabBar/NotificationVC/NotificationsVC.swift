@@ -17,7 +17,7 @@ final class NotificationVC: UITableViewController {
     var notifications = [Notification]()
     
     var timer: Timer?
-
+    
     var currentKey: String?
     
     
@@ -70,7 +70,11 @@ final class NotificationVC: UITableViewController {
     // MARK: - Helper Functions
     private func handleReloadTable() {
         self.timer?.invalidate()
-        self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.handleSortNotifications), userInfo: nil, repeats: false)
+        self.timer = Timer.scheduledTimer(timeInterval: 0.1,
+                                          target: self,
+                                          selector: #selector(self.handleSortNotifications),
+                                          userInfo: nil,
+                                          repeats: false)
     }
     
     
@@ -163,7 +167,7 @@ extension NotificationVC: NotificationCellDelegate {
             cell.followButton.configure(didFollow: true)
         }
     }
-    
+    // notification에서 post를 누르면 해당 post로 이동(1개)
     func handlePostTapped(for cell: NotificationCell) {
         guard let post = cell.notification?.post else { return }
         

@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+// commentVC 하단 텍스트필드 및 버튼 구성
 final class CommentAccessoryView: UIView {
     
     // MARK: - Properties
@@ -18,10 +18,8 @@ final class CommentAccessoryView: UIView {
     // MARK: - Layout
     private lazy var commentTextView: CommentInputTextView = {
         let tv = CommentInputTextView()
-        
             tv.font = UIFont.systemFont(ofSize: 16)
             tv.isScrollEnabled = false
-        
         return tv
     }()
     
@@ -39,6 +37,7 @@ final class CommentAccessoryView: UIView {
     }()
 
     
+    
     // MARK: - Selectors
     @objc private func handleUploadComment() {
         guard let comment = self.commentTextView.text else { return }
@@ -47,7 +46,7 @@ final class CommentAccessoryView: UIView {
     
 
     
-    // MARK: - HelperFunctions
+    // MARK: - Helper Functions
     func clearCommentTextView() {
         self.commentTextView.placeholderLabel.isHidden = false
         self.commentTextView.text = nil
@@ -60,10 +59,17 @@ final class CommentAccessoryView: UIView {
     
     
     
-    // MARK: - Init
+    // MARK: - LifeCycle
     override init(frame: CGRect) {
         super.init(frame: frame)
         
+        self.configureUI()
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func configureUI() {
         //
         self.autoresizingMask = .flexibleHeight
         
@@ -85,9 +91,6 @@ final class CommentAccessoryView: UIView {
                                   leading: self.leadingAnchor,
                                   trailing: self.trailingAnchor,
                                   height: 0.5)
-    }
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }
 

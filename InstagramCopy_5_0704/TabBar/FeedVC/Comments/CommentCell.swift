@@ -16,10 +16,10 @@ final class CommentCell: UICollectionViewCell {
             guard let user = comment?.user else { return }
             guard let profileImageUrl = user.profileImageUrl else { return }
             
-            
-            profileImageView.loadImageView(with: profileImageUrl)
-            
-            configureCommentLabel()
+            // 이미지 불러오기
+            self.profileImageView.loadImageView(with: profileImageUrl)
+            //
+            self.configureCommentLabel()
         }
     }
     
@@ -27,21 +27,13 @@ final class CommentCell: UICollectionViewCell {
     
     // MARK: - Layout
     private let profileImageView: CustomImageView = {
-        let img = CustomImageView()
-        
-        img.contentMode = .scaleAspectFill
-        img.backgroundColor = .lightGray
-        img.clipsToBounds = true
-        
-        return img
+        return CustomImageView().configureCustomImageView()
     }()
 
     let commentLabel: ActiveLabel = {
         let lbl = ActiveLabel()
-        
-        lbl.font = UIFont.systemFont(ofSize: 12)
-        lbl.numberOfLines = 0
-        
+            lbl.font = UIFont.systemFont(ofSize: 12)
+            lbl.numberOfLines = 0
         return lbl
     }()
     
@@ -52,19 +44,23 @@ final class CommentCell: UICollectionViewCell {
     
     
     // MARK: - Helper Functions
+    // 시간 설정
+        // 나중에 시간 넣을 곳 만들어서 넣기
     private func getCommentTimeStamp() -> String? {
         
         guard let comment = self.comment else { return nil }
+        let now = Date()
         
         let dateFormatter = DateComponentsFormatter()
-        dateFormatter.allowedUnits = [.second, .minute, .hour, .day, .weekOfMonth]
-        dateFormatter.maximumUnitCount = 1
-        dateFormatter.unitsStyle = .abbreviated
-        let now = Date()
+            dateFormatter.allowedUnits = [.second, .minute, .hour, .day, .weekOfMonth]
+            dateFormatter.maximumUnitCount = 1
+            dateFormatter.unitsStyle = .abbreviated
         
         return dateFormatter.string(from: comment.creationDate, to: now)
     }
     
+    // commentLabel 기본 설정
+        // commentLabel에서 hashtag, mention 등을 감별하여 bold처리
     private func configureCommentLabel() {
         guard let comment = self.comment else { return }
         guard let user = comment.user else { return }
@@ -86,7 +82,9 @@ final class CommentCell: UICollectionViewCell {
             return atts
         }
         commentLabel.customize { label in
+            // 이름과 텍스트 띄우기
             label.text = "\(userName) \(commentText)"
+            // 기타 텍스트 설정
             label.customColor[customType] = .black
             label.font = UIFont.systemFont(ofSize: 12)
             label.textColor = .black
@@ -112,10 +110,10 @@ final class CommentCell: UICollectionViewCell {
     private func configureUI() {
         // profileImageView
         self.addSubview(self.profileImageView)
-        self.profileImageView.layer.cornerRadius = 40 / 2
         self.profileImageView.anchor(top: self.topAnchor, paddingTop: 8,
                                      leading: self.leadingAnchor, paddingLeading: 8,
-                                     width: 40, height: 40)
+                                     width: 40, height: 40,
+                                     cornerRadius: 40 / 2)
         // commentLabel
         self.addSubview(self.commentLabel)
         self.commentLabel.anchor(top: self.topAnchor, paddingTop: 4,

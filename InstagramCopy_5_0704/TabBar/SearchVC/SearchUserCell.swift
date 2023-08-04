@@ -14,9 +14,9 @@ final class SearchUserCell: UITableViewCell {
             guard let profileImgeUrl = user?.profileImageUrl else { return }
             guard let userName = user?.userName else { return }
             guard let fullName = user?.name else { return }
-            
+            // 이미지 불러오기
             self.profileImageView.loadImageView(with: profileImgeUrl)
-            
+            // textLabel / detailTextLabel 텍스트 설정
             self.textLabel?.text = userName
             self.detailTextLabel?.text = fullName
         }
@@ -26,13 +26,9 @@ final class SearchUserCell: UITableViewCell {
     
     // MARK: - ImageView
     private let profileImageView: CustomImageView = {
-        let img = CustomImageView()
-        
+        let img = CustomImageView().configureCustomImageView()
+            // 기본 이미지
             img.image = UIImage(named: "profile_unselected")
-            img.contentMode = .scaleAspectFill
-            img.backgroundColor = .lightGray
-            img.clipsToBounds = true
-        
         return img
     }()
     
@@ -52,13 +48,15 @@ final class SearchUserCell: UITableViewCell {
         
         // textLabel
         self.textLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        self.textLabel?.frame = CGRect(x: 68, y: (textLabel?.frame.origin.y)! - 2,
+        self.textLabel?.frame = CGRect(x: 68,
+                                       y: (textLabel?.frame.origin.y)! - 2,
                                        width: (self.textLabel?.frame.width)!,
                                        height: (self.textLabel?.frame.height)!)
         // detailTextLabel
         self.detailTextLabel?.textColor = .lightGray
         self.detailTextLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        self.detailTextLabel?.frame = CGRect(x: 68, y: (detailTextLabel?.frame.origin.y)!,
+        self.detailTextLabel?.frame = CGRect(x: 68,
+                                             y: (detailTextLabel?.frame.origin.y)!,
                                              width: self.frame.width - 108,
                                              height: (self.detailTextLabel?.frame.height)!)
     }
@@ -72,9 +70,8 @@ final class SearchUserCell: UITableViewCell {
         // add profile image view
         self.addSubview(self.profileImageView)
         self.profileImageView.anchor(leading: leadingAnchor, paddingLeading: 8,
-                                     width: 48, height: 48)
-        self.profileImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.profileImageView.layer.cornerRadius = 48 / 2
-        self.profileImageView.clipsToBounds = true
+                                     width: 48, height: 48,
+                                     centerY: self,
+                                     cornerRadius: 48 / 2)
     }
 }

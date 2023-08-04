@@ -23,7 +23,7 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
 
     
     
-    // MARK: - Init
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -47,14 +47,12 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     // MARK: - FlowLayout
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
         let width = (view.frame.width - 2) / 3
         
         return CGSize(width: width, height: width)
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        
         return CGSize(width: view.frame.width, height: 200)
     }
     
@@ -71,35 +69,25 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         
         // declare header
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! UserProfileHeader
-        
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+                                                                     withReuseIdentifier: headerIdentifier,
+                                                                     for: indexPath) as! UserProfileHeader
             // set delegate
             header.delegate = self
-        
             // set the user in header
                 // 유저가 있으면 ( 직접 profile로 들어가면 ) 유저의 정보로 이동
-            header.user = user
-        self.navigationItem.title = user?.userName
-
-//        if let user = self.user {
-//            header.user = user
-//            // searchVC를 통해서 들어가면 -> 해당 유저의 정보로 이도
-//        } else if let userToLoadFromSearchVC = self.user {
-//            header.user = userToLoadFromSearchVC
-//            self.navigationItem.title = userToLoadFromSearchVC.userName
-//        }
-        
-        // return header
+            header.user = self.user
+        self.navigationItem.title = self.user?.userName
         return header
     }
     
     
     // MARK: - Collection view
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if posts.count > 9 {
+        if self.posts.count > 9 {
             // indexPath는 0부터 시작하기 때문에 -1을 해줌.
             // 포스트 셀의 개수와 포스트의 개수가 같으면
-            if indexPath.item == posts.count - 1 {
+            if indexPath.item == self.posts.count - 1 {
                 self.fetchPosts()
             }
         }
@@ -117,8 +105,8 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! UserPostCell
-    
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier,
+                                                      for: indexPath) as! UserPostCell
         // Configure the cell
             // date순으로 해야함
             cell.post = posts[indexPath.item]
@@ -127,12 +115,9 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let feedVC = FeedVC(collectionViewLayout: UICollectionViewFlowLayout())
-        
             feedVC.userProfileController = self
-        
             feedVC.viewSinglePost = true
             feedVC.post = self.posts[indexPath.item]
-        
         self.navigationController?.pushViewController(feedVC, animated: true)
     }
 
@@ -148,7 +133,7 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
         } else {
             uid = Auth.auth().currentUser?.uid
         }
-        
+        // UserPorfileVC들어와서 fetchPosts가 처음 불렸을 때
         if currentKey == nil {
             USER_POSTS_REF.child(uid).queryLimited(toLast: 10).observeSingleEvent(of: .value) { snapshot in
                 
@@ -163,10 +148,11 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
                 }
                 self.currentKey = first.key
             }
+            // 2번째 불릴 때부터.
         } else {
             // queryOrderedByKey : 하위 키에 따라 결과를 정렬한다.
             // queryEnding : 선택한 정렬 기준 메소드에 따라 지정된 키 또는 값보다 작거나 같은 항목을 반환한다.
-            USER_POSTS_REF.child(uid).queryOrderedByKey().queryEnding(atValue: self.currentKey).queryLimited(toLast: 7).observeSingleEvent(of: .value) { snapshot in
+            USER_POSTS_REF.child(uid).queryOrderedByKey().queryEnding(atValue: self.currentKey).queryLimited(toLast: 12).observeSingleEvent(of: .value) { snapshot in
                 
                 guard let first = snapshot.children.allObjects.first as? DataSnapshot else { return }
                 guard let allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
@@ -219,14 +205,15 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     // MARK: - Helper Functions
     private func configureRefreshControl() {
         let refreshControl = UIRefreshControl()
-            refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+            refreshControl.addTarget(self, action: #selector(self.handleRefresh), for: .valueChanged)
         self.collectionView.refreshControl = refreshControl
-        
     }
+    
     private func configureCollectionView() {
         self.collectionView!.register(UserPostCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-        self.collectionView!.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
-
+        self.collectionView!.register(UserProfileHeader.self,
+                                      forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                      withReuseIdentifier: headerIdentifier)
         self.collectionView.backgroundColor = .white
     }
     
@@ -245,21 +232,22 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
 
 // MARK: - UserProfileHeaderDelegate
 extension UserProfileVC: UserProfileHeaderDelegate {
-    
+    // followers Label 누르면
     func handleFollowersTapped(for header: UserProfileHeader) {
         let followLikeVC = FollowLikeVC()
             followLikeVC.viewingMode = FollowLikeVC.ViewingMode(index: 1)
-            followLikeVC.uid = user?.uid
+            followLikeVC.uid = self.user?.uid
         self.navigationController?.pushViewController(followLikeVC, animated: true)
     }
-    
+    // following Label 누르면
     func handleFollowingTapped(for header: UserProfileHeader) {
         let followLikeVC = FollowLikeVC()
             followLikeVC.viewingMode = FollowLikeVC.ViewingMode(index: 0)
-            followLikeVC.uid = user?.uid
+            followLikeVC.uid = self.user?.uid
         self.navigationController?.pushViewController(followLikeVC, animated: true)
     }
-    
+    // edit Profile 버튼을 누르면
+        // userProfile의 유저에 따라 버튼 색상, 텍스트 등을 바꿈
     func handleEditFollowTapped(for header: UserProfileHeader) {
         guard let user = header.user else { return }
 
@@ -299,16 +287,16 @@ extension UserProfileVC: UserProfileHeaderDelegate {
                 numberOfFollowers = 0
             }
             
-            
-            let attributedText = NSMutableAttributedString().mutableAttributedText(type1TextString: "\(numberOfFollowers!)\n",
-                                                                         type1FontName: .bold,
-                                                                         type1FontSize: 14,
-                                                                         type1Foreground: UIColor.black,
-                                                                         
-                                                                         type2TextString: "followers",
-                                                                         type2FontName: .system,
-                                                                         type2FontSize: 14,
-                                                                         type2Foreground: UIColor.lightGray)
+            let attributedText = NSMutableAttributedString().mutableAttributedText(
+                type1TextString: "\(numberOfFollowers!)\n",
+                type1FontName: .bold,
+                type1FontSize: 14,
+                type1Foreground: UIColor.black,
+                
+                type2TextString: "followers",
+                type2FontName: .system,
+                type2FontSize: 14,
+                type2Foreground: UIColor.lightGray)
             header.followersLabel.attributedText = attributedText
         }
 
@@ -320,15 +308,16 @@ extension UserProfileVC: UserProfileHeaderDelegate {
                 numberOfFollowing = 0
             }
             
-            let attributedText = NSMutableAttributedString().mutableAttributedText(type1TextString: "\(numberOfFollowing!)\n",
-                                                                          type1FontName: .bold,
-                                                                          type1FontSize: 14,
-                                                                          type1Foreground: UIColor.black,
-                                                                          
-                                                                          type2TextString: "following",
-                                                                          type2FontName: .bold,
-                                                                          type2FontSize: 14,
-                                                                          type2Foreground: UIColor.lightGray)
+            let attributedText = NSMutableAttributedString().mutableAttributedText(
+                type1TextString: "\(numberOfFollowing!)\n",
+                type1FontName: .bold,
+                type1FontSize: 14,
+                type1Foreground: UIColor.black,
+                
+                type2TextString: "following",
+                type2FontName: .bold,
+                type2FontSize: 14,
+                type2Foreground: UIColor.lightGray)
             header.followingLabel.attributedText = attributedText
         }
     }

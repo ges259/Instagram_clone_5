@@ -31,13 +31,14 @@ final class CommentInputTextView: UITextView {
     override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
         // notification
-        NotificationCenter.default.addObserver(self, selector: #selector(handleInputTextChange), name: UITextView.textDidChangeNotification, object: nil)
+        self.notification()
         // configure UI
         self.configureUI()
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     
     
     // MARK: - Configure UI
@@ -47,5 +48,11 @@ final class CommentInputTextView: UITextView {
                                      bottom: self.safeAreaLayoutGuide.bottomAnchor, paddingBottom: 10,
                                      leading: self.leadingAnchor, paddingLeading: 8,
                                      trailing: self.trailingAnchor)
+    }
+    private func notification() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleInputTextChange),
+                                               name: UITextView.textDidChangeNotification,
+                                               object: nil)
     }
 }
