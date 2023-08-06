@@ -18,8 +18,8 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     var posts = [Post]()
     
     var user: User?
-    
-    var currentKey: String?
+    // 포스터를 5개씩 가져오는데 해당 키(currentKey)를 통해서 구별
+    private var currentKey: String?
 
     
     
@@ -45,7 +45,7 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     
-    // MARK: - FlowLayout
+    // MARK: - CollectionView
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = (view.frame.width - 2) / 3
         
@@ -80,6 +80,7 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
         self.navigationItem.title = self.user?.userName
         return header
     }
+    
     
     
     // MARK: - Collection view
@@ -126,7 +127,6 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     // MARK: - API
     private func fetchPosts() {
         var uid: String!
-        
         // 사용자가 올린 게시글과 다른 사람이 올린 게시글을 분리
         if let user = self.user {
             uid = user.uid

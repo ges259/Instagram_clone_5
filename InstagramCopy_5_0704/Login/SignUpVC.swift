@@ -26,7 +26,6 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
                                          cornerRadius: 10)
  
             tf.addTarget(self, action: #selector(self.formValidation), for: .editingChanged)
-
         return tf
     }()
     private lazy var passwordTextField: UITextField = {
@@ -67,7 +66,6 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
     private lazy var plusButton: UIButton = {
         let btn = UIButton().button(title: nil, fontSize: nil,
                                     image: "plus_photo")
-        
             btn.addTarget(self, action: #selector(self.handleSelectProfilePhoto), for: .touchUpInside)
         return btn
     }()
@@ -77,7 +75,7 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
                                     
                                     fontName: .bold,
                                     fontSize: 18,
-                                    backgroundColor: UIColor.rgb(red: 149, green: 204, blue: 244),
+                                    backgroundColor: UIColor.textFieldGray,
                                     
                                     cornerRadius: 10,
                                     isEnable: false)
@@ -96,11 +94,12 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
                                                      type2TextString: "Sign in",
                                                      type2FontName: .bold,
                                                      type2FontSize: 14,
-                                                     type2Foreground: UIColor.rgb(red: 7, green: 154, blue: 237))
+                                                     type2Foreground: UIColor.instaBlue)
 
             btn.addTarget(self, action: #selector(self.handleShowLogin), for: .touchUpInside)
         return btn
     }()
+    
     
     
     // MARK: - StackView
@@ -131,9 +130,10 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
         
         // plusButton
         self.view.addSubview(self.plusButton)
-        self.plusButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         self.plusButton.anchor(top: self.view.topAnchor, paddingTop: 80,
-                               width: 140, height: 140)
+                               width: 140, height: 140,
+                               centerX: self.view,
+                               cornerRadius: plusButton.frame.width / 2)
         // stackView
         self.view.addSubview(self.stackView)
         self.stackView.anchor(top: self.plusButton.bottomAnchor, paddingTop: 30,
@@ -172,33 +172,40 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
                 return
             }
             
-            // set profile image
+            // 이미지 선택 -> plusButton에 이미지 넣기
+                // plusButton의 이미지 가져오기
             guard let profileImage = self.plusButton.imageView?.image else { return }
             // upload data
-                //지정한 이미지를 포함하는 데이터 개체를 JPEG 형식으로 반환, 0.8은 데이터의 품질을 나타낸것 1에 가까울수록 품질이 높은 것
-            guard let uploadData = profileImage.jpegData(compressionQuality: 0.3) else { return }
+                // plusButton에서 가져온 이미지를 지정한 이미지를 포함하는 데이터 개체를 JPEG 형식으로 반환
+                    // 0.8은 데이터의 품질을 나타낸것 1에 가까울수록 품질이 높은 것
+            guard let uploadData = profileImage.jpegData(compressionQuality: 1) else { return }
             
             // profile image in firebase storage
+            // 파일 이름 만들기 ( uuidString 으로 만듦, 중복 방지 )
+                // 네트워크 상에서 고유성을 보장하는 ID를 만들기 위한 표준 규약
+                // 32개의 16진수로 구성됨 (5개의 그룹)
             let fileName = NSUUID().uuidString
             
             // 이미지를 저장할 경로 설정
             let storageRef = STORAGE_PROFILE_IMAGES_REF.child(fileName)
-            // 이미지 저장
+            // storage에 이미지 저장
             storageRef.putData(uploadData, metadata: nil) { metaData, error in
                 // handle error
                 if let error = error {
                     print("Failed to upload image to Firebase storage with error", error.localizedDescription)
                     return
                 }
+                
                 // profile image url
-                    
+                // storage에서 이미지 url을 가져옴
+                    // realtime_DB에 이미지 url을 저장하기 위함
                 storageRef.downloadURL { downloadURL, error in
-                    
+                    // 이미지가 있는 지 확인
                     guard let profileImagURL = downloadURL?.absoluteString else {
                         print("DEBUG: Profile image url is nil")
                         return
                     }
-                    // 사용자에 대한 사전 값
+                    // 사용자에 대한 정보를 배열에 담기
                     let dictionaryValues = ["name": fullName,
                                             "userName": userName,
                                             "profileImageUrl": profileImagURL]
@@ -206,15 +213,16 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
                     guard let uid = user?.user.uid else { return }
                     
                     let values = [uid: dictionaryValues]
-                    // realtime database에 저장
+                    // realtime_DB에 저장
                     // save user info to database
                     USER_REF.updateChildValues(values) { error, ref in
-                        
+                        // 첫 화면 (mainTabVC)에 대한 설정
                         guard let mainTabVC = UIApplication.shared.windows.filter({$0.isKeyWindow}).first?.rootViewController as? MainTabVC else { return }
-
+                        // mainTabVc 함수 호출
                         mainTabVC.configureViewControllers()
                         
                         // dismiss login controller
+                        // 첫 화면 (mainTabVC)로 돌아가기
                         self.dismiss(animated: true, completion: nil)
                         
                         // success
@@ -235,18 +243,18 @@ final class SignUpVC: UIViewController, UINavigationControllerDelegate {
             self.userNameTextField.hasText
         else {
             self.signUpButton.isEnabled = false
-            self.signUpButton.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+            self.signUpButton.backgroundColor = UIColor.textFieldGray
             return
         }
         self.signUpButton.isEnabled = true
-        self.signUpButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+        self.signUpButton.backgroundColor = UIColor.instaBlue
     }
     
     @objc func handleSelectProfilePhoto() {
         // configure imagePicker
         let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.allowsEditing = true
+            imagePicker.delegate = self
+            imagePicker.allowsEditing = true
         
         // present iamge picker
         self.present(imagePicker, animated: true)
@@ -270,13 +278,12 @@ extension SignUpVC: UIImagePickerControllerDelegate {
         // 이미지가 존재한다고 표시
         self.imageSelected = true
         
-        // configre plusPhotoButton with selected image
-        plusButton.layer.cornerRadius = plusButton.frame.width / 2
-        plusButton.clipsToBounds = true
-        plusButton.layer.borderColor = UIColor.black.cgColor
-        plusButton.layer.borderWidth = 2
-        plusButton.setImage(profileImage.withRenderingMode(.alwaysOriginal), for: .normal)
-        
+        // 이미지를 선택한 후
+            // border 설정
+        self.plusButton.layer.borderColor = UIColor.black.cgColor
+        self.plusButton.layer.borderWidth = 1.5
+        // plusButton에 이미지 넣기
+        self.plusButton.setImage(profileImage.withRenderingMode(.alwaysOriginal), for: .normal)
         
         self.dismiss(animated: true, completion: nil)
     }

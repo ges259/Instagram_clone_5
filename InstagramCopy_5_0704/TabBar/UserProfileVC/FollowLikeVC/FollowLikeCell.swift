@@ -61,7 +61,7 @@ final class FollowLikeCell: UITableViewCell {
                                     titleColor: UIColor.white,
                                     fontName: .bold,
                                     fontSize: 14,
-                                    backgroundColor: UIColor.rgb(red: 17, green: 154, blue: 237))
+                                    backgroundColor: UIColor.buttonBlue)
         btn.layer.borderColor = UIColor.lightGray.cgColor
         
         btn.addTarget(self, action: #selector(self.handleFollowTapped), for: .touchUpInside)

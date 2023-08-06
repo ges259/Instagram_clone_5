@@ -15,7 +15,6 @@ final class CommentCell: UICollectionViewCell {
         didSet{
             guard let user = comment?.user else { return }
             guard let profileImageUrl = user.profileImageUrl else { return }
-            
             // 이미지 불러오기
             self.profileImageView.loadImageView(with: profileImageUrl)
             //
@@ -36,7 +35,7 @@ final class CommentCell: UICollectionViewCell {
             lbl.numberOfLines = 0
         return lbl
     }()
-    
+    // 구분 선
     private let separatorView: UIView = {
         return UIView().backgrouncColorView(backgroundColor: UIColor.lightGray)
     }()

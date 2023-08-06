@@ -32,7 +32,7 @@ final class LoginVC: UIViewController {
                                          paddingLeftView: true,
                                          cornerRadius: 10)
   
-        tf.addTarget(self, action: #selector(formValidation), for: .editingChanged)
+        tf.addTarget(self, action: #selector(self.formValidation), for: .editingChanged)
         
         return tf
     }()
@@ -44,7 +44,7 @@ final class LoginVC: UIViewController {
                                          paddingLeftView: true,
                                          cornerRadius: 10)
 
-        tf.addTarget(self, action: #selector(formValidation), for: .editingChanged)
+        tf.addTarget(self, action: #selector(self.formValidation), for: .editingChanged)
         return tf
     }()
     
@@ -57,7 +57,7 @@ final class LoginVC: UIViewController {
                                     
                                     fontName: .bold,
                                     fontSize: 18,
-                                    backgroundColor: UIColor.rgb(red: 149, green: 204, blue: 244),
+                                    backgroundColor: UIColor.textFieldGray,
                                     
                                     cornerRadius: 10,
                                     isEnable: false)
@@ -76,7 +76,7 @@ final class LoginVC: UIViewController {
                                                      type2TextString: "Sign in",
                                                      type2FontName: .bold,
                                                      type2FontSize: 14,
-                                                     type2Foreground: UIColor.rgb(red: 7, green: 154, blue: 237))
+                                                     type2Foreground: .instaBlue)
  
         btn.addTarget(self, action: #selector(handleShowSignUp), for: .touchUpInside)
         return btn
@@ -112,7 +112,7 @@ final class LoginVC: UIViewController {
     private func configureUI() {
         // background color
         self.view.backgroundColor = .white
-        
+        // hide navigationBar
         self.navigationController?.navigationBar.isHidden = true
         
         // logoContainerView
@@ -158,12 +158,12 @@ final class LoginVC: UIViewController {
         else {
             // handle case for above conditions not met
             self.loginButton.isEnabled = false
-            self.loginButton.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+            self.loginButton.backgroundColor = UIColor.textFieldGray
             return
         }
         // handle case for conditions were met
         self.loginButton.isEnabled = true
-        self.loginButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+        self.loginButton.backgroundColor = UIColor.buttonBlue
     }
     
     

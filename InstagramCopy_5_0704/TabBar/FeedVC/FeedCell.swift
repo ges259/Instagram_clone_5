@@ -11,7 +11,7 @@ import ActiveLabel
 
 final class FeedCell: UICollectionViewCell {
     
-    
+    // MARK: - Properties
     var delegate: FeedCellDelegate?
     
     var post: Post? {
@@ -163,7 +163,7 @@ final class FeedCell: UICollectionViewCell {
     
     
     
-    // MARK: - Selector
+    // MARK: - Selectors
     // FeedVC
     @objc private func handleUserNameTapped() {
         self.delegate?.handleUserNameTapped(for: self)

@@ -200,7 +200,7 @@ extension SearchVC: UISearchBarDelegate {
         self.searchBar.sizeToFit()
         self.searchBar.delegate = self
         self.navigationItem.titleView = searchBar
-        self.searchBar.barTintColor = UIColor.rgb(red: 240, green: 240, blue: 240)
+        self.searchBar.barTintColor = UIColor.customGray
         self.searchBar.tintColor = .black
     }
     

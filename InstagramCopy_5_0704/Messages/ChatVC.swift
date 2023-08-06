@@ -158,7 +158,7 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         } else {
             cell.bubbleViewRightAnchor?.isActive = false
             cell.bubbleViewLeftAnchor?.isActive = true
-            cell.bubbleView.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
+            cell.bubbleView.backgroundColor = UIColor.customGray
             cell.textView.textColor = .black
             cell.profileImageView.isHidden = false
         }

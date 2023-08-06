@@ -25,7 +25,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     var viewSinglePost: Bool = false
     
     // 포스터를 5개씩 가져오는데 해당 키(currentKey)를 통해서 구별
-    var currentKey: String?
+    private var currentKey: String?
     //
     var userProfileController: UserProfileVC?
     

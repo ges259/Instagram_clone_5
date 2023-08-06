@@ -302,8 +302,8 @@
 		5FCA94312A63C55D0047FD13 /* Comments */ = {
 			isa = PBXGroup;
 			children = (
-				5F31980D2A5C4B9100DCE362 /* CommentCell.swift */,
 				5F31980B2A5C4A8600DCE362 /* CommentVC.swift */,
+				5F31980D2A5C4B9100DCE362 /* CommentCell.swift */,
 				5FCA94322A63C57F0047FD13 /* CommentAccessoryView.swift */,
 				5FCA94342A63C5C10047FD13 /* CommentInputTextView.swift */,
 			);

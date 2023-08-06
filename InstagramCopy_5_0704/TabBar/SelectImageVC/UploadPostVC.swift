@@ -21,13 +21,25 @@ final class UploadPostVC: UIViewController {
             switch index {
             case 0: self = .UploadPost
             case 1: self = .SaveChanges
+                
             default: self = .UploadPost
             }
         }
     }
-    
-    var selectedImage: UIImage?
+    // SelectImageVC에서 이미지를 받아옴
+        // didSet을 통해 이미지 넣기
+    var selectedImage: UIImage? {
+        didSet {
+            guard let selectedImage = selectedImage else { return }
+            
+            self.photoImageView.image = selectedImage
+        }
+    }
+    // post를 수정하기 위해 UploadPostVC에 들어온다면
+        // 해당 변수에 post가 담김
+        // 이 변수를 수정하여 그대로 DB에 업데이트
     var postToEdit: Post?
+    // 수정인지 업로드인지를 판단하는 변수
     var uploadAction: UploadAction!
     
     
@@ -36,7 +48,7 @@ final class UploadPostVC: UIViewController {
         return CustomImageView().configureCustomImageView()
     }()
     
-    let captionTextView: UITextView = {
+    private let captionTextView: UITextView = {
         let tv = UITextView()
         
         tv.backgroundColor = UIColor.groupTableViewBackground
@@ -48,10 +60,10 @@ final class UploadPostVC: UIViewController {
         return tv
     }()
     
-    lazy var actionButton: UIButton = {
+    private lazy var actionButton: UIButton = {
         let btn = UIButton().button(title: "Share",
                                     titleColor: .white,
-                                    backgroundColor: UIColor.rgb(red: 149, green: 204, blue: 244),
+                                    backgroundColor: UIColor.textFieldGray,
                                     cornerRadius: 5,
                                     isEnable: false)
             btn.addTarget(self, action: #selector(self.handleUploadAction), for: .touchUpInside)
@@ -69,26 +81,28 @@ final class UploadPostVC: UIViewController {
         
         // configure view components
         self.configureViewComponents()
-        
-        // load image
-        self.loadImage()
-        
-        self.view.backgroundColor = UIColor.white
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        if uploadAction == .SaveChanges {
+        // post 수정
+        if self.uploadAction == .SaveChanges {
             self.actionButton.setTitle("SaveChanges", for: .normal)
+            
             self.navigationItem.title = "Edit Post"
-            self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
             self.navigationController?.navigationBar.tintColor = .black
+            self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel",
+                                                                    style: .plain,
+                                                                    target: self,
+                                                                    action: #selector(self.handleCancel))
             
             guard let post = self.postToEdit else { return }
             self.photoImageView.loadImageView(with: post.imageUrl)
             self.captionTextView.text = post.caption
+        
+        // post 업로드
         } else {
-            self.actionButton.setTitle("ShareButton", for: .normal)
+            self.actionButton.setTitle("Share", for: .normal)
             self.navigationItem.title = "Upload Post"
         }
     }
@@ -96,7 +110,10 @@ final class UploadPostVC: UIViewController {
     
     
     // MARK: - Helper Functions
-    func configureViewComponents() {
+    private func configureViewComponents() {
+        // background Color
+        self.view.backgroundColor = UIColor.white
+        
         // photoImageView
         self.view.addSubview(self.photoImageView)
         self.photoImageView.anchor(top: self.view.topAnchor, paddingTop: 92,
@@ -116,23 +133,34 @@ final class UploadPostVC: UIViewController {
                                  height: 40)
     }
     
-    func loadImage() {
-        guard let selectedImage = selectedImage else { return }
-        
-        self.photoImageView.image = selectedImage
-    }
-    
-    
-    
-    // buttonSelector
+    // selector -> buttonSelector
     private func buttonSelector(uploadAction: UploadAction) {
         switch uploadAction {
         case .UploadPost:
             self.handleUploadPost()
+            
+            
         case .SaveChanges:
             self.handleSavePostChanges()
         }
     }
+    
+    
+    
+    // MARK: - Selectors
+    // Helper Functions ->
+    @objc private func handleUploadAction() {
+        self.buttonSelector(uploadAction: self.uploadAction)
+    }
+    
+    @objc private func handleCancel() {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    
+    
+    // MARK: - API
+    // post 수정
     private func handleSavePostChanges() {
         guard let post = self.postToEdit else { return }
         let updateCaption = captionTextView.text
@@ -143,8 +171,8 @@ final class UploadPostVC: UIViewController {
             self.dismiss(animated: true, completion: nil)
         }
     }
+    // post 업로드
     private func handleUploadPost() {
-        
         // paramaters
         guard
             let caption = captionTextView.text,
@@ -159,42 +187,43 @@ final class UploadPostVC: UIViewController {
         let creationDate = Int(NSDate().timeIntervalSince1970)
         
         // update storage
+        // 파일 이름 만들기 (uuidString 사용 32개의 16진수)
         let fileName = NSUUID().uuidString
         
+        // 이미지를 저장할 storage 경로 만들기
         let storageRef = Storage.storage().reference().child("post_images").child(fileName)
         
+        // storage에 데이터 저장
         storageRef.putData(uploadData) { metaData, error in
-            
             // handle error
             if let error = error {
                 print("Failed to upload image to stoage with error", error.localizedDescription)
                 return
             }
-            
+            // storage에 이미지 저장 완료. 이후 과정
+            // realtime_DB에 이미지url을 저장하기 위해
+                // storage에서 url을 다운로드
             storageRef.downloadURL { downloadURL, error in
-                
                 // image url
+                // 이미지가 있는지 확인
                 guard let postImageUrl = downloadURL?.absoluteString else {
                     print("DEBUG: Post image url is nil")
                     return
                 }
-                
                 // post data
+                // realtime_DB에 저장할 때 배열로 만들어서 저장
                 let values = ["caption": caption,
-                             "creationDate": creationDate,
-                             "likes": 0,
-                             "imageUrl":postImageUrl,
-                             "ownerUid": currentId] as [String: Any]
-                
+                              "creationDate": creationDate,
+                              "likes": 0,
+                              "imageUrl":postImageUrl,
+                              "ownerUid": currentId] as [String: Any]
                 // post id
                 let postId = POSTS_REF.childByAutoId()
                 guard let postKey = postId.key else { return }
                 
                 // upload information to database
+                // realtime_DB에 데이터를 저장(업데이트)
                 postId.updateChildValues(values) { err, ref in
-                    
-                    guard let postKey = postId.key else { return }
-                    
                     // update user-post structure
                     // user-post가 하는 일: 어떤 사용자가 어떤 게시물을 올렸는지 확인이 가능하다.
                     USER_POSTS_REF.child(currentId).updateChildValues([postKey: 1])
@@ -209,8 +238,8 @@ final class UploadPostVC: UIViewController {
                     if caption.contains("@") {
                         self.uploadMentionNotification(forPostId: postKey, withText: caption, isForComment: false)
                     }
-                    
                     // return to home feed
+                    // 업로드를 하고나면 feed로 가기 (index == 0 <<<<<---- feed)
                     self.dismiss(animated: true) {
                         self.tabBarController?.selectedIndex = 0
                     }
@@ -219,7 +248,9 @@ final class UploadPostVC: UIViewController {
         }
     }
     
-    func updateUserFeeds(with postId: String) {
+    // 포스트를 업로드 하면 -> 자신이 팔로우한 사람들의 DB에 추가된다.
+        // feed에서 자신이 팔로우한 사람의 post를 보기 위함
+    private func updateUserFeeds(with postId: String) {
         // current user id
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
         
@@ -241,8 +272,8 @@ final class UploadPostVC: UIViewController {
         print("current id is \(currentUid)")
     }
     
-    
-    // MARK: - API
+    // 해쉬태그
+        // 수정 및 업로드 모두
     private func uploadHashtagToServer(withPostId postId: String) {
         
         guard let caption = captionTextView.text else { return }
@@ -264,18 +295,6 @@ final class UploadPostVC: UIViewController {
             }
         }
     }
-    
-    
-    
-    // MARK: - Selectors
-    // Helper Functions ->
-    @objc private func handleUploadAction() {
-        self.buttonSelector(uploadAction: self.uploadAction)
-    }
-    
-    @objc private func handleCancel() {
-        self.dismiss(animated: true, completion: nil)
-    }
 }
 
 
@@ -287,10 +306,10 @@ extension UploadPostVC: UITextViewDelegate {
         
         guard !textView.text.isEmpty else {
             self.actionButton.isEnabled = false
-            self.actionButton.backgroundColor = UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1)
+            self.actionButton.backgroundColor = UIColor.textFieldGray
             return
         }
         self.actionButton.isEnabled = true
-        self.actionButton.backgroundColor = UIColor(red: 17/255, green: 154/255, blue: 237/255, alpha: 1)
+        self.actionButton.backgroundColor = UIColor.buttonBlue
     }
 }

@@ -39,7 +39,6 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
         
         // fetch comments
         self.fetchComments()
-        
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -164,7 +163,7 @@ final class CommentVC: UICollectionViewController, UICollectionViewDelegateFlowL
             guard let dictionary = snapshot.value as? Dictionary<String, AnyObject> else { return }
             guard let uid = dictionary["uid"] as? String else { return }
             
-            // extension에 있는 fetchUser를 통해서 user들의 데이터들을 가져온다.
+            // extension에 있는 fetchUser를 통해서 추가된(업데이트)된 user들의 데이터들을 가져온다.
             Database.fetchUser(with: uid) { (user) in
                 let comment = Comment(user: user, dictionary: dictionary)
                 self.comments.append(comment)

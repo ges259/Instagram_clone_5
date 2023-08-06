@@ -56,6 +56,11 @@ extension UIColor {
     static func rgb(red: CGFloat, green: CGFloat, blue: CGFloat) -> UIColor {
         return UIColor(red: red/255, green: green/255, blue: blue/255, alpha: 1)
     }
+    static let textFieldGray: UIColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+    static let instaBlue: UIColor = UIColor.rgb(red: 7, green: 154, blue: 237)
+    static let buttonBlue: UIColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+    static let customGray: UIColor = UIColor.rgb(red: 240, green: 240, blue: 240)
+    
 }
 
 
@@ -164,6 +169,9 @@ extension UIButton {
                 
                 tintColor: UIColor? = UIColor.black,
                 
+                borderColor: UIColor? = nil,
+                borderWidth: CGFloat? = 2,
+                
                 backgroundColor: UIColor? = nil,
                 
                 cornerRadius: CGFloat? = nil,
@@ -201,6 +209,13 @@ extension UIButton {
                 btn.titleLabel?.font = UIFont.systemFont(ofSize: fontSize)
             }
         }
+        
+        if let borderColor = borderColor, let borderWidth = borderWidth {
+            btn.layer.borderColor = borderColor.cgColor
+            btn.layer.borderWidth = borderWidth
+        }
+        
+        
         // background Color
         if let backgroundColor = backgroundColor {
             btn.backgroundColor = backgroundColor

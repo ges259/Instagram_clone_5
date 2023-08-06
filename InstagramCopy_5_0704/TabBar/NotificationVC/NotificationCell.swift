@@ -8,12 +8,11 @@
 import UIKit
 
 final class NotificationCell: UITableViewCell {
-
-    
-    var delegate: NotificationCellDelegate?
-    
     
     // MARK: - Properties
+    // NotificationsVC
+    var delegate: NotificationCellDelegate?
+    
     var notification: Notification? {
         didSet {
             guard let user = notification?.user else { return }
@@ -32,7 +31,6 @@ final class NotificationCell: UITableViewCell {
             }
         }
     }
-    
     
     
     
@@ -58,8 +56,8 @@ final class NotificationCell: UITableViewCell {
     lazy var followButton: UIButton = {
         let btn = UIButton().button(title: "",
                                     titleColor: .white,
-                                    backgroundColor: UIColor.rgb(red: 17, green: 154, blue: 237))
-            btn.addTarget(self, action: #selector(handleFollowTapped), for: .touchUpInside)
+                                    backgroundColor: UIColor.buttonBlue)
+            btn.addTarget(self, action: #selector(self.handleFollowTapped), for: .touchUpInside)
         return btn
     }()
     
@@ -137,7 +135,7 @@ final class NotificationCell: UITableViewCell {
                     self.followButton.setTitle("Follow", for: .normal)
                     self.followButton.setTitleColor(.white, for: .normal)
                     self.followButton.layer.borderWidth = 0
-                    self.followButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+                    self.followButton.backgroundColor = UIColor.buttonBlue
                 }
             })
         }
@@ -151,7 +149,6 @@ final class NotificationCell: UITableViewCell {
         guard let notification = self.notification else { return nil }
         
         let now = Date()
-        
         let dateFormatter = DateComponentsFormatter()
             dateFormatter.allowedUnits = [.second, .minute, .hour, .day, .weekOfMonth]
             dateFormatter.maximumUnitCount = 1
@@ -165,8 +162,7 @@ final class NotificationCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        self.selectionStyle = .none
-        
+        // configure UI + selection_Style
         self.configureUI()
     }
     required init?(coder: NSCoder) {
@@ -177,6 +173,10 @@ final class NotificationCell: UITableViewCell {
     
     // MARK: - Configure UI
     private func configureUI() {
+        // selection_Style
+        self.selectionStyle = .none
+        
+        // profileImageView
         self.addSubview(self.profileImageView)
         self.profileImageView.anchor(leading: self.leadingAnchor, paddingLeading: 8,
                                      width: 40, height: 40,

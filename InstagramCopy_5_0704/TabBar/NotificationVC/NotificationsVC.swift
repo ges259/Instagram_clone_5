@@ -25,12 +25,8 @@ final class NotificationVC: UITableViewController {
     // MARK: - viewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.tableView.register(NotificationCell.self, forCellReuseIdentifier: reuseIdentifier)
-        
-        self.tableView.separatorStyle = .none
-        
-        self.navigationItem.title = "Notifications"
+        // configure TableView + Nav_title
+        self.configureTableView()
         
         // fetch notifications
         self.fetchNotifications()
@@ -75,6 +71,16 @@ final class NotificationVC: UITableViewController {
                                           selector: #selector(self.handleSortNotifications),
                                           userInfo: nil,
                                           repeats: false)
+    }
+    
+    private func configureTableView() {
+        // navigation_title
+        self.navigationItem.title = "Notifications"
+        
+        // configure_tableView
+        self.tableView.separatorStyle = .none
+        self.tableView.register(NotificationCell.self,
+                                forCellReuseIdentifier: reuseIdentifier)
     }
     
     

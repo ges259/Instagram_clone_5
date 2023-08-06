@@ -199,7 +199,7 @@ final class UserProfileHeader: UICollectionViewCell {
         } else {
             // configure button as follow button
             self.editProfileFollowButton.setTitleColor(.white, for: .normal)
-            self.editProfileFollowButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+            self.editProfileFollowButton.backgroundColor = UIColor.buttonBlue
             
             // 버튼을 누르면 버튼의 텍스트가 바뀜
             user.checkIfUserIsFollowed { followed in

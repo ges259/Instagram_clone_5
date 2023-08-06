@@ -40,8 +40,10 @@ final class UserPostCell: UICollectionViewCell {
     
     // MARK: - Configure UI
     private func configureUI() {
+        // background Color
         self.backgroundColor = .red
         
+        // postIamgeView
         self.addSubview(self.postIamgeView)
         self.postIamgeView.anchor(top: self.topAnchor,
                                   bottom: self.bottomAnchor,
