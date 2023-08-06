@@ -12,6 +12,7 @@
 protocol UserProfileHeaderDelegate {
     func handleEditFollowTapped(for header: UserProfileHeader)
     func setUserStats(for header: UserProfileHeader)
+    func handlePostsTapped(for header: UserProfileHeader)
     func handleFollowersTapped(for header: UserProfileHeader)
     func handleFollowingTapped(for header: UserProfileHeader)
 }
@@ -41,4 +42,8 @@ protocol Printable {
 
 protocol CommentInputAccesoryViewDelegate {
     func didSubmit(forComment comment: String)
+}
+
+protocol ChatCellDelegate {
+    func chatCellImageTapped(for cell: ChatCell)
 }

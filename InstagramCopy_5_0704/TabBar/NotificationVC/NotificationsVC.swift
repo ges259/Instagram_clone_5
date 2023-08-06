@@ -25,12 +25,15 @@ final class NotificationVC: UITableViewController {
     // MARK: - viewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
-        // configure TableView + Nav_title
+        // configure
+            // TableView + Nav_title + refresh Control
         self.configureTableView()
         
         // fetch notifications
         self.fetchNotifications()
     }
+    
+    
     
     // MARK: - TableView
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -54,7 +57,7 @@ final class NotificationVC: UITableViewController {
         self.navigationController?.pushViewController(userProfileVC, animated: true)
     }
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if self.notifications.count > 4 {
+        if self.notifications.count > 14 {
             if indexPath.row == self.notifications.count - 1 {
                 self.fetchNotifications()
             }
@@ -73,7 +76,21 @@ final class NotificationVC: UITableViewController {
                                           repeats: false)
     }
     
+    @objc private func refrechController() {
+        self.notifications.removeAll(keepingCapacity: false)
+        self.currentKey = nil
+        
+        self.fetchNotifications()
+        self.tableView.reloadData()
+    }
+    
     private func configureTableView() {
+        // refresh Control
+        let refreshControl = UIRefreshControl()
+            refreshControl.addTarget(self, action: #selector(self.refrechController), for: .valueChanged)
+        self.tableView.refreshControl = refreshControl
+        
+        
         // navigation_title
         self.navigationItem.title = "Notifications"
         
@@ -100,7 +117,9 @@ final class NotificationVC: UITableViewController {
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
         
         if currentKey == nil {
-            NOTIFICATIONS_REF.child(currentUid).queryLimited(toLast: 5).observeSingleEvent(of: .value) { snapshot in
+            NOTIFICATIONS_REF.child(currentUid).queryLimited(toLast: 15).observeSingleEvent(of: .value) { snapshot in
+                
+                self.tableView.refreshControl?.endRefreshing()
                 
                 guard let first = snapshot.children.allObjects.first as? DataSnapshot else { return }
                 guard let allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
@@ -114,7 +133,7 @@ final class NotificationVC: UITableViewController {
                 self.currentKey = first.key
             }
         }else {
-            NOTIFICATIONS_REF.child(currentUid).queryOrderedByKey().queryEnding(atValue: self.currentKey).queryLimited(toLast: 6).observeSingleEvent(of: .value) { snapshot in
+            NOTIFICATIONS_REF.child(currentUid).queryOrderedByKey().queryEnding(atValue: self.currentKey).queryLimited(toLast: 19).observeSingleEvent(of: .value) { snapshot in
                 
                 guard let first = snapshot.children.allObjects.first as? DataSnapshot else { return }
                 guard let allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }

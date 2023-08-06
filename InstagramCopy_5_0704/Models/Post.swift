@@ -63,6 +63,7 @@ final class Post {
                     POSTS_REF.child(postId).child("likes").setValue(self.likes)
                 }
             }
+            
         } else {
             
             // observe database for notification id to remove

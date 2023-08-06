@@ -21,10 +21,8 @@ final class HashtagVC: UICollectionViewController, UICollectionViewDelegateFlowL
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.configureNavigationBar()
-        
-        self.collectionView.backgroundColor = .white
-        self.collectionView.register(HashtagCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        // configure Nav + CollectioinView
+        self.configureHashtagVC()
         
         // fetch post
         self.fetchPost()
@@ -72,9 +70,13 @@ final class HashtagVC: UICollectionViewController, UICollectionViewDelegateFlowL
     
     
     // MARK: - Handler
-    private func configureNavigationBar() {
-        guard let hashtag = self.hashtag else { return }
+    private func configureHashtagVC() {
+        // configure CollectionView
+        self.collectionView.backgroundColor = .white
+        self.collectionView.register(HashtagCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
+        // configure NavigationBar
+        guard let hashtag = self.hashtag else { return }
         self.navigationItem.title = hashtag
     }
     

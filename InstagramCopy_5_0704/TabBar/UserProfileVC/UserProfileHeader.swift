@@ -21,12 +21,12 @@ final class UserProfileHeader: UICollectionViewCell {
             self.configureEditProfileFollowButton()
             
             // set user Stats
-            self.setUserStats(for: user)
+            self.setUserStats(for: self.user)
             
-            let fullName = user?.name
+            let fullName = self.user?.name
             self.fullNameLabel.text = fullName
             
-            guard let profileImageUrl = user?.profileImageUrl else { return }
+            guard let profileImageUrl = self.user?.profileImageUrl else { return }
             
             self.profileImageView.loadImageView(with: profileImageUrl)
         }
@@ -50,9 +50,9 @@ final class UserProfileHeader: UICollectionViewCell {
     }()
     
     // 나중에 기능 추가해야 함
-    private let postLabel: UILabel = {
-        return UILabel().labelMutableAttributedString(
-            type1TextString: "5\n",
+    lazy var postLabel: UILabel = {
+        let lbl = UILabel().labelMutableAttributedString(
+            type1TextString: "0\n",
             type1FontName: .bold,
             type1FontSize: 14,
             type1Foreground: UIColor.black,
@@ -64,6 +64,15 @@ final class UserProfileHeader: UICollectionViewCell {
             
             numberOfLines: 0,
             textAlignment: .center)
+        
+        let followTap = UITapGestureRecognizer(target: self,
+                                               action: #selector(self.handlePostsTapped))
+            followTap.numberOfTapsRequired = 1
+        
+            lbl.isUserInteractionEnabled = true
+            lbl.addGestureRecognizer(followTap)
+        
+        return lbl
     }()
     
     lazy var followersLabel: UILabel = {
@@ -214,18 +223,22 @@ final class UserProfileHeader: UICollectionViewCell {
     
     // MARK: - Selector - Delegate
         // UserProfileVC
+        // 레이블을 눌렸을 때 ( 아래 3개 )
+    @objc func handlePostsTapped() {
+        self.delegate?.handlePostsTapped(for: self)
+    }
     @objc func handleFollowersTapped() {
         self.delegate?.handleFollowersTapped(for: self)
     }
-
     @objc func handleFollowingTapped() {
         self.delegate?.handleFollowingTapped(for: self)
     }
-
+    
     @objc func handleEditProfileFollow() {
         self.delegate?.handleEditFollowTapped(for: self)
     }
     
+    // posts / followers / followin - Label의 텍스트를 바꿈
     func setUserStats(for user: User?) {
         self.delegate?.setUserStats(for: self)
     }

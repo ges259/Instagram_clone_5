@@ -67,6 +67,48 @@ extension UIColor {
 
 // MARK: - UIViewController
 extension UIViewController {
+    
+    // MARK: - presentAlertController
+    func presentAlertController(alertStyle: UIAlertController.Style,
+                                withTitle title: String? = nil,
+                                message: String? = nil,
+                                secondButtonName: String,
+                                thirdButtonName: String? = nil,
+                                completion: @escaping (Int) -> Void) {
+        
+        // alertController
+        let alertController = UIAlertController(title: title,
+                                                message: message,
+                                                preferredStyle: alertStyle)
+        
+        // first Button - cancel
+        alertController.addAction(UIAlertAction(title: "Cancel",
+                                                style: .cancel,
+                                                handler: nil))
+        
+        
+        // second Button
+        alertController.addAction(UIAlertAction(title: secondButtonName,
+                                                style: .default,
+                                                handler: { _ in
+            completion(2)
+        }))
+        
+        // third Button
+        if let thirdButtonName = thirdButtonName {
+            alertController.addAction(UIAlertAction(title: thirdButtonName,
+                                                    style: .default,
+                                                    handler: { _ in
+                completion(3)
+            }))
+        }
+        
+        // present
+        self.present(alertController, animated: true)
+    }
+    
+    
+    
     func getMentionUser(withuserName userName: String) {
         
         USER_REF.observe(.childAdded) { snapshot in

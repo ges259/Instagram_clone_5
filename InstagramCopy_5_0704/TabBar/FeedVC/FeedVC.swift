@@ -14,7 +14,6 @@ private let reuseIdentifier = "Cell"
 
 final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     
-    
     // MARK: - properties
     // 포스트들을 담아두는 배열
     var posts = [Post]()
@@ -33,15 +32,11 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        // background Color
-        self.collectionView.backgroundColor = .white
-        // register cell
-        self.collectionView!.register(FeedCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-        
-        // refresh
+        // refresh Control
         self.refreshController()
-        // configure Nav
-        self.configureNavigationBar()
+        // configure
+            // Nav + background Color + FeedCell
+        self.configureFeedVC()
         // viewSinglePost가 아닐 경우 -> 처음 feed에 들어올 때
             // 즉, 여러개의 포스터들을 가져오는 경우
         if !viewSinglePost {
@@ -127,13 +122,12 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         self.navigationController?.pushViewController(messagesVC, animated: true)
     }
     
+    // 얼럿 창 만들기 / 로그아웃
     @objc func handleLogout() {
         // declare alert controller
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        
-        // add alert logout action
-        alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { _ in
-            
+        self.presentAlertController(alertStyle: .actionSheet,
+                                    secondButtonName: "Log Out") { _ in
+            // 로그아웃 클릭 후 - completion()
             do {
                 // attempt sign out
                 try Auth.auth().signOut()
@@ -141,17 +135,13 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
                 // present login controller
                 let loginVC = LoginVC()
                 let navController = UINavigationController(rootViewController: loginVC)
-                navController.modalPresentationStyle = .fullScreen
+                    navController.modalPresentationStyle = .fullScreen
                 self.present(navController, animated: true, completion: nil)
             } catch {
                 // handle error
                 print("Failed to sign out")
             }
-        }))
-        // add cancel action
-        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        
-        self.present(alertController, animated: true, completion: nil)
+        }
     }
     
     @objc private func handleRefresh() {
@@ -165,10 +155,23 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     
     // MARK: - Helper Functions
-    private func configureNavigationBar() {
+    private func configureFeedVC() {
+        // Configure background Color
+        self.collectionView.backgroundColor = .white
+        
+        // Configure FeedCell
+        self.collectionView!.register(FeedCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        
+        // configure NavigationBar
         if !viewSinglePost {
-            self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(self.handleLogout))
+            self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout",
+                                                                    style: .plain,
+                                                                    target: self,
+                                                                    action: #selector(self.handleLogout))
         }
+        
+        // MARK: - 수정
+        // 보기모드 or 수정모드
         self.navigationItem.title = "Feed"
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "send2"),
                                                                  style: .plain,
@@ -243,10 +246,7 @@ final class FeedVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
 //        }
 //    }
 //
-    
-    
-    
-    
+
     
     private func fetchPosts() {
         guard let currentUid = Auth.auth().currentUser?.uid else { return }
@@ -316,45 +316,83 @@ extension FeedVC: FeedCellDelegate {
         self.navigationController?.pushViewController(userProfileVC, animated: true)
     }
     
+    // alert만들기
     func handleOptionsTapped(for cell: FeedCell) {
         guard let post = cell.post else { return }
         
         // 자신(사용자)가 올린 포스트에만 반응
         if post.ownerUid == Auth.auth().currentUser?.uid {
-            let alertController = UIAlertController(title: "Options", message: nil, preferredStyle: .actionSheet)
-            
-            alertController.addAction(UIAlertAction(title: "Delete Post", style: .destructive, handler: { _ in
-                post.deletePost()
+            presentAlertController(alertStyle: .actionSheet,
+                                   withTitle: "Options",
+                                   message: nil,
+                                   secondButtonName: "Delete Post",
+                                   thirdButtonName: "Edit Post") { num in
                 
-                if !self.viewSinglePost {
-                    self.handleRefresh()
-                } else {
-                    if let userProfileController = self.userProfileController {
-                            userProfileController.handleRefresh()
-                        self.navigationController?.popViewController(animated: true)
+                // num이 2면 == delete post 누르면
+                    // post삭제
+                if num == 2 {
+                    post.deletePost()
+
+                    if !self.viewSinglePost {
+                        self.handleRefresh()
+                    } else {
+                        if let userProfileController = self.userProfileController {
+                                userProfileController.handleRefresh()
+                            self.navigationController?.popViewController(animated: true)
+                        }
                     }
+                    
+                // num이 3이면 == Edit Post 누르며
+                    // 화면 이동
+                } else {
+                    let uploadPostVC = UploadPostVC()
+                    
+                    let navigationController = UINavigationController(rootViewController: uploadPostVC)
+                        navigationController.modalPresentationStyle = .fullScreen
+                    
+                    uploadPostVC.postToEdit = post
+                    uploadPostVC.uploadAction = UploadPostVC.UploadAction(index: 1)
+                    
+                    self.present(navigationController, animated: true)
                 }
-            }))
-            
-            alertController.addAction(UIAlertAction(title: "Edit Post", style: .default, handler: { _ in
-                let uploadPostVC = UploadPostVC()
-                
-                let navigationController = UINavigationController(rootViewController: uploadPostVC)
-                    navigationController.modalPresentationStyle = .fullScreen
-                
-                uploadPostVC.postToEdit = post
-                uploadPostVC.uploadAction = UploadPostVC.UploadAction(index: 1)
-                
-                self.present(navigationController, animated: true)
-                
-            }))
-            
-            alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
-                print("Handle cancel post..")
-            }))
-            
-            self.present(alertController, animated: true, completion: nil)
+            }
         }
+        // refactoring
+//        if post.ownerUid == Auth.auth().currentUser?.uid {
+//            let alertController = UIAlertController(title: "Options", message: nil, preferredStyle: .actionSheet)
+//
+//            alertController.addAction(UIAlertAction(title: "Delete Post", style: .destructive, handler: { _ in
+//                post.deletePost()
+//
+//                if !self.viewSinglePost {
+//                    self.handleRefresh()
+//                } else {
+//                    if let userProfileController = self.userProfileController {
+//                            userProfileController.handleRefresh()
+//                        self.navigationController?.popViewController(animated: true)
+//                    }
+//                }
+//            }))
+//
+//            alertController.addAction(UIAlertAction(title: "Edit Post", style: .default, handler: { _ in
+//                let uploadPostVC = UploadPostVC()
+//
+//                let navigationController = UINavigationController(rootViewController: uploadPostVC)
+//                    navigationController.modalPresentationStyle = .fullScreen
+//
+//                uploadPostVC.postToEdit = post
+//                uploadPostVC.uploadAction = UploadPostVC.UploadAction(index: 1)
+//
+//                self.present(navigationController, animated: true)
+//
+//            }))
+//
+//            alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+//                print("Handle cancel post..")
+//            }))
+//
+//            self.present(alertController, animated: true, completion: nil)
+//        }
     }
     
     // Like Button Tapped

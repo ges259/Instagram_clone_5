@@ -26,11 +26,10 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.configureCollectionView()
-        
-        // configure refresh controller
-        self.configureRefreshControl()
+        // configure
+            // + refresh control
+            // + CollectionView
+        self.configureUserProfileVC()
         
         // fetch user data
         // 프로필을 직접 눌렀을 때만 fetch
@@ -203,18 +202,18 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
     
     
     // MARK: - Helper Functions
-    private func configureRefreshControl() {
-        let refreshControl = UIRefreshControl()
-            refreshControl.addTarget(self, action: #selector(self.handleRefresh), for: .valueChanged)
-        self.collectionView.refreshControl = refreshControl
-    }
-    
-    private func configureCollectionView() {
+    private func configureUserProfileVC() {
+        // configure CollectionView
         self.collectionView!.register(UserPostCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         self.collectionView!.register(UserProfileHeader.self,
                                       forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                       withReuseIdentifier: headerIdentifier)
         self.collectionView.backgroundColor = .white
+        
+        // configure RefreshControl
+        let refreshControl = UIRefreshControl()
+            refreshControl.addTarget(self, action: #selector(self.handleRefresh), for: .valueChanged)
+        self.collectionView.refreshControl = refreshControl
     }
     
     
@@ -232,6 +231,15 @@ final class UserProfileVC: UICollectionViewController, UICollectionViewDelegateF
 
 // MARK: - UserProfileHeaderDelegate
 extension UserProfileVC: UserProfileHeaderDelegate {
+    // posts Label을 누르면,
+    func handlePostsTapped(for header: UserProfileHeader) {
+        guard let user = self.user else { return }
+        
+        let HashtagVC = HashtagVC(collectionViewLayout: UICollectionViewFlowLayout())
+            HashtagVC.hashtag = user.userName
+        self.navigationController?.pushViewController(HashtagVC, animated: true)
+    }
+    
     // followers Label 누르면
     func handleFollowersTapped(for header: UserProfileHeader) {
         let followLikeVC = FollowLikeVC()
@@ -246,6 +254,10 @@ extension UserProfileVC: UserProfileHeaderDelegate {
             followLikeVC.uid = self.user?.uid
         self.navigationController?.pushViewController(followLikeVC, animated: true)
     }
+    
+    
+    
+    
     // edit Profile 버튼을 누르면
         // userProfile의 유저에 따라 버튼 색상, 텍스트 등을 바꿈
     func handleEditFollowTapped(for header: UserProfileHeader) {
@@ -275,8 +287,29 @@ extension UserProfileVC: UserProfileHeaderDelegate {
     func setUserStats(for header: UserProfileHeader) {
         guard let uid = header.user?.uid else { return }
         
+        var numberOfPosts: Int!
         var numberOfFollowers: Int!
         var numberOfFollowing: Int!
+        
+        // get number of Posts
+        USER_POSTS_REF.child(uid).observe(.value) { snapshot in
+            if let snapshot = snapshot.value as? Dictionary<String, AnyObject> {
+                numberOfPosts = snapshot.count
+            } else {
+                numberOfPosts = 0
+            }
+            let attributedText = NSMutableAttributedString().mutableAttributedText(
+                type1TextString: "\(numberOfPosts!)\n",
+                type1FontName: .bold,
+                type1FontSize: 14,
+                type1Foreground: UIColor.black,
+                
+                type2TextString: "posts",
+                type2FontName: .system,
+                type2FontSize: 14,
+                type2Foreground: UIColor.lightGray)
+            header.postLabel.attributedText = attributedText
+        }
         
         // get number of followers
         USER_FOLLOWER_REF.child(uid).observe(.value) { snapshot in

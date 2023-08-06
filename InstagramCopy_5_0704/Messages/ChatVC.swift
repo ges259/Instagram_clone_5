@@ -13,9 +13,10 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     
     
     // MARK: - Properties
-    
     var chatPartnerUser: User?
     var messages = [Message]()
+    
+//    var collectionViewBottomAnchor: NSLayoutConstraint?
     
     private lazy var containerView: UIView = {
         let containerView = UIView()
@@ -61,12 +62,9 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.configureNavigationBar()
-        
-        self.collectionView.backgroundColor = .white
-        self.collectionView.register(ChatCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-        
+        // configure Nav + CollectionView
+        self.configureChatVC()
+        // 메세지 가져오기
         self.observeMessages()
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -100,6 +98,7 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! ChatCell
             cell.message = self.messages[indexPath.item]
+            cell.delegate = self
         
         self.configureMessage(cell: cell, message: self.messages[indexPath.item])
         return cell
@@ -109,28 +108,15 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
         let message = messages[indexPath.row]
         
         var height: CGFloat = 80
-            height = estimateFrameForText(message.messageText).height + 20
+            height = self.estimateFrameForText(message.messageText).height + 20
         
         return CGSize(width: view.frame.width, height: height)
     }
-     
     
     
-    // MARK: - Helper Functions
-    private func configureNavigationBar() {
-        guard let user = self.chatPartnerUser else { return }
-        
-        self.navigationItem.title = user.userName
-        
-        let infoButton = UIButton(type: .infoLight)
-            infoButton.tintColor = .black
-            infoButton.addTarget(self, action: #selector(self.handleInfoTapped), for: .touchUpInside)
-        
-        let infoButtonItem = UIBarButtonItem(customView: infoButton)
-        
-        self.navigationItem.rightBarButtonItem = infoButtonItem
-    }
     
+    // MARK: - Cell - Functions
+    // cell에 관한 함수들
     private func estimateFrameForText( _ text: String) -> CGRect {
         let size = CGSize(width: 200, height: 1000)
         let options = NSStringDrawingOptions.usesFontLeading.union(.usesLineFragmentOrigin)
@@ -165,12 +151,57 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
     }
     
     
+    // MARK: - Helper Functions
+    private func configureChatVC() {
+        // configure CollectionView
+        self.collectionView.backgroundColor = .white
+        self.collectionView.register(ChatCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        
+        // configure NavigationBar
+        // 네비게이션 타이틀에 액션 추가하기
+        guard let user = self.chatPartnerUser else { return }
+        let titleButton = UIButton(type: .infoLight).button(title: user.userName,
+                                                            titleColor: UIColor.black,
+                                                            fontName: .bold,
+                                                            fontSize: 17)
+            titleButton.addTarget(self, action: #selector(self.handleTitleTapped), for: .touchUpInside)
+        
+        self.navigationItem.titleView = titleButton
+        
+        // Nav - Right Bar Button
+        let infoButton = UIButton(type: .infoLight)
+            infoButton.tintColor = .black
+            infoButton.addTarget(self, action: #selector(self.handleInfoTapped), for: .touchUpInside)
+        let infoButtonItem = UIBarButtonItem(customView: infoButton)
+        self.navigationItem.rightBarButtonItem = infoButtonItem
+        
+        
+        
+        
+        
+        // configure Bottom Anchor
+            // UIViewController에 collectionView가 변수라면 해볼만 할 듯?
+//        self.collectionViewBottomAnchor = self.collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor,
+//                                                                                      constant: -55)
+//        self.collectionViewBottomAnchor?.priority = UILayoutPriority(742)
+//        self.collectionViewBottomAnchor?.isActive = true
+    }
+    
+    
     
     // MARK: - Selectors
-    @objc private func handleInfoTapped() {
+    @objc private func handleTitleTapped() {
         let userProfileVC = UserProfileVC(collectionViewLayout: UICollectionViewFlowLayout())
             userProfileVC.user = self.chatPartnerUser
         self.navigationController?.pushViewController(userProfileVC, animated: true)
+    }
+    
+    // 신고하기 / 취소 - 얼럿 만들기
+    @objc private func handleInfoTapped() {
+        self.presentAlertController(alertStyle: .actionSheet,
+                                    secondButtonName: "신고") { _ in
+            print(#function)
+        }
     }
     
     @objc private func handleSend() {
@@ -227,7 +258,26 @@ final class ChatVC: UICollectionViewController, UICollectionViewDelegateFlowLayo
             let message = Message(dictionary: dictionary)
             self.messages.append(message)
             
-            self.collectionView?.reloadData()
+            DispatchQueue.main.async {
+                self.collectionView?.reloadData()
+                // 처음에 ChatVC에 들어온 상황 / 새로운 메세지가 온 상황
+                    // 화면의 맨 밑으로 이동
+                let indexPath = IndexPath(row: self.messages.count - 1, section: 0)
+                self.collectionView.scrollToItem(at: indexPath, at: .top, animated: true)
+            }
+            
         }
+    }
+}
+
+
+
+// MARK: - ChatCellDelegate
+extension ChatVC: ChatCellDelegate {
+    func chatCellImageTapped(for cell: ChatCell) {
+        print(#function)
+        
+        self.handleTitleTapped()
+        
     }
 }
